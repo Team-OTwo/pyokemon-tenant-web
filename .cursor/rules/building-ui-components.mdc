@@ -1,0 +1,333 @@
+---
+description: building frontend ui components code in react
+globs: 
+---
+The following basic principles must be followed when creating frontend ui components using React.
+
+## Component Composition
+
+Break down complex UIs into smaller, more manageable parts, which can be easily reused across different parts of the application.
+
+Avoid large components with nested rendering functions.
+
+## Pages and Others
+
+Pages are used in a special folder separate from components. The folder structure corresponds one-to-one with Routes used in react-router.
+
+Components used in routes are largely divided into two types:
+
+- `{route-path-name}-layout.tsx`
+- `{route-path-name}-page.tsx`
+
+The layout file may or may not exist. If a route exists, the page file must always exist.
+
+If you separate components within a page and these components are only used on that specific page, create them in a `_components` folder.
+
+**example**
+```bash
+./src/pages/user/user-page.tsx
+./src/pages/user/_components/user-form-1.tsx
+./src/pages/user/_components/user-form-2.tsx
+./src/pages/user/_hooks/use-user-test.tsx
+```
+
+## UI
+
+Check if a similar component already exists in any of the following locations
+
+- src/components/ui
+
+For example, when using a `Button`, you must use `@/components/ui/button`.
+
+**example**
+```tsx
+import Button from "@/components/ui/button"
+import { Link } from "react-router"
+
+function ExamplePage() {
+  return (
+    <Box sx={{ mt: "16px", px: "20px" }}>
+      <Button component={Link} variant="secondary" to="#" fullWidth>
+        View All Notifications
+      </Button>
+    </Box>
+  )
+}
+```
+
+If the design requires a `Button` with a different style than this `Button`, you need to create a custom one. The standard approach is to override styles using styled-components.
+
+```tsx
+import styled from 'styled-components'
+
+import Button from "@/components/ui/button"
+
+const StyledButton = styled(Button)`
+  /* override styles */
+`
+```
+
+UI Component를 사용해서 페이지나 상위 컴포넌트를 만들 때 props를 정확하게 지정해서 작성되어야 합니다.
+antd와 mui를 혼용해서 쓰기에 이에 맞춰서 적절한 props를 지정해야합니다.
+
+**example 1**
+```diff
+-<Pagination count={10} page={1} />
++<Pagination total={10} current={1} />
+```
+
+**example 2**
+```diff
+-<Badge badgeType="primary" />
++<Badge color="primary />
+```
+
+## Design Tokens and Themes
+
+Design tokens must be used.
+
+Basic style design tokens such as color, typography, and z-index used in the application are located under `./src/styles/design-tokens`, and these must be used., when using UI libraries, themes have been configured batosherenced accordingly.
+
+### MUI
+
+When using MUrefer to the @mui-theme.tsx file.
+If you need to add values to the or typography, modify @mui.types.ts, @typography.ts, @palette.ts, etc.
+If theme coto be modified, the @mui-theme.tsx file should be modified. If type overriding or props additions are needed, perform type extension first before modifying the @mui-theme.tsx file.
+
+### Antd
+
+Whennents, refer to the @antd-theme.ts file. Globally applied styles exist in `antd-{component}.ts` in the same folder as @antd-theme.ts.
+Additionally, there are components using antd under `./src/components/ui`. Style overrides within these components use styled-components css, and these styles are globally applied during styled-components @global-styles.ts `createGlobalStyle`.
+
+```tsx
+const GlobalStyles = styled.createGlobalStyle`
+  // ... global styles
+
+  // antd styles override
+  ${cssAntd}
+`
+```
+
+## Full Implementation Example
+
+**example 1**
+```tsx
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Box, Typography } from "@mui/material"
+import { notification } from "antd"
+import { Controller, useForm, useWatch } from "react-hook-form"
+import styled from "styled-components"
+
+import Button from "@/components/ui/button"
+import Checkbox from "@/components/ui/checkbox"
+
+import { termsSchema, TermsSchema } from "../_schema/sign-up-schema"
+import SignUpTermsOpenButton from "./sign-up-terms-open-button"
+import StepContentCard from "./step-content-card"
+
+const terms = [
+  "사실이 아니거나 잘못된 답변을 받을 수도 있어요.",
+  "커뮤니티에 공유한 콘텐츠는 다른 사용자에 의해 활용될 수 있어요.",
+  "커뮤니티에 공유한 콘텐츠가 정책에 어긋나거나 유해하다고 판단되는 경우, 동의 없이 콘텐츠를 삭제할 수 있어요.",
+]
+
+const CheckboxInputBox = styled.div<{ $isChecked: boolean }>`
+  border-radius: 12px;
+  padding: 16px;
+  background-color: ${({ $isChecked, theme }) =>
+    $isChecked ? theme.colors.gray[3] : theme.colors.gray[2]};
+`
+
+interface TermsStepProps {
+  onNext: (isAgree: boolean) => void
+}
+
+function TermsStep({ onNext }: TermsStepProps) {
+  const {
+    control,
+    handleSubmit,
+    formState: { isValid },
+    setValue,
+  } = useForm<TermsSchema>({
+    resolver: zodResolver(termsSchema),
+    defaultValues: {
+      isAgreeTerms: terms.map(() => false),
+    },
+  })
+
+  const onSubmit = handleSubmit(
+    (data) => {
+      onNext(data.isAgreeTerms.every((isAgree) => isAgree))
+    },
+    (error) => {
+      notification.error({
+        message: "이용 약관 동의 실패",
+      })
+      console.error(error)
+    }
+  )
+
+  const isAgreeTerms = useWatch({ control, name: "isAgreeTerms" })
+
+  return (
+    <Box component={StepContentCard} sx={{ mt: "50px" }}>
+      <Typography variant="h2" textAlign="center">
+        이용을 위해 꼭 알아두세요
+      </Typography>
+      <Box component="form" onSubmit={onSubmit}>
+        <Box
+          component="ul"
+          sx={{ display: "flex", flexDirection: "column", gap: "12px", mt: "36px" }}
+        >
+          {terms.map((term, index) => (
+            <Box component="li" key={`${term}-${index}`}>
+              <Controller
+                control={control}
+                name={`isAgreeTerms.${index}`}
+                render={({ field: { value, onChange, ...field } }) => (
+                  <CheckboxInputBox $isChecked={value}>
+                    <Checkbox
+                      {...field}
+                      checked={value}
+                      onChange={(e) => {
+                        onChange(e.target.checked)
+                      }}
+                    >
+                      {term}
+                    </Checkbox>
+                  </CheckboxInputBox>
+                )}
+              />
+            </Box>
+          ))}
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mt: "48px",
+          }}
+        >
+          <Checkbox
+            checked={isAgreeTerms.length > 0 && isAgreeTerms.every((isAgree) => isAgree)}
+            onChange={(e) => {
+              setValue(
+                "isAgreeTerms",
+                isAgreeTerms.map(() => e.target.checked),
+                { shouldValidate: true }
+              )
+            }}
+          >
+            모두 확인 했습니다.
+          </Checkbox>
+          <SignUpTermsOpenButton />
+        </Box>
+
+        <Button type="submit" size="largest" fullWidth sx={{ mt: "24px" }} disabled={!isValid}>
+          다음 단계로
+        </Button>
+      </Box>
+    </Box>
+  )
+}
+
+export default TermsStep
+```
+
+**example 2**
+
+```tsx
+import { Box } from "@mui/material"
+import { Link } from "react-router"
+import styled from "styled-components"
+
+import { color } from "@/styles/design-tokens"
+import LgLogoImage from "@/assets/images/lg-logo.svg"
+
+import FooterTermsOpenButton from "./footer-terms-open-button"
+
+const Content = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 var(--body-spacing-left) 0 var(--body-spacing-right);
+  max-width: var(--container-width);
+  margin: 0 auto;
+
+  display: "flex";
+`
+
+const StyledLink = styled(Link)`
+  width: 100px;
+  height: 30px;
+
+  font-size: 17px;
+  font-weight: 400;
+`
+
+const LinkCol = styled(Box)`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+`
+
+function Footer() {
+  return (
+    <Box sx={{ bgcolor: color.gray[2], py: "40px" }}>
+      <Content>
+        <Box sx={{ flex: 1 }}>
+          <Box sx={{ width: "236px", height: "34px", bgcolor: color.primary[5] }}>APP LOGO</Box>
+          <Box sx={{ mt: "44px" }}>
+            <FooterTermsOpenButton />
+          </Box>
+          <Box sx={{ mt: "16px", display: "flex", alignItems: "center", gap: "20px" }}>
+            <img src={LgLogoImage} loading="lazy" />
+            <Box
+              sx={{
+                fontWeight: 400,
+                fontSize: "13px",
+                lineHeight: "18px",
+                letterSpacing: "0.1px",
+                color: color.gray[7],
+              }}
+            >
+              <Box component="p">서울시 강서구 마곡중앙8로 71 LG사이언스파크 E13, E14</Box>
+              <Box component="p">
+                Copyright &copy;{new Date().getFullYear()} LG CNS. All right reserved.
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+        <Box sx={{ flex: 1 }}>
+          <Box sx={{ display: "flex" }}>
+            <LinkCol>
+              <StyledLink to="#">Link 1</StyledLink>
+              <StyledLink to="#">Link 2</StyledLink>
+              <StyledLink to="#">Link 3</StyledLink>
+            </LinkCol>
+
+            <LinkCol>
+              <StyledLink to="#">Link 4</StyledLink>
+              <StyledLink to="#">Link 5</StyledLink>
+              <StyledLink to="#">Link 6</StyledLink>
+            </LinkCol>
+
+            <LinkCol>
+              <StyledLink to="#">Link 7</StyledLink>
+              <StyledLink to="#">Link 8</StyledLink>
+              <StyledLink to="#">Link 9</StyledLink>
+            </LinkCol>
+          </Box>
+        </Box>
+      </Content>
+    </Box>
+  )
+}
+
+export default Footer
+```
+

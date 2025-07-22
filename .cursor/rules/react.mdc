@@ -1,0 +1,17 @@
+---
+description: react cursor rules
+globs: 
+---
+Please refer to [03-react.md](mdc:.guide/fe/code-style/03-react.md) with following rules.
+
+- Use functional components and TypeScript interfaces.
+- Use declarative JSX.
+- Use function, not const, for components.
+- Place static content and interfaces at file start.
+- Use content variables for static content outside render functions.
+- Minimize 'useEffect', and 'setState'.
+- Use Zod for form validation.
+- Wrap client components in Suspense with fallback.
+- Use dynamic loading for non-critical components.
+- Optimize images: WebP format, size data, lazy loading.
+- Use error boundaries for unexpected errors: Implement error boundaries using `_error/{context}-error.tsx` files to handle unexpected errors and provide a fallback UI.

@@ -1,0 +1,13 @@
+---
+description: typescript cursor rules
+globs: 
+---
+Please refer to [02-typescript.md](mdc:.guide/fe/code-style/02-typescript.md) with following rules.
+
+- Use "function" keyword for pure functions. Omit semicolons.
+- Use TypeScript for all code. Prefer interfaces over types. Avoid enums, use maps.
+- File structure: Reference @03-file-convention.md
+- Avoid unnecessary curly braces in conditional statements.
+- For single-line statements in conditionals, omit curly braces.
+- Use baseUrl and paths (`"@/*": ["./src/*"]`). Therefore, when importing, use `@/components/...` instead of `./src/...`
+However, when using relative paths for files in the same directory, it's fine to use `./...ts`.

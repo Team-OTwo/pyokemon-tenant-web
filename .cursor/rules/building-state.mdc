@@ -1,0 +1,228 @@
+---
+description: building frontend state code in react
+globs: 
+---
+The following basic principles must be followed when creating frontend state code using React.
+
+## State
+
+### useState
+
+for simpler states that are independent
+
+**example**
+```tsx
+function ExmapleComponent() {
+    const [open, setOpen] = useState(false)
+
+    return (
+        <Popover open={open} onClose={() => setOpen(false)}>
+            {/* Inner Commponents */}
+        </Popover>
+    )
+}
+```
+
+### Zustand
+when you need to share global state across multiple components or want to avoid props drilling.
+
+Global use cases should follow a structure that can be used globally within the project structure.
+Create a folder with a feature domain name like `./src/stores/{feature domain}` and create Zustand store files under it.
+For file naming rules, use kebab-case as previously instructed and add -store as a postfix.
+
+**example**
+```bash
+./src/stores/auth/use-token-store.ts
+```
+
+When implementing code inside, it's important to define types for the store and write it in a readable way that shows how it will be used.
+
+**example**
+```tsx
+import { create } from "zustand"
+
+interface LilAuthStore {
+  accessToken: string | null
+  setAccessToken: (accessToken: string | null) => void
+}
+
+const useLilAuthStore = create<LilAuthStore>()((set) => ({
+  accessToken: null,
+  setAccessToken: (accessToken) => set({ accessToken }),
+}))
+
+export default useLilAuthStore
+```
+
+### React Query hooks
+> Please refer to [04-react-query.md](mdc:.guide/fe/code-style/04-react-query.md)
+
+React Query hooks are used to manage Remote state when making backend API calls.
+
+Since they are used globally, we use a folder structure that can be used globally in the project structure. We use a folder structure like `./src/api/{feature domain}/...`.
+
+Inside this structure, there are two folders - queries and mutations. For APIs corresponding to the `GET` method, we use useQuery, so under the queries folder, we specify 'get' after 'use' and add '-query' as a postfix (ex: `use-get-example-query.ts`).
+
+For other methods like `POST`, `PATCH`, `PUT`, `DELETE`, we use useMutation under the mutations folder, so we add the corresponding method word after 'use' and add '-mutation' as a postfix (ex: `use-post-example-mutation.ts`, `use-delete-example-mutation.ts`).
+
+**example**
+```bash
+./src/api/example/queries/use-get-example-query.ts
+./src/api/example/mutations/use-post-example-mutation.ts
+./src/api/example/mutations/use-delete-example-mutation.ts
+```
+
+Under this folder structure, there are files containing actual React Query hooks and a types folder. The types folder contains request and response type definitions, which are used by the React Query hooks to handle input and output types.
+
+**example**
+```bash
+./src/api/example/queries/types/example.ts
+./src/api/example/mutations/types/example.ts
+```
+
+For internal types, if it's a GET method, add the 'Get' prefix. If it corresponds to a Response, add the 'Response' postfix. Similarly, if it's a Request type, add the 'Request' postfix.
+
+For example, use it like this:
+
+**example**
+```ts
+export interface GetExampleResponse {
+  exampleAttribute: string
+}
+```
+
+For mutation types, similarly add the corresponding HTTP method as a prefix and 'Response' or 'Request' as a postfix. (However, for POST types, you may omit the prefix.)
+
+**example**
+```ts
+// Since it's a POST method, the prefix can be omitted
+export interface CheckUsernameRequest {
+  username: string
+}
+
+export interface CheckUsernameResponse {
+  availableYn: "Y" | "N"
+}
+
+export interface DeleteUsernameRequest {
+  username: string
+}
+```
+
+When using useQuery, we fill in the front part of the key by splitting the API endpoint.
+Then we complete the key by appending variable values at the end. We structure this as a function to make it reusable.
+
+```ts
+// if the API is /api/user/{userId}
+const generateQueryKey = (userId: string) => ["api", "user", userId]
+```
+
+And we include this as a useQuery hook attribute so that when using this query, we can easily generate the query key.
+
+
+```ts
+const useExampleQuery = () = { 
+  //...
+}
+const generateQueryKey = (userId: string) => ["api", "user", userId]
+useExampleQuery.generateQueryKey = generateQueryKey
+
+export default useExampleQuery
+```
+
+React Query hooks use axios client for implementation, so it should be imported and used accordingly.
+The response type is designed to use generics(defined in `./src/types/common-api-response.ts`) which should be included in the Response.
+Error types also differ slightly from success responses, so please refer to the types defined in [common-api-response.ts](mdc:src/types/common-api-response.ts).
+
+For error cases, error type inference is done through the type guard function (`isErrorApiResponse`) in [common-api-response.ts](mdc:src/types/common-api-response.ts)
+
+```ts
+if (isErrorApiResponse(responseData)) {
+  notification.error({
+    message: "Sign up failed",
+    description: responseData.data.errorMessage,
+  })
+  return
+}
+```
+
+Here's an example of writing a query:
+
+**example**
+```ts
+import { client } from "@/api/client"
+import { useQuery } from "@tanstack/react-query"
+import qs from "qs"
+
+import { CommonApiResponse } from "@/types/common-api-response"
+
+import { GetAuthTokenResponse } from "./types/auth-token"
+
+const useGetAuthTokenQuery = (accessToken?: string) => {
+  const queryKey = generateQueryKey(accessToken)
+  const searchParams = qs.stringify({ AccessToken: accessToken })
+
+  return useQuery({
+    queryKey,
+    queryFn: () =>
+      client.get<CommonApiResponse<GetAuthTokenResponse>>(`/api/auth/token?${searchParams}`),
+    select: (response) => response.data,
+    enabled: !!accessToken,
+  })
+}
+
+const generateQueryKey = (accessToken?: string) => ["api", "auth", "token", accessToken]
+useGetAuthTokenQuery.generateQueryKey = generateQueryKey
+
+export default useGetAuthTokenQuery
+```
+
+Here's an example of a mutation:
+
+**example**
+```ts
+import { client } from "@/api/client"
+import { useMutation } from "@tanstack/react-query"
+
+import { CommonApiResponse } from "@/types/common-api-response"
+
+import { SignUpRequest, SignUpResponse } from "./types/sign-up"
+
+const usePostSignUpMutation = () => {
+  return useMutation({
+    mutationFn: (request: SignUpRequest) =>
+      client.post<CommonApiResponse<SignUpResponse>>("/api/user/sign-up", request),
+  })
+}
+
+export default usePostSignUpMutation
+```
+
+### React Hook Form 
+
+> Please refer to [05-react-hook-form+zod.md](mdc:.guide/fe/code-style/05-react-hook-form+zod.md)
+
+### Custom hooks
+
+Custom hooks are used to separate business code and for reuse across multiple locations.
+
+• When the same logic is repeated across multiple components
+• When you want to separate complex state management logic
+• When you want to separate business logic from components
+• When you want to reuse recurring side effect logic
+• When you want to reuse data fetching logic
+• When managing browser event-related logic
+• When separating animation or timer-related logic
+
+In page folders where the project structure is explicitly divided, custom hooks that will be used internally are provided through internal folders. However, use them minimally.
+In most cases, they won't be necessary.
+
+```bash
+./src/pages/example-menu-level-1/example-menu-level-2/_hooks/use-example.ts
+```
+
+For custom hooks that are managed globally or used for reuse purposes, create and use a global hooks folder.
+
+```bash
+./src/hooks/use-sign-in.tsx
+```
