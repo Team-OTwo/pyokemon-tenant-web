@@ -1,0 +1,27 @@
+@import 'tailwindcss';
+
+body {
+  margin: 0;
+  color: var(--color-black);
+}
+
+
+:root {
+  font-family: Pretendard;
+  background-color: var(--color-white);
+}
+
+
+@theme {
+  --spacing: 1px;
+
+  --color-black: #222222;
+  --color-white: #FFFFFF;
+  --color-primary: #FFCF36;
+  --color-error: #ED7171;
+  --color-success: #44CB8F;
+  --color-gray-100: #F3F2F1;
+  --color-gray-300: #DDDDDB;
+  --color-gray-500: #A19F9A;
+  --color-gray-700: #686764;
+}
