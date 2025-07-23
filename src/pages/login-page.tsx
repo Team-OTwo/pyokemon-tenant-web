@@ -15,7 +15,7 @@ function LoginPage() {
 
   return (
     <div className="w-full min-h-screen relative bg-white pb-[180px]">
-      {/* Header */}
+      {/* Header     */}
       <Header />
 
       {/* 로그인 컨테이너 */}
@@ -53,15 +53,8 @@ function LoginPage() {
 
         <Button
           onClick={handleLogin}
-          style={{
-            backgroundColor: "var(--color-primary)",
-            border: "none",
-            borderRadius: "12px",
-            width: "320px",
-            height: "50px",
-            marginTop: "46px",
-          }}
-          fullWidth
+          style={{ marginTop: "46px" }}
+          className="bg-primary border-none rounded-xl w-full h-[50px]"
         >
           로그인
         </Button>
