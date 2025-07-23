@@ -1,16 +1,13 @@
-@import 'tailwindcss';
+@import "tailwindcss";
+@import 'swiper/css';
+@import 'swiper/css/pagination';
+@import './assets/fonts/fonts.css';
 
 body {
   margin: 0;
   color: var(--color-black);
+  font-family: var(--font-family-base), sans-serif;
 }
-
-
-:root {
-  font-family: Pretendard;
-  background-color: var(--color-white);
-}
-
 
 @theme {
   --spacing: 1px;
@@ -18,10 +15,38 @@ body {
   --color-black: #222222;
   --color-white: #FFFFFF;
   --color-primary: #FFCF36;
+  --color-primary-hover: #E6B820;
   --color-error: #ED7171;
   --color-success: #44CB8F;
   --color-gray-100: #F3F2F1;
   --color-gray-300: #DDDDDB;
   --color-gray-500: #A19F9A;
   --color-gray-700: #686764;
+}
+
+.head1 {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.head2{
+  font-size: 20px;
+  font-weight: 600;
+}
+
+hr {
+  color: var(--color-gray-100);
+}
+
+.custom-pagination .swiper-pagination-bullet {
+  background-color: var(--color-gray-300);
+  width: 10px;
+  height: 10px;
+  opacity: 1;
+}
+
+.custom-pagination .swiper-pagination-bullet-active {
+  background-color: var(--color-primary);
+  width: 30px;
+  border-radius: 10px;
 }

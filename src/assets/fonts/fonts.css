@@ -1,29 +1,12 @@
-@font-face {
-  font-family: "Spoqa Han Sans Neo";
-  font-weight: 700;
-  font-display: swap;
-  src:
-    local("Spoqa Han Sans Neo Bold"),
-    url("./SpoqaHanSansNeo-Bold.woff2") format("woff2"),
-    url("./SpoqaHanSansNeo-Bold.woff") format("woff");
+/* Pretendard 폰트 설정 */
+@import '@fontsource/pretendard/400.css';
+@import '@fontsource/pretendard/500.css';
+@import '@fontsource/pretendard/700.css';
+
+:root {
+  --font-family-base: 'Pretendard', sans-serif;
 }
 
-@font-face {
-  font-family: "Spoqa Han Sans Neo";
-  font-weight: 500;
-  font-display: swap;
-  src:
-    local("Spoqa Han Sans Neo Medium"),
-    url("./SpoqaHanSansNeo-Medium.woff2") format("woff2"),
-    url("./SpoqaHanSansNeo-Medium.woff") format("woff");
-}
-
-@font-face {
-  font-family: "Spoqa Han Sans Neo";
-  font-weight: 400;
-  font-display: swap;
-  src:
-    local("Spoqa Han Sans Neo Regular"),
-    url("./SpoqaHanSansNeo-Regular.woff2") format("woff2"),
-    url("./SpoqaHanSansNeo-Regular.woff") format("woff");
+body {
+  font-family: var(--font-family-base);
 }

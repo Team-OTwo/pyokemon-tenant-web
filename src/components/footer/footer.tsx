@@ -1,13 +1,5 @@
-import { Box, Container } from "@mui/material"
-
-import { color } from "@/styles/design-tokens"
-
 function Footer() {
-  return (
-    <Box sx={{ bgcolor: color.gray[2], py: "40px" }}>
-      <Container maxWidth="lg"></Container>
-    </Box>
-  )
+  return <footer className="bg-black h-100"></footer>
 }
 
 export default Footer
