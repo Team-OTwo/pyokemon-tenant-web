@@ -3,6 +3,7 @@ import { createBrowserRouter } from "react-router"
 import AdminProtectedRoute from "./components/admin-protected-route"
 import ProtectedRoute from "./components/protected-route"
 import HomePage from "./pages/home-page"
+import LoginPage from "./pages/login-page"
 import MainEmptyLayout from "./pages/main-empty-layout"
 import MainGrayLayout from "./pages/main-gray-layout"
 import MainContainerLayout from "./pages/main-layout"
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
                 Component: HomePage,
               },
             ],
+          },
+          {
+            path: "login",
+            Component: LoginPage,
           },
         ],
       },

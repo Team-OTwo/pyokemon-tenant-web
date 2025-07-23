@@ -1,12 +1,19 @@
-import { Box, Container } from "@mui/material"
+import React from "react"
 
-import { color } from "@/styles/design-tokens"
+interface FooterProps {
+  style?: React.CSSProperties
+}
 
-function Footer() {
+function Footer({ style }: FooterProps) {
   return (
-    <Box sx={{ bgcolor: color.gray[2], py: "40px" }}>
-      <Container maxWidth="lg"></Container>
-    </Box>
+    <footer
+      className="absolute left-0 right-0 bottom-0 py-50 bg-black text-center text-primary text-sm"
+      style={style}
+    >
+      <div className="container mx-auto">
+        <p>© 2025 Pyokemon. All rights reserved.</p>
+      </div>
+    </footer>
   )
 }
 
