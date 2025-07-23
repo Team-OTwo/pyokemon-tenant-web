@@ -1,25 +1,43 @@
-import { useState } from "react"
+import React, { useState } from "react"
 
 import Button from "@/components/ui/button"
-import Input from "@/components/ui/input/input"
-import Footer from "@/components/footer"
-import Header from "@/components/header"
 
 function LoginPage() {
-  const [id, setId] = useState("")
-  const [password, setPassword] = useState("")
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+  })
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleLogin = () => {
-    console.log("Login attempt with:", { id, password })
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }))
+  }
+
+  const handleLogin = async () => {
+    setIsLoading(true)
+
+    // 로그인 test
+    setTimeout(() => {
+      if (formData.username && formData.password) {
+        console.log("로그인 성공:", {
+          username: formData.username,
+          role: "admin",
+          loginTime: new Date().toISOString(),
+        })
+      } else {
+        console.log("로그인 실패: 아이디와 비밀번호를 입력하세요.")
+      }
+      setIsLoading(false)
+    }, 1000)
   }
 
   return (
-    <div className="w-full min-h-screen relative bg-white pb-[180px]">
-      {/* Header     */}
-      <Header />
-
+    <div className="w-full min-h-screen relative bg-white overflow-hidden pb-[180px]">
       {/* 로그인 컨테이너 */}
-      <div className="w-399 h-478 left-1/2 top-215 -translate-x-1/2 absolute bg-white rounded-xl shadow-[0px_0px_20px_0px_rgba(0,0,0,0.15)] border border-radius 12 border-gray-300 p-[34px_40px] flex flex-col">
+      <div className="w-399 h-478 left-1/2 top-115 -translate-x-1/2 absolute bg-white rounded-xl shadow-[0px_0px_20px_0px_rgba(0,0,0,0.15)] border border-radius 12 border-gray-300 p-[34px_40px] flex flex-col">
         <div className="text-center w-full text-black text-xl font-bold">티켓 매니저 로그인</div>
 
         <div className="text-center w-full mt-12 text-gray-500 text-sm font-normal">
@@ -27,45 +45,37 @@ function LoginPage() {
         </div>
 
         <div className="mt-12 mb-2 text-black text-base font-medium pl-8">ID</div>
-        <Input
-          value={id}
-          onChange={(e) => setId(e.target.value)}
+        <input
+          type="text"
+          name="username"
+          value={formData.username}
+          onChange={handleChange}
           placeholder="아이디"
-          size="large"
-          className="w-320 h-50 border border-gray-300 rounded-lg pl-16"
+          className="w-full h-[50px] px-15 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition-colors"
         />
 
         <div className="mt-6">
           <div className="mt-12 mb-2 text-black text-base font-medium pl-8">PW</div>
-          <Input
+          <input
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
             placeholder="패스워드"
-            size="large"
-            className="w-320 h-50 border-radius 12 border-gray-300 rounded-lg pl-16"
+            className="w-full h-[50px] px-15 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition-colors"
           />
         </div>
 
-        <div className="text-right mt-5 mb-5 text-gray-700 text-sm cursor-pointer underline">
+        <div className="text-right mt-5 mb-40 text-gray-700 text-sm cursor-pointer underline">
           비밀번호 재설정
         </div>
 
-        <Button
-          onClick={handleLogin}
-          style={{ marginTop: "46px" }}
-          className="bg-primary border-none rounded-xl w-full h-[50px]"
-        >
-          로그인
-        </Button>
-      </div>
+        <Button text={isLoading ? "로그인 중..." : "로그인"} onClick={handleLogin} />
 
-      <div className="absolute left-1/2 -translate-x-1/2 top-[644px] text-center text-gray-500 text-sm font-normal">
-        관리자 승인이 필요한 계정입니다
+        <div className="text-center mt-30 text-gray-500 text-sm font-normal">
+          관리자 승인이 필요한 계정입니다
+        </div>
       </div>
-
-      {/* Footer */}
-      <Footer style={{ top: "calc(215px + 478px + 140px)" }} />
     </div>
   )
 }

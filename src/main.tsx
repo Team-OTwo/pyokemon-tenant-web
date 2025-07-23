@@ -4,7 +4,6 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import ReactDOM from "react-dom/client"
 import { RouterProvider } from "react-router"
 
-import Providers from "./components/providers"
 import router from "./routes"
 
 import "./styles/global-styles"
@@ -24,9 +23,7 @@ const queryClient = new QueryClient({
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <Providers>
-        <RouterProvider router={router} />
-      </Providers>
+      <RouterProvider router={router} />
       {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
     </QueryClientProvider>
   </React.StrictMode>

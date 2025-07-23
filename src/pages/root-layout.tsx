@@ -2,6 +2,7 @@ import { Box } from "@mui/material"
 import { ErrorBoundary } from "react-error-boundary"
 import { Outlet } from "react-router"
 
+import Footer from "@/components/footer"
 import Header from "@/components/header"
 
 import RootError from "./_error/root-error"
@@ -20,6 +21,7 @@ function RootLayout() {
       >
         <Header />
         <Outlet />
+        <Footer />
       </Box>
     </ErrorBoundary>
   )

@@ -1,0 +1,55 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# 즉시 디버깅 로그 출력
+echo "DEBUG: Starting commit-msg hook"
+echo "DEBUG: Input argument: $1"
+
+# 현재 브랜치 이름 가져오기
+BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+echo "DEBUG: BRANCH_NAME=$BRANCH_NAME"
+
+# 브랜치 이름에서 티켓 번호 추출 (feature/PYOKEMON-123-기능명 or bugfix/PYOKEMON-123-기능명)
+TICKET=$(echo "$BRANCH_NAME" | grep -o 'PYOKEMON-[0-9]\+' || echo "")
+echo "DEBUG: TICKET=$TICKET"
+
+# 커밋 메시지 파일 경로 (첫 번째 인자, 기본값은 동적으로 추출)
+COMMIT_MSG_FILE=$1
+if [ -z "$COMMIT_MSG_FILE" ]; then
+  GIT_DIR=$(git rev-parse --git-dir)
+  COMMIT_MSG_FILE="$GIT_DIR/COMMIT_EDITMSG"
+fi
+echo "DEBUG: COMMIT_MSG_FILE=$COMMIT_MSG_FILE"
+
+# 커밋 메시지 파일이 존재하는지 확인
+if [ ! -f "$COMMIT_MSG_FILE" ] || [ ! -r "$COMMIT_MSG_FILE" ]; then
+  echo "ERROR: Commit message file ($COMMIT_MSG_FILE) does not exist or is not readable"
+  exit 1
+fi
+
+# 스테이징된 파일 확인 (디버깅용, 커밋 중단하지 않음)
+if git diff --cached --name-only | grep -q .; then
+  echo "DEBUG: Staged files found: $(git diff --cached --name-only)"
+else
+  echo "DEBUG: No staged files found, but proceeding with commit"
+fi
+
+# 티켓 번호가 존재하는 경우에만 메시지 수정
+if [ -n "$TICKET" ]; then
+  # 기존 커밋 메시지 읽기
+  ORIGINAL_MSG=$(cat "$COMMIT_MSG_FILE" || echo "")
+  echo "DEBUG: ORIGINAL_MSG=$ORIGINAL_MSG"
+
+  # 티켓 번호가 이미 메시지에 포함되어 있는지 확인
+  if [ -n "$ORIGINAL_MSG" ] && ! echo "$ORIGINAL_MSG" | grep -q "$TICKET"; then
+    # 티켓 번호를 메시지 앞에 추가
+    echo "[$TICKET] $ORIGINAL_MSG" > "$COMMIT_MSG_FILE"
+    echo "DEBUG: Updated commit message to [$TICKET] $ORIGINAL_MSG"
+  else
+    echo "DEBUG: Ticket already in message or empty message, no changes made"
+  fi
+else
+  echo "DEBUG: No ticket number found in branch name, skipping message modification"
+fi
+
+echo "DEBUG: commit-msg hook completed successfully"

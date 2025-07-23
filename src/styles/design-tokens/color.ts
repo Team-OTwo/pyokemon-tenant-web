@@ -4,17 +4,17 @@ export const black: string = "#000000"
 export const white: string = "#ffffff"
 
 export const primary = {
-  0.5: "#fff9e6",
-  1: "#fff4cc",
-  2: "#ffefb3",
-  3: "#ffe999",
-  4: "#ffe480",
-  5: "#ffdf66",
-  6: "#FFCF36", // index.css의 --color-primary와 동일한 값
-  7: "#e6ba30",
-  8: "#cca52a",
-  9: "#b39025",
-  10: "#997a20",
+  0.5: "#f8f5ff",
+  1: "#f1ecff",
+  2: "#e6dcff",
+  3: "#c7b4f4",
+  4: "#a185e8",
+  5: "#805bdb",
+  6: "#6338ce",
+  7: "#4c25ad",
+  8: "#361489",
+  9: "#220a5c",
+  10: "#140539",
 }
 
 export const gray = {
