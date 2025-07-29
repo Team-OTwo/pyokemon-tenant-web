@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material"
-import { Link, useSearchParams } from "react-router"
+import { Link } from "react-router-dom"
 
 import { color, zIndex } from "@/styles/design-tokens"
 

@@ -1,8 +1,8 @@
-import { createBrowserRouter } from "react-router"
+import { createBrowserRouter } from "react-router-dom"
 
 import AdminProtectedRoute from "./components/admin-protected-route"
 import ProtectedRoute from "./components/protected-route"
-import HomePage from "./pages/home-page"
+import EventRegisterPage from "./pages/event-register-page"
 import LoginPage from "./pages/login-page"
 import MainEmptyLayout from "./pages/main-empty-layout"
 import MainGrayLayout from "./pages/main-gray-layout"
@@ -22,18 +22,18 @@ const router = createBrowserRouter([
             Component: ProtectedRoute,
             children: [
               {
-                index: true,
-                Component: HomePage,
+                path: "main",
+                Component: MainPage,
+              },
+              {
+                path: "event-register",
+                Component: EventRegisterPage,
               },
             ],
           },
           {
-            path: "/login",
+            path: "login",
             Component: LoginPage,
-          },
-          {
-            path: "/main",
-            Component: MainPage,
           },
         ],
       },
