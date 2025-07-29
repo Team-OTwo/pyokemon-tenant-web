@@ -24,7 +24,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className = "" }) => {
                 href="#"
                 className={`flex items-center space-x-3 px-4 py-16 ${
                   item.active
-                    ? "bg-white text-amber-400 border-l-4"
+                    ? "bg-white text-primary border-l-4"
                     : "text-gray-500 hover:bg-gray-100 hover:text-primary "
                 }`}
               >

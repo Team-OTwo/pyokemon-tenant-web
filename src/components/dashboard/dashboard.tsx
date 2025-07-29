@@ -6,7 +6,7 @@ interface DashboardBoardProps {
 
 const Dashboard: React.FC<DashboardBoardProps> = ({ children }) => {
   return (
-    <div className="w-[933px] min-h-[670px] rounded-[12px] mt-[28px] border border-gray-300 bg-white shadow-lg px-[32px] py-[23px] box-border">
+    <div className="w-[935px] min-h-[670px] rounded-[12px] mt-[28px] mb-[28px] border border-gray-300 bg-white shadow-lg px-[32px] py-[23px] box-border">
       {children}
     </div>
   )
