@@ -9,6 +9,7 @@ import MainGrayLayout from "./pages/main-gray-layout"
 import MainContainerLayout from "./pages/main-layout"
 import MainPage from "./pages/main-page"
 import RootLayout from "./pages/root-layout"
+import SchedulesRegisterPage from "./pages/schedules-register-page"
 
 const router = createBrowserRouter([
   {
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
               {
                 path: "event-register",
                 Component: EventRegisterPage,
+              },
+              {
+                path: "schedules-register",
+                Component: SchedulesRegisterPage,
               },
             ],
           },

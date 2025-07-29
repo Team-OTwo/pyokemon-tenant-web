@@ -1,5 +1,5 @@
 import React from "react"
-import { IoBarChartOutline, IoCalendarOutline, IoHomeOutline, IoListOutline } from "react-icons/io5"
+import { IoCalendarOutline, IoHomeOutline, IoListOutline } from "react-icons/io5"
 import { useLocation, useNavigate } from "react-router-dom"
 
 interface SidebarProps {
@@ -21,7 +21,8 @@ const Sidebar: React.FC<SidebarProps> = ({ className = "" }) => {
       icon: IoCalendarOutline,
       label: "공연 정보 등록",
       path: "/event-register",
-      active: location.pathname === "/event-register",
+      active:
+        location.pathname === "/event-register" || location.pathname === "/schedules-register",
     },
     {
       icon: IoListOutline,

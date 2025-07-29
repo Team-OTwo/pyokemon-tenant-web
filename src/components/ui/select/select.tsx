@@ -20,6 +20,16 @@ const StyledSelect = styled(AntdSelect)`
       font-family: Pretendard;
     }
 
+    .ant-select-selection-placeholder {
+      color: #a19f9a !important;
+      font-size: 16px;
+      font-family: Pretendard;
+    }
+
+    .ant-select-selection-item {
+      color: #222222 !important;
+    }
+
     &.ant-select:not(.ant-select-disabled):hover .ant-select-selector,
     &.ant-select-focused .ant-select-selector,
     &.ant-select-open .ant-select-selector {
