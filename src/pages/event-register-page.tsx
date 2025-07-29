@@ -1,4 +1,3 @@
-// src/pages/event-register-page.tsx
 import React, { ChangeEvent, useRef, useState } from "react"
 import { mockVenues } from "@/mock/venue-mock"
 
@@ -7,29 +6,13 @@ import Select from "@/components/ui/select/select"
 import Dashboard from "@/components/dashboard/dashboard"
 import Sidebar from "@/components/sidebar/sidebar"
 
-interface PriceGrade {
-  grade: string
-  price: string
-}
+import { ageLimit, gradeOptions, PriceGrade } from "../constants/event-register-options"
 
 function EventRegisterPage() {
   const [thumbnail, setThumbnail] = useState<File | null>(null)
   const [thumbnailPreview, setThumbnailPreview] = useState<string>("")
   const [priceGrades, setPriceGrades] = useState<PriceGrade[]>([{ grade: "", price: "" }])
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const ageRestrictions = [
-    { label: "전체관람가", value: "전체관람가" },
-    { label: "12세 이상", value: "12세 이상" },
-    { label: "15세 이상", value: "15세 이상" },
-    { label: "19세 이상", value: "19세 이상" },
-  ]
-  const gradeOptions = [
-    { label: "VIP", value: "VIP" },
-    { label: "R", value: "R" },
-    { label: "S", value: "S" },
-    { label: "A", value: "A" },
-  ]
 
   const handleThumbnailChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -86,7 +69,7 @@ function EventRegisterPage() {
               <div>
                 <div className="text-[16px] font-medium text-black mt-24 mb-8">연령 제한</div>
                 <Select
-                  options={ageRestrictions}
+                  options={ageLimit}
                   onChange={(value) => console.log(value)}
                   placeholder="연령 제한을 선택하세요"
                 />
@@ -96,7 +79,7 @@ function EventRegisterPage() {
               <div>
                 <div className="text-[16px] font-medium text-black mt-24 mb-8">공연 상세정보</div>
                 <textarea
-                  className="w-full px-16 py-16 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary min-h-[200px]"
+                  className="w-full px-16 py-16 border border-gray-300 rounded-[12px] focus:outline-none focus:ring-2 focus:ring-primary min-h-[200px]"
                   placeholder="공연 상세정보를 입력하세요"
                 />
               </div>
@@ -130,7 +113,7 @@ function EventRegisterPage() {
                     <img
                       src={thumbnailPreview}
                       alt="썸네일 미리보기"
-                      className="max-w-[300px] rounded-lg shadow-md"
+                      className="max-w-[300px] rounded-[12px] shadow-md"
                     />
                   </div>
                 )}
