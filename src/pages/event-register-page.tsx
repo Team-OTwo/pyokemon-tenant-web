@@ -107,7 +107,7 @@ function EventRegisterPage() {
                 <div className="flex items-center space-x-10">
                   <input
                     type="text"
-                    className="flex-1 w-350 h-50 px-16 border border-gray-300 rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-650 h-50 px-16 border border-gray-300 rounded-[12px] bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="썸네일 불러오기"
                     value={thumbnail?.name || ""}
                     readOnly
@@ -119,7 +119,11 @@ function EventRegisterPage() {
                     accept="image/*"
                     onChange={handleThumbnailChange}
                   />
-                  <Button text="추가" onClick={() => fileInputRef.current?.click()} />
+                  <Button
+                    text="추가"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-[60px]"
+                  />
                 </div>
                 {thumbnailPreview && (
                   <div className="mt-4">
