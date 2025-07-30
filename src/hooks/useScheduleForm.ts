@@ -1,6 +1,10 @@
-import { useState } from "react"
+import React, { useState } from "react"
 
 import { ScheduleFormData } from "@/types/schedule"
+
+// React Calendar의 Value 타입을 직접 정의
+type ValuePiece = Date | null
+type Value = ValuePiece | [ValuePiece, ValuePiece]
 
 export const useScheduleForm = () => {
   const [showCalendar, setShowCalendar] = useState(false)
@@ -12,14 +16,14 @@ export const useScheduleForm = () => {
     ticketStartTime: { hour: "", minute: "" },
   })
 
-  const handleDateChange = (value: Date | Date[]) => {
+  const handleDateChange = (value: Value, event?: React.MouseEvent<HTMLButtonElement>) => {
     if (value instanceof Date) {
       setScheduleForm((prev) => ({ ...prev, date: value }))
       setShowCalendar(false)
     }
   }
 
-  const handleTicketDateChange = (value: Date | Date[]) => {
+  const handleTicketDateChange = (value: Value, event?: React.MouseEvent<HTMLButtonElement>) => {
     if (value instanceof Date) {
       setScheduleForm((prev) => ({ ...prev, ticketDate: value }))
       setShowTicketCalendar(false)
