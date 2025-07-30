@@ -26,3 +26,24 @@ export const initialEventFormData: EventFormData = {
   thumbnailPreview: "",
   priceGrades: [{ grade: "", price: "", genre: "" }],
 }
+
+// event-register API 요청 관련 타입들
+export interface EventSchedule {
+  venueId: number
+  ticketOpenAt: string
+  eventDate: string
+  prices: Array<{
+    seatClassId: number
+    price: number
+  }>
+}
+
+export interface EventRequestData {
+  tenantId: number
+  title: string
+  ageLimit: number
+  description: string
+  genre: string
+  thumbnailUrl: string
+  schedules: EventSchedule[]
+}

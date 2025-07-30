@@ -1,4 +1,4 @@
-import { PriceGrade } from "@/types/event"
+import { EventRequestData, PriceGrade } from "@/types/event"
 import { ExtendedEventData, ScheduleFormData } from "@/types/schedule"
 
 // 연령 제한 문자열을 숫자로 변환하는 함수
@@ -31,24 +31,6 @@ const convertGradeToSeatClassId = (grade: string): number => {
     default:
       return 1
   }
-}
-
-export interface EventRequestData {
-  tenantId: number
-  title: string
-  ageLimit: number
-  description: string
-  genre: string
-  thumbnailUrl: string
-  schedules: Array<{
-    venueId: number
-    ticketOpenAt: string
-    eventDate: string
-    prices: Array<{
-      seatClassId: number
-      price: number
-    }>
-  }>
 }
 
 export const createEventRequestData = (
