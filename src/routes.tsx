@@ -8,6 +8,7 @@ import LoginPage from "./pages/login-page"
 import MainEmptyLayout from "./pages/main-empty-layout"
 import MainGrayLayout from "./pages/main-gray-layout"
 import MainContainerLayout from "./pages/main-layout"
+import MainPage from "./pages/main-page"
 import RootLayout from "./pages/root-layout"
 
 const router = createBrowserRouter([
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
           {
             path: "/login",
             Component: LoginPage,
+          },
+          {
+            path: "/main",
+            Component: MainPage,
           },
           {
             path: "/events",
