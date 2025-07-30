@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router"
 
 import AdminProtectedRoute from "./components/admin-protected-route"
 import ProtectedRoute from "./components/protected-route"
+import EventsPage from "./pages/events-page/events-page"
 import HomePage from "./pages/home-page"
 import LoginPage from "./pages/login-page"
 import MainEmptyLayout from "./pages/main-empty-layout"
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
           {
             path: "/main",
             Component: MainPage,
+          },
+          {
+            path: "/events",
+            Component: EventsPage,
           },
         ],
       },

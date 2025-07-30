@@ -1,79 +1,26 @@
-import { Badge as AntdBadge } from "antd"
-import styled from "styled-components"
+import React from "react"
 
-type BadgeColor = "red" | "green" | "gray" | "primary invert" | "primary"
-
-interface StyledBadgeProps {
-  $color?: BadgeColor
+interface BadgeProps {
+  text: string
+  textColor?: string
+  bgColor?: string
+  borderColor?: string
 }
 
-const StyledBadge = styled(AntdBadge)<StyledBadgeProps>`
-  &.ant-badge {
-    .ant-badge-count {
-      font-size: 13px;
-      line-height: 22px;
-      height: 22px;
-      border-radius: 100px;
-      padding-left: 7px;
-      padding-right: 7px;
-
-      &.ant-badge-count-sm {
-        font-size: 12px;
-        line-height: 16px;
-        height: 16px;
-        border-radius: 100px;
-        padding-left: 5px;
-        padding-right: 5px;
-      }
-
-      ${({ $color, theme }) => {
-        if ($color === "primary invert") {
-          return `
-            background-color: ${theme.colors.primary[1]};
-            color: ${theme.colors.primary[6]};
-          `
-        }
-
-        if ($color === "primary") {
-          return `
-            background-color: ${theme.colors.primary[6]};
-            color: ${theme.colors.white};
-          `
-        }
-
-        if ($color === "green") {
-          return `
-            background-color: ${theme.colors.green[6]};
-            color: ${theme.colors.white};
-          `
-        }
-
-        if ($color === "gray") {
-          return `
-            background-color: ${theme.colors.gray[4]};
-            color: ${theme.colors.gray[9]};
-          `
-        }
-
-        if ($color === "red") {
-          return `
-            background-color: ${theme.colors.red[5]};
-            color: ${theme.colors.white};
-          `
-        }
-      }}
-    }
-  }
-`
-
-interface BadgeProps extends React.ComponentProps<typeof AntdBadge> {
-  color?: BadgeColor
+const Badge = ({
+  text,
+  textColor = "#A19F9A",
+  bgColor = "white",
+  borderColor = "#A19F9A",
+}: BadgeProps) => {
+  return (
+    <div
+      className="py-4 px-16 rounded-full h-30 text-center text-sm border-1 justify-center items-center inline"
+      style={{ color: textColor, backgroundColor: bgColor, borderColor: borderColor }}
+    >
+      {text}
+    </div>
+  )
 }
-
-function Badge({ color = "gray", ...props }: BadgeProps) {
-  return <StyledBadge $color={color} {...props} />
-}
-
-Badge.Ribbon = StyledBadge.Ribbon
 
 export default Badge

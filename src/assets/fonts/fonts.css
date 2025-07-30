@@ -1,7 +1,7 @@
 /* Pretendard 폰트 설정 */
-@import '@fontsource/pretendard/400.css';
-@import '@fontsource/pretendard/500.css';
-@import '@fontsource/pretendard/700.css';
+/* @import '@fontsource/pretendard/400.css'; */
+/* @import '@fontsource/pretendard/500.css'; */
+/* @import '@fontsource/pretendard/700.css'; */
 
 :root {
   --font-family-base: 'Pretendard', sans-serif;
