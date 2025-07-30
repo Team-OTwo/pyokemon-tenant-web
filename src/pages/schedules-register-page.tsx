@@ -6,6 +6,7 @@ import "@/components/calander/calander.css"
 
 import { createEventRequestData, submitEvent } from "@/api/event-register-api"
 import { hourOptions, minuteOptions } from "@/constants/event-register-options"
+import { useEventStore } from "@/store/eventStore"
 import { useLocation, useNavigate } from "react-router-dom"
 
 import { ExtendedEventData } from "@/types/schedule"
@@ -19,6 +20,7 @@ function SchedulesRegisterPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const eventData: ExtendedEventData = location.state?.eventData
+  const { resetEventFormData } = useEventStore()
 
   const {
     scheduleForm,
@@ -50,6 +52,8 @@ function SchedulesRegisterPage() {
       await submitEvent(requestData)
 
       alert("공연이 성공적으로 등록되었습니다.")
+      // Zustand store 초기화
+      resetEventFormData()
       // 성공 시 다른 페이지로 이동
       navigate("/main")
     } catch (error) {

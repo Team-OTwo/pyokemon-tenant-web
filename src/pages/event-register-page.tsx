@@ -1,5 +1,6 @@
-import React, { ChangeEvent, useRef, useState } from "react"
+import React, { ChangeEvent, useRef } from "react"
 import { mockVenues } from "@/mock/venue-mock"
+import { useEventStore } from "@/store/eventStore"
 import { useNavigate } from "react-router-dom"
 
 import Button from "@/components/ui/button/button"
@@ -8,66 +9,59 @@ import Dashboard from "@/components/dashboard/dashboard"
 import Sidebar from "@/components/sidebar/sidebar"
 
 import { ageLimit, genreOptions, gradeOptions } from "../constants/event-register-options"
-import { EventFormData, initialEventFormData, PriceGrade } from "../types/event"
+import { EventFormData, PriceGrade } from "../types/event"
 
 function EventRegisterPage() {
   const navigate = useNavigate()
-  const [formData, setFormData] = useState<EventFormData>(initialEventFormData)
+  const { eventFormData, setEventFormData, updateEventFormData } = useEventStore()
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
+    updateEventFormData({ [name]: value })
   }
 
   const handleSelectChange = (name: string) => (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
+    updateEventFormData({ [name]: value })
   }
 
   const handleThumbnailChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      setFormData((prev) => ({
-        ...prev,
+      updateEventFormData({
         thumbnail: file,
         thumbnailPreview: URL.createObjectURL(file),
-      }))
+      })
     }
   }
 
   const handleAddPriceGrade = () => {
-    setFormData((prev) => ({
-      ...prev,
-      priceGrades: [...prev.priceGrades, { grade: "", price: "", genre: "" }],
-    }))
+    const newPriceGrades = [...eventFormData.priceGrades, { grade: "", price: "", genre: "" }]
+    updateEventFormData({ priceGrades: newPriceGrades })
   }
 
   const handlePriceGradeChange = (index: number, field: keyof PriceGrade, value: string) => {
-    const newPriceGrades = [...formData.priceGrades]
+    const newPriceGrades = [...eventFormData.priceGrades]
     newPriceGrades[index][field] = value
-    setFormData((prev) => ({
-      ...prev,
-      priceGrades: newPriceGrades,
-    }))
+    updateEventFormData({ priceGrades: newPriceGrades })
   }
 
   const handleNext = () => {
     // 필수 필드 검증
-    if (!formData.title || !formData.venue || !formData.ageLimit || !formData.description) {
+    if (
+      !eventFormData.title ||
+      !eventFormData.venue ||
+      !eventFormData.ageLimit ||
+      !eventFormData.description
+    ) {
       alert("모든 필수 필드를 입력해주세요.")
       return
     }
 
     // 다음 페이지로 데이터 전달
     navigate("/schedules-register", {
-      state: { eventData: formData },
+      state: { eventData: eventFormData },
     })
   }
 
@@ -86,7 +80,7 @@ function EventRegisterPage() {
                 <input
                   type="text"
                   name="title"
-                  value={formData.title}
+                  value={eventFormData.title}
                   onChange={handleInputChange}
                   className="w-full h-50 px-16 py-2 mb-24 border border-gray-300 rounded-[12px] focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="공연명을 입력하세요"
@@ -98,7 +92,7 @@ function EventRegisterPage() {
                 <div className="text-[16px] font-medium text-black mb-8">공연장</div>
                 <Select
                   options={mockVenues}
-                  value={formData.venue || undefined}
+                  value={eventFormData.venue || undefined}
                   onChange={handleSelectChange("venue")}
                   placeholder="공연장을 선택하세요"
                 />
@@ -109,7 +103,7 @@ function EventRegisterPage() {
                 <div className="text-[16px] font-medium text-black mt-24 mb-8">장르 선택</div>
                 <Select
                   options={genreOptions}
-                  value={formData.genre || undefined}
+                  value={eventFormData.genre || undefined}
                   onChange={handleSelectChange("genre")}
                   placeholder="장르를 선택하세요"
                 />
@@ -120,7 +114,7 @@ function EventRegisterPage() {
                 <div className="text-[16px] font-medium text-black mt-24 mb-8">연령 제한</div>
                 <Select
                   options={ageLimit}
-                  value={formData.ageLimit || undefined}
+                  value={eventFormData.ageLimit || undefined}
                   onChange={handleSelectChange("ageLimit")}
                   placeholder="연령 제한을 선택하세요"
                 />
@@ -131,7 +125,7 @@ function EventRegisterPage() {
                 <div className="text-[16px] font-medium text-black mt-24 mb-8">공연 상세정보</div>
                 <textarea
                   name="description"
-                  value={formData.description}
+                  value={eventFormData.description}
                   onChange={handleInputChange}
                   className="w-full px-16 py-16 border border-gray-300 rounded-[12px] focus:outline-none focus:ring-2 focus:ring-primary min-h-[200px]"
                   placeholder="공연 상세정보를 입력하세요"
@@ -146,7 +140,7 @@ function EventRegisterPage() {
                     type="text"
                     className="w-650 h-50 px-16 border border-gray-300 rounded-[12px] bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="썸네일 불러오기"
-                    value={formData.thumbnail?.name || ""}
+                    value={eventFormData.thumbnail?.name || ""}
                     readOnly
                   />
                   <input
@@ -158,10 +152,10 @@ function EventRegisterPage() {
                   />
                   <Button small text="추가" onClick={() => fileInputRef.current?.click()} />
                 </div>
-                {formData.thumbnailPreview && (
+                {eventFormData.thumbnailPreview && (
                   <div className="mt-4">
                     <img
-                      src={formData.thumbnailPreview}
+                      src={eventFormData.thumbnailPreview}
                       alt="썸네일 미리보기"
                       className="max-w-[300px] rounded-[12px] shadow-md"
                     />
@@ -175,7 +169,7 @@ function EventRegisterPage() {
                   등급별 가격 설정
                 </div>
                 <div className="space-y-4">
-                  {formData.priceGrades.map((grade, index) => (
+                  {eventFormData.priceGrades.map((grade, index) => (
                     <div key={index} className="grid grid-cols-[1fr_1fr_1fr] gap-10 items-center">
                       <Select
                         options={gradeOptions}
@@ -192,7 +186,7 @@ function EventRegisterPage() {
                         placeholder="가격을 입력하세요"
                         step="1000"
                       />
-                      {index === formData.priceGrades.length - 1 && (
+                      {index === eventFormData.priceGrades.length - 1 && (
                         <Button small text="추가" onClick={handleAddPriceGrade} />
                       )}
                     </div>
