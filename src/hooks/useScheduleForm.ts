@@ -8,20 +8,18 @@ export const useScheduleForm = () => {
   const [scheduleForm, setScheduleForm] = useState<ScheduleFormData>({
     date: null,
     ticketDate: null,
-    eventStartTime: { hour: "00", minute: "00" },
-    ticketStartTime: { hour: "00", minute: "00" },
+    eventStartTime: { hour: "", minute: "" },
+    ticketStartTime: { hour: "", minute: "" },
   })
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleDateChange = (value: any) => {
+  const handleDateChange = (value: Date | Date[]) => {
     if (value instanceof Date) {
       setScheduleForm((prev) => ({ ...prev, date: value }))
       setShowCalendar(false)
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleTicketDateChange = (value: any) => {
+  const handleTicketDateChange = (value: Date | Date[]) => {
     if (value instanceof Date) {
       setScheduleForm((prev) => ({ ...prev, ticketDate: value }))
       setShowTicketCalendar(false)

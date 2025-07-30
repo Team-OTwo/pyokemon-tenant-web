@@ -156,11 +156,7 @@ function EventRegisterPage() {
                     accept="image/*"
                     onChange={handleThumbnailChange}
                   />
-                  <Button
-                    text="추가"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-[60px]"
-                  />
+                  <Button small text="추가" onClick={() => fileInputRef.current?.click()} />
                 </div>
                 {formData.thumbnailPreview && (
                   <div className="mt-4">
@@ -197,7 +193,7 @@ function EventRegisterPage() {
                         step="1000"
                       />
                       {index === formData.priceGrades.length - 1 && (
-                        <Button text="추가" onClick={handleAddPriceGrade} className="w-[60px]" />
+                        <Button small text="추가" onClick={handleAddPriceGrade} />
                       )}
                     </div>
                   ))}
