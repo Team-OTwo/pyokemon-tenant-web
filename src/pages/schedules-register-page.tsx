@@ -5,7 +5,7 @@ import { IoCalendarOutline } from "react-icons/io5"
 import "react-calendar/dist/Calendar.css"
 
 import { createEventRequestData, submitEvent } from "@/api/event-register-api"
-import { hourOptions, minuteOptions } from "@/constants/schedule-options"
+import { hourOptions, minuteOptions } from "@/constants/event-register-options"
 import { useLocation, useNavigate } from "react-router-dom"
 
 import { ExtendedEventData } from "@/types/schedule"

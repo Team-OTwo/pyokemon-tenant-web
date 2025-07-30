@@ -1,5 +1,4 @@
-import { PriceGrade } from "@/constants/event-register-options"
-
+import { PriceGrade } from "@/types/event"
 import { ExtendedEventData, ScheduleFormData } from "@/types/schedule"
 
 // 연령 제한 문자열을 숫자로 변환하는 함수
@@ -67,10 +66,10 @@ export const createEventRequestData = (
       {
         venueId: 1, // 실제로는 선택된 공연장 ID
         ticketOpenAt: scheduleForm.ticketDate
-          ? `${scheduleForm.ticketDate.toISOString().split("T")[0]}T${scheduleForm.ticketStartTime.hour}:${scheduleForm.ticketStartTime.minute}:00`
+          ? `${scheduleForm.ticketDate.getFullYear()}-${String(scheduleForm.ticketDate.getMonth() + 1).padStart(2, "0")}-${String(scheduleForm.ticketDate.getDate()).padStart(2, "0")}T${scheduleForm.ticketStartTime.hour}:${scheduleForm.ticketStartTime.minute}:00`
           : "",
         eventDate: scheduleForm.date
-          ? `${scheduleForm.date.toISOString().split("T")[0]}T${scheduleForm.eventStartTime.hour}:${scheduleForm.eventStartTime.minute}:00`
+          ? `${scheduleForm.date.getFullYear()}-${String(scheduleForm.date.getMonth() + 1).padStart(2, "0")}-${String(scheduleForm.date.getDate()).padStart(2, "0")}T${scheduleForm.eventStartTime.hour}:${scheduleForm.eventStartTime.minute}:00`
           : "",
         prices: eventData.priceGrades.map((grade: PriceGrade) => ({
           seatClassId: convertGradeToSeatClassId(grade.grade),

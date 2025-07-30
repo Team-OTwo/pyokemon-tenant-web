@@ -1,12 +1,28 @@
-export interface EventType {
-  eventId: number
-  title: string
-  ageLimit: number
-  venueName: string
-  eventDate: string
-  ticketOpenAt: string
+export interface PriceGrade {
+  grade: string
+  price: string
   genre: string
-  thumbnailUrl: string
+}
+
+export interface EventFormData {
+  title: string
+  venue: string
+  ageLimit: string
+  genre: string
   description: string
-  eventScheduleId: number
+  thumbnail: File | null
+  thumbnailPreview: string
+  priceGrades: PriceGrade[]
+}
+
+// 초기 상태
+export const initialEventFormData: EventFormData = {
+  title: "",
+  venue: "",
+  ageLimit: "",
+  genre: "",
+  description: "",
+  thumbnail: null,
+  thumbnailPreview: "",
+  priceGrades: [{ grade: "", price: "", genre: "" }],
 }

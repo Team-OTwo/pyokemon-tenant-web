@@ -7,36 +7,12 @@ import Select from "@/components/ui/select/select"
 import Dashboard from "@/components/dashboard/dashboard"
 import Sidebar from "@/components/sidebar/sidebar"
 
-import {
-  ageLimit,
-  genreOptions,
-  gradeOptions,
-  PriceGrade,
-} from "../constants/event-register-options"
-
-interface EventFormData {
-  title: string
-  venue: string
-  ageLimit: string
-  genre: string
-  description: string
-  thumbnail: File | null
-  thumbnailPreview: string
-  priceGrades: PriceGrade[]
-}
+import { ageLimit, genreOptions, gradeOptions } from "../constants/event-register-options"
+import { EventFormData, initialEventFormData, PriceGrade } from "../types/event"
 
 function EventRegisterPage() {
   const navigate = useNavigate()
-  const [formData, setFormData] = useState<EventFormData>({
-    title: "",
-    venue: "",
-    ageLimit: "",
-    genre: "",
-    description: "",
-    thumbnail: null,
-    thumbnailPreview: "",
-    priceGrades: [{ grade: "", price: "", genre: "" }],
-  })
+  const [formData, setFormData] = useState<EventFormData>(initialEventFormData)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 

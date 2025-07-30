@@ -4,8 +4,6 @@ import AdminProtectedRoute from "./components/admin-protected-route"
 import ProtectedRoute from "./components/protected-route"
 import EventRegisterPage from "./pages/event-register-page"
 import LoginPage from "./pages/login-page"
-import MainEmptyLayout from "./pages/main-empty-layout"
-import MainGrayLayout from "./pages/main-gray-layout"
 import MainContainerLayout from "./pages/main-layout"
 import MainPage from "./pages/main-page"
 import RootLayout from "./pages/root-layout"
@@ -17,7 +15,7 @@ const router = createBrowserRouter([
     Component: RootLayout,
     children: [
       {
-        Component: MainEmptyLayout,
+        Component: MainContainerLayout,
         children: [
           {
             Component: ProtectedRoute,
@@ -39,15 +37,6 @@ const router = createBrowserRouter([
           {
             path: "login",
             Component: LoginPage,
-          },
-        ],
-      },
-      {
-        Component: MainGrayLayout,
-        children: [
-          {
-            Component: ProtectedRoute,
-            children: [],
           },
         ],
       },

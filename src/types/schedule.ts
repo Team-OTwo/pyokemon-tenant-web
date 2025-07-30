@@ -1,6 +1,4 @@
-import { PriceGrade } from "@/constants/event-register-options"
-
-import { EventType } from "./event"
+import { EventFormData, PriceGrade } from "./event"
 
 export interface ScheduleFormData {
   date: Date | null
@@ -15,10 +13,15 @@ export interface ScheduleFormData {
   }
 }
 
-export interface ExtendedEventData extends Omit<EventType, "ageLimit"> {
-  venue: string
-  ageLimit: string
-  thumbnail: File | null
-  thumbnailPreview: string
-  priceGrades: PriceGrade[]
+export interface ExtendedEventData extends EventFormData {
+  date: Date | null
+  ticketDate: Date | null
+  eventStartTime: {
+    hour: string
+    minute: string
+  }
+  ticketStartTime: {
+    hour: string
+    minute: string
+  }
 }
