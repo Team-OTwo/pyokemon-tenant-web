@@ -1,3 +1,5 @@
+import { PriceGrade } from "@/constants/event-register-options"
+
 import { EventType } from "./event"
 
 export interface ScheduleFormData {
@@ -13,10 +15,10 @@ export interface ScheduleFormData {
   }
 }
 
-// EventType을 확장하여 추가 필드들을 포함
-export interface ExtendedEventData extends EventType {
+export interface ExtendedEventData extends Omit<EventType, "ageLimit"> {
   venue: string
+  ageLimit: string
   thumbnail: File | null
   thumbnailPreview: string
-  priceGrades: Array<{ grade: string; price: string }>
+  priceGrades: PriceGrade[]
 }

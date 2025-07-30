@@ -4,7 +4,7 @@ import { IoCalendarOutline } from "react-icons/io5"
 
 import "react-calendar/dist/Calendar.css"
 
-import { createEventRequestData, submitEvent } from "@/api/event-api"
+import { createEventRequestData, submitEvent } from "@/api/event-register-api"
 import { hourOptions, minuteOptions } from "@/constants/schedule-options"
 import { useLocation, useNavigate } from "react-router-dom"
 
@@ -45,11 +45,13 @@ function SchedulesRegisterPage() {
 
       // API 요청 데이터 구성 및 제출
       const requestData = createEventRequestData(eventData, scheduleForm)
+      console.log("생성된 requestData:", requestData)
+
       await submitEvent(requestData)
 
-      console.log("공연이 성공적으로 등록되었습니다.")
+      alert("공연이 성공적으로 등록되었습니다.")
       // 성공 시 다른 페이지로 이동
-      navigate("/success")
+      navigate("/main")
     } catch (error) {
       console.error("Error:", error)
     }
@@ -59,7 +61,7 @@ function SchedulesRegisterPage() {
     <div className="flex">
       <Sidebar />
       <main className="flex-1 bg-white">
-        <div className="[&>div]:!w-[1200px]">
+        <div className="[&>div]:!w-[1100px]">
           <Dashboard>
             <div className="flex gap-50">
               <div className="w-500 p-8">
@@ -102,6 +104,7 @@ function SchedulesRegisterPage() {
                         <Calendar
                           onChange={handleDateChange}
                           value={scheduleForm.date}
+                          minDate={new Date()}
                           className="border rounded-lg shadow-lg"
                         />
                       </div>
@@ -144,6 +147,7 @@ function SchedulesRegisterPage() {
                           <Calendar
                             onChange={handleTicketDateChange}
                             value={scheduleForm.ticketDate}
+                            minDate={new Date()}
                             className="border rounded-lg shadow-lg"
                           />
                         </div>
@@ -172,7 +176,7 @@ function SchedulesRegisterPage() {
           </Dashboard>
         </div>
         {/* 등록 버튼 */}
-        <div className="pt-5 pb-24 ml-880">
+        <div className="pt-5 pb-24 ml-780">
           <Button text="공연 일정 등록" onClick={handleSubmit} />
         </div>
       </main>
