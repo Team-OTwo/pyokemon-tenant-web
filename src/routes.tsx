@@ -3,6 +3,7 @@ import { createBrowserRouter } from "react-router-dom"
 import AdminProtectedRoute from "./components/admin-protected-route"
 import ProtectedRoute from "./components/protected-route"
 import BookingsPage from "./pages/bookings-page"
+import EventDetailPage from "./pages/event-detail-page"
 import EventRegisterPage from "./pages/event-register-page"
 import EventsPage from "./pages/events-page/events-page"
 import LoginPage from "./pages/login-page"
@@ -47,12 +48,16 @@ const router = createBrowserRouter([
             Component: LoginPage,
           },
           {
-            path: "/main",
+            path: "main",
             Component: MainPage,
           },
           {
-            path: "/events",
+            path: "events",
             Component: EventsPage,
+          },
+          {
+            path: "events/:eventId",
+            Component: EventDetailPage,
           },
         ],
       },

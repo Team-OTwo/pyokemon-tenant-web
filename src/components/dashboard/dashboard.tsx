@@ -5,11 +5,9 @@ interface DashboardBoardProps {
   width?: string
 }
 
-const Dashboard: React.FC<DashboardBoardProps> = ({ children, width = "w-[935px]" }) => {
+const Dashboard: React.FC<DashboardBoardProps> = ({ children }) => {
   return (
-    <div
-      className={`${width} min-h-[670px] rounded-[12px] mt-[28px] mb-[28px] border border-gray-300 bg-white shadow-lg px-[32px] py-[23px] box-border`}
-    >
+    <div className="min-h-670 bg-white box-border rounded-xl shadow-[0px_0px_20px_0px_rgba(0,0,0,0.15)] border-1 border-gray-300 p-24 w-full">
       {children}
     </div>
   )
