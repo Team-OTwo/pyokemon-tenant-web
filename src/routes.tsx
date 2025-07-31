@@ -40,7 +40,7 @@ const router = createBrowserRouter([
             ],
           },
           {
-            path: "bookings",
+            path: "bookings/:eventId",
             Component: BookingsPage,
           },
           {

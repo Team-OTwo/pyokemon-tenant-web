@@ -78,34 +78,22 @@ const BookingsTable: React.FC<BookingsTableProps> = ({ bookings, loading }) => {
             {[...Array(5)].map((_, index) => (
               <tr key={index}>
                 <td className="px-6 py-15">
-                  <div className="flex justify-center">
-                    <SkeletonMain variant="text" width={80} />
-                  </div>
+                  <div className="flex justify-center"></div>
                 </td>
                 <td className="px-6 py-15">
-                  <div className="flex justify-center">
-                    <SkeletonMain variant="text" width={120} />
-                  </div>
+                  <div className="flex justify-center"> </div>
                 </td>
                 <td className="px-6 py-15">
-                  <div className="flex justify-center">
-                    <SkeletonMain variant="text" width={100} />
-                  </div>
+                  <div className="flex justify-center"> </div>
                 </td>
                 <td className="px-6 py-15">
-                  <div className="flex justify-center">
-                    <SkeletonMain variant="text" width={100} />
-                  </div>
+                  <div className="flex justify-center"> </div>
                 </td>
                 <td className="px-6 py-15">
-                  <div className="flex justify-center">
-                    <SkeletonMain variant="text" width={80} />
-                  </div>
+                  <div className="flex justify-center"> </div>
                 </td>
                 <td className="px-6 py-15">
-                  <div className="flex justify-center">
-                    <SkeletonMain variant="text" width={80} height={32} />
-                  </div>
+                  <div className="flex justify-center"> </div>
                 </td>
               </tr>
             ))}

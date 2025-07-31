@@ -182,7 +182,7 @@ const mockUsers: User[] = [
 // Mock Event 데이터
 const mockEvent: Event = {
   id: 1,
-  eventId: "event1",
+  eventId: "1",
   title: "TOMORROW X TOGETHER WORLD TOUR",
   description: "TOMORROW X TOGETHER의 월드 투어",
   ageLimit: 8,

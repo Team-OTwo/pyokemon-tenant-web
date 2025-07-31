@@ -66,7 +66,7 @@ function SchedulesRegisterPage() {
       // Zustand store 초기화
       resetEventFormData()
       // 성공 시 다른 페이지로 이동
-      navigate("/main")
+      navigate("/events")
     } catch (error) {
       console.error("Error:", error)
     }
