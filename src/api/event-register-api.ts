@@ -85,7 +85,7 @@ export const createEventRequestData = (
 export const submitEvent = async (requestData: EventRequestData): Promise<void> => {
   console.log("API 요청 데이터:", requestData)
 
-  const response = await fetch("http://localhost:8080/api/events", {
+  const response = await fetch("http://localhost:8081/event/api/events", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

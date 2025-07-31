@@ -37,11 +37,11 @@ const router = createBrowserRouter([
                 path: "schedules-register",
                 Component: SchedulesRegisterPage,
               },
-              {
-                path: "bookings",
-                Component: BookingsPage,
-              },
             ],
+          },
+          {
+            path: "bookings",
+            Component: BookingsPage,
           },
           {
             path: "login",

@@ -59,28 +59,29 @@ const BookingsPage = () => {
                   <p className="text-gray-700 mb-4">{bookings[0]?.eventDate}</p>
                   <p className="text-gray-700 mb-16">{bookings[0]?.venueName}</p>
 
-                  <div className="flex justify-between items-center">
-                    <div className="space-y-4">
-                      <p className="text-lg font-semibold">
-                        총 매출 : {formatAmount(mockBookingSummary.totalSales)}
-                      </p>
+                  <div className="space-y-4">
+                    <p className="text-lg font-semibold">
+                      총 매출 : {formatAmount(mockBookingSummary.totalSales)}
+                    </p>
+                    <div className="flex justify-between items-center">
                       <p className="text-lg font-semibold">
                         잔여석 : {mockBookingSummary.remainingSeats}
                       </p>
-                    </div>
-                  </div>
-                  {/* 상태 필터 버튼들 */}
-                  <div className="flex gap-8 ml-350">
-                    {statusOptions.map((status, index) => (
-                      <div key={index} onClick={() => setActiveStatus(index)}>
-                        <Badge
-                          text={status}
-                          textColor={index === activeStatus ? "white" : undefined}
-                          bgColor={index === activeStatus ? "#FFD800" : undefined}
-                          borderColor={index === activeStatus ? "#FFD800" : undefined}
-                        />
+
+                      {/* 상태 필터 버튼들 */}
+                      <div className="flex gap-8">
+                        {statusOptions.map((status, index) => (
+                          <div key={index} onClick={() => setActiveStatus(index)}>
+                            <Badge
+                              text={status}
+                              textColor={index === activeStatus ? "white" : undefined}
+                              bgColor={index === activeStatus ? "#FFD800" : undefined}
+                              borderColor={index === activeStatus ? "#FFD800" : undefined}
+                            />
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    </div>
                   </div>
                 </div>
               </div>
