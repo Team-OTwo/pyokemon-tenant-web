@@ -1,4 +1,5 @@
 import React from "react"
+import { useNavigate } from "react-router-dom"
 
 import { EventType } from "@/types/event"
 import Badge from "@/components/ui/badge"
@@ -7,8 +8,15 @@ interface EventCardProps {
   event: EventType
 }
 const EventCard = ({ event }: EventCardProps) => {
+  const navigation = useNavigate()
+  const handleClick = () => {
+    navigation(`/events/${event.eventId}`)
+  }
   return (
-    <div className="p-16 flex shadow-[0px_0px_10px_0px_rgba(0,0,0,0.10)] rounded-xl justify-between">
+    <div
+      className="p-16 flex shadow-[0px_0px_10px_0px_rgba(0,0,0,0.10)] rounded-xl justify-between"
+      onClick={handleClick}
+    >
       <div className="flex gap-16">
         <img src={event.thumbnailUrl} alt="" className="w-120 rounded-lg" />
         <div>

@@ -35,7 +35,7 @@ const DashboardContent: React.FC = () => {
             <div className="bg-primary rounded-full p-6 mr-[10px]">
               <IoCalendarOutline className="w-30 h-30 text-white" />
             </div>
-            <h1 className="text-[30px] font-bold text-black">최근 공연 현황</h1>
+            <h1 className="text-2xl font-bold text-black">최근 공연 현황</h1>
           </div>
           <p className="text-gray-700 mt-[15px] mb-[30px]">
             최근 1년 간 공연들의 예매 현황을 확인하세요
@@ -53,7 +53,7 @@ function MainPage() {
   return (
     <div className="flex">
       <Sidebar />
-      <main className="flex-1 bg-white">
+      <main className="p-32 w-full">
         <DashboardContent />
       </main>
     </div>

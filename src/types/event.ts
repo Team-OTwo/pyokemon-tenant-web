@@ -47,3 +47,16 @@ export interface EventRequestData {
   thumbnailUrl: string
   schedules: EventSchedule[]
 }
+
+export interface EventType {
+  eventId: number
+  title: string
+  ageLimit: number
+  venueName: string
+  eventDate: string
+  ticketOpenAt: string
+  genre: string
+  description: string
+  eventScheduleId: number
+  thumbnailUrl: string
+}

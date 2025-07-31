@@ -2,6 +2,8 @@ import React, { useState } from "react"
 import { eventList } from "@/constants/event"
 
 import Badge from "@/components/ui/badge"
+import Dashboard from "@/components/dashboard/dashboard"
+import Sidebar from "@/components/sidebar/sidebar"
 
 import EventCard from "./_components/event-card"
 
@@ -10,33 +12,36 @@ const EventsPage = () => {
   const [activeStatus, setActiveStatus] = useState(0)
 
   return (
-    <div className="p-32">
-      <div className="rounded-xl shadow-[0px_0px_20px_0px_rgba(0,0,0,0.15)] border-1 border-gray-300 p-16">
-        <div className="flex justify-between">
-          <h1 className="text-xl font-bold">공연 리스트 조회</h1>
-          <div>공연 검색</div>
-        </div>
+    <div className="flex">
+      <Sidebar />
+      <div className="p-32 w-full">
+        <Dashboard>
+          <div className="flex justify-between">
+            <h1 className="text-2xl font-bold">공연 리스트 조회</h1>
+            <div>공연 검색</div>
+          </div>
 
-        <div className="py-24 flex justify-end gap-8">
-          {status.map((s, i) => {
-            return (
-              <div key={i} onClick={() => setActiveStatus(i)}>
-                <Badge
-                  text={s}
-                  textColor={i === activeStatus ? "white" : undefined}
-                  bgColor={i === activeStatus ? "#FFD800" : undefined}
-                  borderColor={i === activeStatus ? "#FFD800" : undefined}
-                />
-              </div>
-            )
-          })}
-        </div>
+          <div className="py-24 flex justify-end gap-8">
+            {status.map((s, i) => {
+              return (
+                <div key={i} onClick={() => setActiveStatus(i)}>
+                  <Badge
+                    text={s}
+                    textColor={i === activeStatus ? "white" : undefined}
+                    bgColor={i === activeStatus ? "#FFD800" : undefined}
+                    borderColor={i === activeStatus ? "#FFD800" : undefined}
+                  />
+                </div>
+              )
+            })}
+          </div>
 
-        <div className="flex flex-col gap-16">
-          {eventList.map((event) => {
-            return <EventCard event={event} key={event.eventId} />
-          })}
-        </div>
+          <div className="flex flex-col gap-16">
+            {eventList.map((event) => {
+              return <EventCard event={event} key={event.eventId} />
+            })}
+          </div>
+        </Dashboard>
       </div>
     </div>
   )
