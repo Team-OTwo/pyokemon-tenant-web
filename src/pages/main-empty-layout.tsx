@@ -1,18 +1,10 @@
-import { Box } from "@mui/material"
-import { Outlet } from "react-router"
+import { Outlet } from "react-router-dom"
 
 function MainEmptyLayout() {
   return (
-    <Box
-      component="main"
-      sx={{
-        flex: 1,
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <div>
       <Outlet />
-    </Box>
+    </div>
   )
 }
 

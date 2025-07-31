@@ -1,15 +1,35 @@
 import React from "react"
-import { IoBarChartOutline, IoCalendarOutline, IoHomeOutline, IoListOutline } from "react-icons/io5"
+import { IoCalendarOutline, IoHomeOutline, IoListOutline } from "react-icons/io5"
+import { useLocation, useNavigate } from "react-router-dom"
 
 interface SidebarProps {
   className?: string
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ className = "" }) => {
+  const location = useLocation()
+  const navigate = useNavigate()
+
   const menuItems = [
-    { icon: IoHomeOutline, label: "대시보드", active: true },
-    { icon: IoCalendarOutline, label: "공연 정보 등록", active: false },
-    { icon: IoListOutline, label: "공연 리스트 조회", active: false },
+    {
+      icon: IoHomeOutline,
+      label: "대시보드",
+      path: "/main",
+      active: location.pathname === "/main",
+    },
+    {
+      icon: IoCalendarOutline,
+      label: "공연 정보 등록",
+      path: "/event-register",
+      active:
+        location.pathname === "/event-register" || location.pathname === "/schedules-register",
+    },
+    {
+      icon: IoListOutline,
+      label: "공연 리스트 조회",
+      path: "/event-list",
+      active: location.pathname === "/event-list",
+    },
   ]
 
   return (
@@ -19,18 +39,18 @@ const Sidebar: React.FC<SidebarProps> = ({ className = "" }) => {
           {menuItems.map((item, index) => {
             const Icon = item.icon
             return (
-              <a
+              <button
                 key={index}
-                href="#"
-                className={`flex items-center space-x-3 px-4 py-16 ${
+                onClick={() => navigate(item.path)}
+                className={`flex items-center space-x-3 px-4 py-16 w-full ${
                   item.active
                     ? "bg-white text-primary border-l-4"
-                    : "text-gray-500 hover:bg-gray-100 hover:text-primary "
+                    : "text-gray-500 hover:bg-gray-100 hover:text-primary"
                 }`}
               >
                 <Icon size={20} className="ml-[21px]" />
-                <span className="font-medium text-xl ml-[6px]">{item.label}</span>
-              </a>
+                <span className="font-medium text-[18px] ml-[6px]">{item.label}</span>
+              </button>
             )
           })}
         </nav>
