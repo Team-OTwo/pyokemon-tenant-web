@@ -31,7 +31,7 @@ const EvenDetailPage = () => {
       <Sidebar />
       <div className="p-32 w-full">
         <Dashboard>
-          <div className="flex gap-12 items-center">
+          <div className="flex gap-12 items-center mb-16">
             <IoChevronBackOutline
               color="#686764"
               onClick={handleGoBack}
