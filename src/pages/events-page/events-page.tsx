@@ -24,7 +24,7 @@ const EventsPage = () => {
     <div className="flex">
       <Sidebar />
       <main className="flex-1 bg-white">
-        <div className="[&>div]:!w-[1100px]">
+        <div>
           <Dashboard>
             <div className="flex justify-between items-center">
               <h1 className="text-xl font-bold">공연 리스트 조회</h1>
