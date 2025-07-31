@@ -40,8 +40,19 @@ function SchedulesRegisterPage() {
 
   const handleSubmit = async () => {
     try {
+      // 날짜와 시간 유효성 검사
       if (!scheduleForm.date || !scheduleForm.ticketDate) {
         alert("공연 날짜와 티켓 오픈일을 모두 선택해주세요.")
+        return
+      }
+
+      if (!scheduleForm.eventStartTime.hour || !scheduleForm.eventStartTime.minute) {
+        alert("공연 시작 시간을 선택해주세요.")
+        return
+      }
+
+      if (!scheduleForm.ticketStartTime.hour || !scheduleForm.ticketStartTime.minute) {
+        alert("티켓 오픈 시간을 선택해주세요.")
         return
       }
 

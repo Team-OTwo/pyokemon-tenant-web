@@ -49,7 +49,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className = "" }) => {
                 }`}
               >
                 <Icon size={20} className="ml-[21px]" />
-                <span className="font-medium text-xl ml-[6px]">{item.label}</span>
+                <span className="font-medium text-[18px] ml-[6px]">{item.label}</span>
               </button>
             )
           })}
