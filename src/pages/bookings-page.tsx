@@ -42,7 +42,7 @@ const BookingsPage = () => {
     <div className="flex">
       <Sidebar />
       <main className="flex-1 bg-white">
-        <div>
+        <div className="p-30">
           <Dashboard>
             {/* 이벤트 정보 섹션 */}
             <div className="bg-white border border-gray-200 rounded-xl p-24 mb-24 shadow-sm">
