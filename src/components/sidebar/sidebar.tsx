@@ -27,8 +27,8 @@ const Sidebar: React.FC<SidebarProps> = ({ className = "" }) => {
     {
       icon: IoListOutline,
       label: "공연 리스트 조회",
-      path: "/event-list",
-      active: location.pathname === "/event-list",
+      path: "/events",
+      active: location.pathname === "/events",
     },
   ]
 
@@ -42,7 +42,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className = "" }) => {
               <button
                 key={index}
                 onClick={() => navigate(item.path)}
-                className={`flex items-center space-x-3 px-4 py-16 w-full ${
+                className={`flex items-center space-x-3 px-4 py-16 w-full cursor-pointer ${
                   item.active
                     ? "bg-white text-primary border-l-4"
                     : "text-gray-500 hover:bg-gray-100 hover:text-primary"

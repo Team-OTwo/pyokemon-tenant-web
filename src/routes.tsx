@@ -48,6 +48,7 @@ const router = createBrowserRouter([
           {
             path: "/events",
             Component: EventsPage,
+          },
         ],
       },
       {
