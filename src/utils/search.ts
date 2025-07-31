@@ -1,3 +1,5 @@
+import { isBefore } from "date-fns"
+
 import { EventType } from "@/types/event"
 
 // 공연명으로 검색하는 함수
@@ -12,16 +14,11 @@ export const searchEventsByTitle = (events: EventType[], searchTerm: string) => 
   })
 }
 
-// 오늘 날짜 기준으로 공연 상태를 판단하는 함수
+// 공연 시간 기준으로 공연 상태를 판단하는 함수
 export const getEventStatus = (eventDate: string) => {
-  const today = new Date()
-  const eventDateObj = new Date(eventDate)
+  const isCompleted = isBefore(new Date(), new Date(eventDate)) === false
 
-  // 시간 정보를 제거하고 날짜만 비교
-  today.setHours(0, 0, 0, 0)
-  eventDateObj.setHours(0, 0, 0, 0)
-
-  if (eventDateObj < today) {
+  if (isCompleted) {
     return "진행 완료"
   } else {
     return "진행중"

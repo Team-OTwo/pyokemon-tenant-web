@@ -1,4 +1,5 @@
 import React from "react"
+import { isBefore } from "date-fns"
 
 import { EventType } from "@/types/event"
 import Badge from "@/components/ui/badge"
@@ -9,10 +10,9 @@ interface EventCardProps {
 
 const EventCard = ({ event }: EventCardProps) => {
   const getEventStatus = (eventDate: string) => {
-    const today = new Date()
-    const eventDateObj = new Date(eventDate)
+    const isCompleted = isBefore(new Date(), new Date(eventDate)) === false
 
-    if (eventDateObj < today) {
+    if (isCompleted) {
       return {
         text: "진행 완료",
         bgColor: "rgba(255, 207, 54, 0.2)",
