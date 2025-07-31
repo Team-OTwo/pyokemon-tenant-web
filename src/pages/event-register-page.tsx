@@ -1,7 +1,7 @@
-import React, { ChangeEvent, useRef } from "react"
+import React, { ChangeEvent, useEffect, useRef } from "react"
 import { mockVenues } from "@/mock/venue-mock"
 import { useEventStore } from "@/store/eventStore"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 
 import Button from "@/components/ui/button/button"
 import Select from "@/components/ui/select/select"
@@ -13,6 +13,9 @@ import { EventFormData, PriceGrade } from "../types/event"
 
 function EventRegisterPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { eventData, mode = "create" } = location.state || {}
+
   const { eventFormData, setEventFormData, updateEventFormData } = useEventStore()
 
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -37,7 +40,7 @@ function EventRegisterPage() {
   }
 
   const handleAddPriceGrade = () => {
-    const newPriceGrades = [...eventFormData.priceGrades, { grade: "", price: "", genre: "" }]
+    const newPriceGrades = [...eventFormData.priceGrades, { grade: "", price: "" }]
     updateEventFormData({ priceGrades: newPriceGrades })
   }
 
@@ -58,12 +61,18 @@ function EventRegisterPage() {
       alert("모든 필수 필드를 입력해주세요.")
       return
     }
-
+    console.log(eventFormData)
     // 다음 페이지로 데이터 전달
     navigate("/schedules-register", {
-      state: { eventData: eventFormData },
+      state: { eventData: eventFormData, mode },
     })
   }
+
+  useEffect(() => {
+    if (mode === "edit" && eventData) {
+      setEventFormData(eventData)
+    }
+  }, [mode, eventData, setEventFormData])
 
   return (
     <div className="flex">
