@@ -75,7 +75,7 @@ export const createEventRequestData = (
         ),
         prices: eventData.priceGrades.map((grade: PriceGrade) => ({
           seatClassId: convertGradeToSeatClassId(grade.grade),
-          price: parseInt(grade.price),
+          price: grade.price,
         })),
       },
     ],
