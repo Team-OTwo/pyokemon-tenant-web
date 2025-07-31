@@ -1,7 +1,6 @@
 export interface PriceGrade {
   grade: string
   price: string
-  genre: string
 }
 
 export interface EventFormData {
@@ -24,7 +23,7 @@ export const initialEventFormData: EventFormData = {
   description: "",
   thumbnail: null,
   thumbnailPreview: "",
-  priceGrades: [{ grade: "", price: "", genre: "" }],
+  priceGrades: [{ grade: "", price: "" }],
 }
 
 // event-register API 요청 관련 타입들
