@@ -1,5 +1,7 @@
 import React from "react"
 import { event } from "@/constants/event"
+import { useScheduleFormStore } from "@/store/schedule-form-store"
+import { convertEventToScheduleFormData } from "@/util/convertEventToScheduleFormData"
 import { format } from "date-fns"
 import { IoChevronBackOutline } from "react-icons/io5"
 import { useNavigate } from "react-router-dom"
@@ -13,10 +15,10 @@ import Sidebar from "@/components/sidebar/sidebar"
 const EvenDetailPage = () => {
   const navigate = useNavigate()
   const prices: PriceGrade[] = [
-    { grade: "VIP", price: "198000" },
-    { grade: "R", price: "178000" },
-    { grade: "A", price: "148000" },
-    { grade: "B", price: "0" },
+    { grade: "VIP", price: 198000 },
+    { grade: "R", price: 178000 },
+    { grade: "A", price: 148000 },
+    { grade: "B", price: 0 },
   ]
   const handleGoBack = () => {
     navigate(-1)
@@ -36,6 +38,9 @@ const EvenDetailPage = () => {
   }
 
   const handleEdit = () => {
+    const scheduleData = convertEventToScheduleFormData(event)
+    useScheduleFormStore.getState().setScheduleFormData(scheduleData)
+
     navigate("/event-register", {
       state: { mode: "edit", eventData: convertEventToFormData(event) },
     })
@@ -87,7 +92,7 @@ const EvenDetailPage = () => {
                 <li>
                   <ul className="text-gray-700">
                     {prices
-                      .filter((price: PriceGrade) => price.price != "")
+                      .filter((price: PriceGrade) => price.price != 0)
                       .map((price: PriceGrade) => {
                         return (
                           <li key={price.grade}>
