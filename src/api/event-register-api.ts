@@ -75,7 +75,7 @@ export const createEventRequestData = (
         ),
         prices: eventData.priceGrades.map((grade: PriceGrade) => ({
           seatClassId: convertGradeToSeatClassId(grade.grade),
-          price: parseInt(grade.price),
+          price: grade.price,
         })),
       },
     ],
@@ -100,3 +100,5 @@ export const submitEvent = async (requestData: EventRequestData): Promise<void> 
     throw new Error("공연 등록에 실패했습니다.")
   }
 }
+
+export const updateEvent = async (requestData: EventRequestData) => {}

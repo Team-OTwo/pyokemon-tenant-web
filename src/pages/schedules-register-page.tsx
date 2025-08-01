@@ -1,12 +1,13 @@
-import React from "react"
+import React, { useEffect } from "react"
 import Calendar from "react-calendar"
 import { IoCalendarOutline } from "react-icons/io5"
 
 import "@/components/calander/calander.css"
 
-import { createEventRequestData, submitEvent } from "@/api/event-register-api"
+import { createEventRequestData, submitEvent, updateEvent } from "@/api/event-register-api"
 import { hourOptions, minuteOptions } from "@/constants/event-register-options"
 import { useEventStore } from "@/store/eventStore"
+import { useScheduleFormStore } from "@/store/schedule-form-store"
 import { useLocation, useNavigate } from "react-router-dom"
 
 import { ExtendedEventData } from "@/types/schedule"
@@ -19,13 +20,16 @@ import Sidebar from "@/components/sidebar/sidebar"
 function SchedulesRegisterPage() {
   const location = useLocation()
   const navigate = useNavigate()
-  const eventData: ExtendedEventData = location.state?.eventData
+  // const eventData: ExtendedEventData = location.state?.eventData
+  const { eventData, mode = "create" } = location.state || {}
   const { resetEventFormData } = useEventStore()
+  const { scheduleFormData } = useScheduleFormStore()
 
   const {
     scheduleForm,
     showCalendar,
     showTicketCalendar,
+    setScheduleForm,
     setShowCalendar,
     setShowTicketCalendar,
     handleDateChange,
@@ -33,36 +37,48 @@ function SchedulesRegisterPage() {
     handleTimeChange,
   } = useScheduleForm()
 
+  useEffect(() => {
+    if (mode === "edit" && scheduleFormData) {
+      // setScheduleForm은 useScheduleForm 훅 내부의 setter라고 가정
+      setScheduleForm(scheduleFormData)
+    }
+  }, [mode, scheduleFormData, setScheduleForm])
+
   if (!eventData) {
     navigate("/event-register")
     return null
   }
 
   const handleSubmit = async () => {
+    // 날짜와 시간 유효성 검사
+    if (!scheduleForm.date || !scheduleForm.ticketDate) {
+      alert("공연 날짜와 티켓 오픈일을 모두 선택해주세요.")
+      return
+    }
+
+    if (!scheduleForm.eventStartTime.hour || !scheduleForm.eventStartTime.minute) {
+      alert("공연 시작 시간을 선택해주세요.")
+      return
+    }
+
+    if (!scheduleForm.ticketStartTime.hour || !scheduleForm.ticketStartTime.minute) {
+      alert("티켓 오픈 시간을 선택해주세요.")
+      return
+    }
+
+    // API 요청 데이터 구성 및 제출
+    const requestData = createEventRequestData(eventData, scheduleForm)
+    console.log("생성된 requestData:", requestData)
+
     try {
-      // 날짜와 시간 유효성 검사
-      if (!scheduleForm.date || !scheduleForm.ticketDate) {
-        alert("공연 날짜와 티켓 오픈일을 모두 선택해주세요.")
-        return
+      if (mode === "edit") {
+        await updateEvent(requestData)
+        alert("공연이 성공적으로 수정되었습니다.")
+      } else {
+        await submitEvent(requestData)
+        alert("공연이 성공적으로 등록되었습니다.")
       }
 
-      if (!scheduleForm.eventStartTime.hour || !scheduleForm.eventStartTime.minute) {
-        alert("공연 시작 시간을 선택해주세요.")
-        return
-      }
-
-      if (!scheduleForm.ticketStartTime.hour || !scheduleForm.ticketStartTime.minute) {
-        alert("티켓 오픈 시간을 선택해주세요.")
-        return
-      }
-
-      // API 요청 데이터 구성 및 제출
-      const requestData = createEventRequestData(eventData, scheduleForm)
-      console.log("생성된 requestData:", requestData)
-
-      await submitEvent(requestData)
-
-      alert("공연이 성공적으로 등록되었습니다.")
       // Zustand store 초기화
       resetEventFormData()
       // 성공 시 다른 페이지로 이동

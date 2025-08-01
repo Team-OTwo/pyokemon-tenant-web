@@ -48,6 +48,7 @@ export const useScheduleForm = () => {
     scheduleForm,
     showCalendar,
     showTicketCalendar,
+    setScheduleForm,
     setShowCalendar,
     setShowTicketCalendar,
     handleDateChange,
