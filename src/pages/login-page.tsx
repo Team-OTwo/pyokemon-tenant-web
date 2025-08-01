@@ -95,8 +95,6 @@ function LoginPage() {
         <div className="text-center mt-30 text-gray-500 text-sm font-normal">
           관리자 승인이 필요한 계정입니다
         </div>
-
-        <div className="text-center mt-4 text-gray-400 text-xs">테스트 계정: test/test123</div>
       </div>
     </div>
   )
