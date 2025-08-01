@@ -25,3 +25,16 @@ export interface ExtendedEventData extends EventFormData {
     minute: string
   }
 }
+
+export const initialScheduleFormData: ScheduleFormData = {
+  date: null,
+  ticketDate: null,
+  eventStartTime: {
+    hour: "",
+    minute: "",
+  },
+  ticketStartTime: {
+    hour: "",
+    minute: "",
+  },
+}

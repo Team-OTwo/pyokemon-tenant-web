@@ -1,31 +1,51 @@
 import React from "react"
 import { event } from "@/constants/event"
+import { useScheduleFormStore } from "@/store/schedule-form-store"
+import { convertEventToScheduleFormData } from "@/util/convertEventToScheduleFormData"
 import { format } from "date-fns"
 import { IoChevronBackOutline } from "react-icons/io5"
 import { useNavigate } from "react-router-dom"
 
+import { EventFormData, EventType, PriceGrade } from "@/types/event"
 import Button from "@/components/ui/button"
 import GenreBadge from "@/components/ui/genre-badge"
 import Dashboard from "@/components/dashboard/dashboard"
 import Sidebar from "@/components/sidebar/sidebar"
 
-interface SeatPrice {
-  seatGrade: string
-  price: number
-  remainingSeats?: number
-}
-
 const EvenDetailPage = () => {
-  const navigation = useNavigate()
-  const prices: SeatPrice[] = [
-    { seatGrade: "VIP", price: 198000 },
-    { seatGrade: "R", price: 178000 },
-    { seatGrade: "A", price: 148000 },
-    { seatGrade: "B", price: 0 },
+  const navigate = useNavigate()
+  const prices: PriceGrade[] = [
+    { grade: "VIP", price: 198000 },
+    { grade: "R", price: 178000 },
+    { grade: "A", price: 148000 },
+    { grade: "B", price: 0 },
   ]
   const handleGoBack = () => {
-    navigation(-1)
+    navigate(-1)
   }
+
+  function convertEventToFormData(event: EventType): EventFormData {
+    return {
+      title: event.title,
+      venue: event.venueName,
+      ageLimit: event.ageLimit.toString(),
+      genre: event.genre,
+      description: event.description,
+      thumbnail: null, // 수정 시 파일은 사용자가 새로 업로드해야 함
+      thumbnailPreview: event.thumbnailUrl || "", // 이미지 URL에서 미리보기
+      priceGrades: prices || [], // null일 경우 []로 처리
+    }
+  }
+
+  const handleEdit = () => {
+    const scheduleData = convertEventToScheduleFormData(event)
+    useScheduleFormStore.getState().setScheduleFormData(scheduleData)
+
+    navigate("/event-register", {
+      state: { mode: "edit", eventData: convertEventToFormData(event) },
+    })
+  }
+
   return (
     <div className="flex">
       <Sidebar />
@@ -72,11 +92,11 @@ const EvenDetailPage = () => {
                 <li>
                   <ul className="text-gray-700">
                     {prices
-                      .filter((price: SeatPrice) => price.price != 0)
-                      .map((price: SeatPrice) => {
+                      .filter((price: PriceGrade) => price.price != 0)
+                      .map((price: PriceGrade) => {
                         return (
-                          <li key={price.seatGrade}>
-                            {price.seatGrade}{" "}
+                          <li key={price.grade}>
+                            {price.grade}{" "}
                             <span className="font-bold text-black">
                               {price.price.toLocaleString()}원
                             </span>
@@ -89,7 +109,7 @@ const EvenDetailPage = () => {
             </div>
           </div>
           <div className="flex justify-end gap-16">
-            <Button text="수정" small border />
+            <Button text="수정" small border onClick={handleEdit} />
             <Button text="예매/결제 현황" small border />
           </div>
         </Dashboard>

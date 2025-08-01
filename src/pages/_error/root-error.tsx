@@ -34,7 +34,7 @@ const ButtonBox = styled.div`
 function RootError({ error, resetErrorBoundary }: FallbackProps) {
   return (
     <Box>
-      <ErrorTitle>Error</ErrorTitle>
+      {/* <ErrorTitle>Error</ErrorTitle>
       <ErrorMessage>{error.message}</ErrorMessage>
       <ButtonBox>
         <Button onClick={resetErrorBoundary} variant="secondary">
@@ -43,7 +43,7 @@ function RootError({ error, resetErrorBoundary }: FallbackProps) {
         <Button component={Link} to="/" variant="link">
           Go to home
         </Button>
-      </ButtonBox>
+      </ButtonBox> */}
     </Box>
   )
 }

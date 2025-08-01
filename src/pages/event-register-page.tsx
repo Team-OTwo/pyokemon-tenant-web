@@ -1,7 +1,8 @@
-import React, { ChangeEvent, useRef } from "react"
+import React, { ChangeEvent, useEffect, useRef } from "react"
 import { mockVenues } from "@/mock/venue-mock"
 import { useEventStore } from "@/store/eventStore"
-import { useNavigate } from "react-router-dom"
+import { useScheduleFormStore } from "@/store/schedule-form-store"
+import { useLocation, useNavigate } from "react-router-dom"
 
 import Button from "@/components/ui/button/button"
 import Select from "@/components/ui/select/select"
@@ -13,6 +14,9 @@ import { EventFormData, PriceGrade } from "../types/event"
 
 function EventRegisterPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { eventData, mode = "create" } = location.state || {}
+
   const { eventFormData, setEventFormData, updateEventFormData } = useEventStore()
 
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -37,13 +41,22 @@ function EventRegisterPage() {
   }
 
   const handleAddPriceGrade = () => {
-    const newPriceGrades = [...eventFormData.priceGrades, { grade: "", price: "", genre: "" }]
+    const newPriceGrades = [...eventFormData.priceGrades, { grade: "", price: 0 }]
     updateEventFormData({ priceGrades: newPriceGrades })
   }
 
-  const handlePriceGradeChange = (index: number, field: keyof PriceGrade, value: string) => {
+  const handlePriceGradeChange = (
+    index: number,
+    field: keyof PriceGrade,
+    value: string | number
+  ) => {
     const newPriceGrades = [...eventFormData.priceGrades]
-    newPriceGrades[index][field] = value
+
+    if (field === "grade" && typeof value === "string") {
+      newPriceGrades[index].grade = value
+    } else if (field === "price" && typeof value === "number") {
+      newPriceGrades[index].price = value
+    }
     updateEventFormData({ priceGrades: newPriceGrades })
   }
 
@@ -58,12 +71,24 @@ function EventRegisterPage() {
       alert("모든 필수 필드를 입력해주세요.")
       return
     }
-
+    console.log(eventFormData)
     // 다음 페이지로 데이터 전달
     navigate("/schedules-register", {
-      state: { eventData: eventFormData },
+      state: { eventData: eventFormData, mode },
     })
   }
+
+  const { resetScheduleFormData } = useScheduleFormStore()
+  const { resetEventFormData } = useEventStore()
+
+  useEffect(() => {
+    if (mode === "edit" && eventData) {
+      setEventFormData(eventData)
+    } else if (mode === "create") {
+      resetEventFormData()
+      resetScheduleFormData()
+    }
+  }, [mode, eventData, setEventFormData, resetScheduleFormData, resetEventFormData])
 
   return (
     <div className="flex">
@@ -178,7 +203,9 @@ function EventRegisterPage() {
                     <input
                       type="number"
                       value={grade.price}
-                      onChange={(e) => handlePriceGradeChange(index, "price", e.target.value)}
+                      onChange={(e) =>
+                        handlePriceGradeChange(index, "price", parseInt(e.target.value))
+                      }
                       className="w-320 h-50 px-16 border border-gray-300 rounded-[12px] focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="가격을 입력하세요"
                       step="1000"
