@@ -28,7 +28,10 @@ const Sidebar: React.FC<SidebarProps> = ({ className = "" }) => {
       icon: IoListOutline,
       label: "공연 리스트 조회",
       path: "/events",
-      active: location.pathname === "/events",
+      active:
+        location.pathname === "/events" ||
+        location.pathname.startsWith("/events/") ||
+        location.pathname.startsWith("/bookings/"),
     },
   ]
 

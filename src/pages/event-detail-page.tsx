@@ -110,7 +110,13 @@ const EvenDetailPage = () => {
           </div>
           <div className="flex justify-end gap-16">
             <Button text="수정" small border onClick={handleEdit} />
-            <Button text="예매/결제 현황" small border />
+            <Button
+              text="예매/결제 현황"
+              small
+              border
+              onClick={() => navigation(`/bookings/${event.eventId}`)}
+            />
+
           </div>
         </Dashboard>
       </div>

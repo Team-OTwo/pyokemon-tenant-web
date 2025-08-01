@@ -1,5 +1,6 @@
 import React from "react"
 import { isBefore } from "date-fns"
+import { useNavigate } from "react-router-dom"
 
 import { EventType } from "@/types/event"
 import Badge from "@/components/ui/badge"
@@ -9,6 +10,10 @@ interface EventCardProps {
 }
 
 const EventCard = ({ event }: EventCardProps) => {
+  const navigation = useNavigate()
+  const handleClick = () => {
+    navigation(`/events/${event.eventId}`)
+  }
   const getEventStatus = (eventDate: string) => {
     const isCompleted = isBefore(new Date(), new Date(eventDate)) === false
 
@@ -32,7 +37,7 @@ const EventCard = ({ event }: EventCardProps) => {
   const status = getEventStatus(event.eventDate)
   return (
     <div
-      className="p-16 flex shadow-[0px_0px_10px_0px_rgba(0,0,0,0.10)] rounded-xl justify-between"
+      className="p-16 flex shadow-[0px_0px_10px_0px_rgba(0,0,0,0.10)] rounded-xl justify-between cursor-pointer"
       onClick={handleClick}
     >
       <div className="flex gap-16">

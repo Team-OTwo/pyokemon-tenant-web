@@ -1,7 +1,8 @@
-import { createBrowserRouter } from "react-router-dom"
+import { createBrowserRouter, Navigate } from "react-router-dom"
 
 import AdminProtectedRoute from "./components/admin-protected-route"
 import ProtectedRoute from "./components/protected-route"
+import BookingsPage from "./pages/bookings-page"
 import EventDetailPage from "./pages/event-detail-page"
 import EventRegisterPage from "./pages/event-register-page"
 import EventsPage from "./pages/events-page/events-page"
@@ -14,6 +15,10 @@ import RootLayout from "./pages/root-layout"
 import SchedulesRegisterPage from "./pages/schedules-register-page"
 
 const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Navigate to="/login" replace />,
+  },
   {
     path: "/",
     Component: RootLayout,
@@ -37,6 +42,10 @@ const router = createBrowserRouter([
                 Component: SchedulesRegisterPage,
               },
             ],
+          },
+          {
+            path: "bookings/:eventId",
+            Component: BookingsPage,
           },
           {
             path: "login",
