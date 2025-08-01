@@ -1,28 +1,18 @@
-import { Box } from "@mui/material"
 import { ErrorBoundary } from "react-error-boundary"
 import { Outlet } from "react-router-dom"
 
-import Footer from "@/components/footer"
-import Header from "@/components/header"
+import { SidebarContent } from "@/components/catalyst-ui"
+import { Navbar } from "@/components/catalyst-ui/navbar"
+import { SidebarLayout } from "@/components/catalyst-ui/sidebar-layout"
 
 import RootError from "./_error/root-error"
 
 function RootLayout() {
   return (
     <ErrorBoundary FallbackComponent={RootError}>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          position: "relative",
-          minHeight: "100svh",
-          minWidth: "var(--container-width)",
-        }}
-      >
-        <Header />
+      <SidebarLayout navbar={<Navbar />} sidebar={<SidebarContent />}>
         <Outlet />
-        <Footer />
-      </Box>
+      </SidebarLayout>
     </ErrorBoundary>
   )
 }
