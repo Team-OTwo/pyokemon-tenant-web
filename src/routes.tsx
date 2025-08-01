@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom"
+import { createBrowserRouter, Navigate } from "react-router-dom"
 
 import AdminProtectedRoute from "./components/admin-protected-route"
 import ProtectedRoute from "./components/protected-route"
@@ -15,6 +15,10 @@ import RootLayout from "./pages/root-layout"
 import SchedulesRegisterPage from "./pages/schedules-register-page"
 
 const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Navigate to="/login" replace />,
+  },
   {
     path: "/",
     Component: RootLayout,

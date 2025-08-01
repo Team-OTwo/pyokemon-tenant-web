@@ -1,13 +1,17 @@
 import React, { useState } from "react"
+import { validateLogin } from "@/mock/auth-mock"
+import { useNavigate } from "react-router-dom"
 
 import Button from "@/components/ui/button"
 
 function LoginPage() {
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     username: "",
     password: "",
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
@@ -18,17 +22,31 @@ function LoginPage() {
 
   const handleLogin = async () => {
     setIsLoading(true)
+    setError("")
 
     // 로그인 test
     setTimeout(() => {
-      if (formData.username && formData.password) {
+      if (!formData.username || !formData.password) {
+        setError("아이디와 비밀번호를 입력해주세요.")
+        setIsLoading(false)
+        return
+      }
+
+      const user = validateLogin(formData.username, formData.password)
+
+      if (user) {
         console.log("로그인 성공:", {
-          username: formData.username,
-          role: "admin",
+          username: user.username,
           loginTime: new Date().toISOString(),
         })
+
+        // 로그인 성공 시 세션스토리지에 사용자 정보 저장
+        sessionStorage.setItem("user", JSON.stringify(user))
+
+        // /main으로 리다이렉트
+        navigate("/main")
       } else {
-        console.log("로그인 실패: 아이디와 비밀번호를 입력하세요.")
+        setError("아이디 또는 비밀번호가 올바르지 않습니다.")
       }
       setIsLoading(false)
     }, 1000)
@@ -70,11 +88,15 @@ function LoginPage() {
           비밀번호 재설정
         </div>
 
+        {error && <div className="text-center mt-4 text-red-500 text-sm font-normal">{error}</div>}
+
         <Button text={isLoading ? "로그인 중..." : "로그인"} onClick={handleLogin} />
 
         <div className="text-center mt-30 text-gray-500 text-sm font-normal">
           관리자 승인이 필요한 계정입니다
         </div>
+
+        <div className="text-center mt-4 text-gray-400 text-xs">테스트 계정: test/test123</div>
       </div>
     </div>
   )
