@@ -114,9 +114,8 @@ const EvenDetailPage = () => {
               text="예매/결제 현황"
               small
               border
-              onClick={() => navigation(`/bookings/${event.eventId}`)}
+              onClick={() => navigate(`/bookings/${event.eventId}`)}
             />
-
           </div>
         </Dashboard>
       </div>

@@ -23,47 +23,45 @@ const EventsPage = () => {
   return (
     <div className="flex">
       <Sidebar />
-      <main className="flex-1 bg-white">
-        <div className="p-30">
-          <Dashboard>
-            <div className="flex justify-between items-center">
-              <h1 className="text-xl font-bold">공연 리스트 조회</h1>
-              <SearchBox
-                placeholder="공연명을 검색하세요"
-                value={searchValue}
-                onChange={setSearchValue}
-                className="w-300"
-              />
-            </div>
+      <main className="p-32 w-full">
+        <Dashboard>
+          <div className="flex justify-between">
+            <h1 className="text-2xl font-bold">공연 리스트 조회</h1>
+            <SearchBox
+              placeholder="공연명을 검색하세요"
+              value={searchValue}
+              onChange={setSearchValue}
+              className="w-300"
+            />
+          </div>
 
-            <div className="py-24 flex justify-end gap-8">
-              {status.map((s, i) => {
-                return (
-                  <div key={i} onClick={() => setActiveStatus(i)}>
-                    <Badge
-                      text={s}
-                      textColor={i === activeStatus ? "white" : undefined}
-                      bgColor={i === activeStatus ? "#FFD800" : undefined}
-                      borderColor={i === activeStatus ? "#FFD800" : undefined}
-                    />
-                  </div>
-                )
-              })}
-            </div>
-
-            <div className="flex flex-col gap-16">
-              {finalEvents.length > 0 ? (
-                finalEvents.map((event: EventType, index: number) => {
-                  return <EventCard event={event} key={`${event.eventId}-${index}`} />
-                })
-              ) : (
-                <div className="text-center py-40 text-gray-500">
-                  {searchValue ? "검색 결과가 없습니다." : "표시할 공연이 없습니다."}
+          <div className="py-24 flex justify-end gap-8">
+            {status.map((s, i) => {
+              return (
+                <div key={i} onClick={() => setActiveStatus(i)}>
+                  <Badge
+                    text={s}
+                    textColor={i === activeStatus ? "white" : undefined}
+                    bgColor={i === activeStatus ? "#FFD800" : undefined}
+                    borderColor={i === activeStatus ? "#FFD800" : undefined}
+                  />
                 </div>
-              )}
-            </div>
-          </Dashboard>
-        </div>
+              )
+            })}
+          </div>
+
+          <div className="flex flex-col gap-16">
+            {finalEvents.length > 0 ? (
+              finalEvents.map((event: EventType, index: number) => {
+                return <EventCard event={event} key={`${event.eventId}-${index}`} />
+              })
+            ) : (
+              <div className="text-center py-40 text-gray-500">
+                {searchValue ? "검색 결과가 없습니다." : "표시할 공연이 없습니다."}
+              </div>
+            )}
+          </div>
+        </Dashboard>
       </main>
     </div>
   )
