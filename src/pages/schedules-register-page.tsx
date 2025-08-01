@@ -76,7 +76,7 @@ function SchedulesRegisterPage() {
     <div className="flex">
       <Sidebar />
       <main className="flex-1 bg-white">
-        <div className="[&>div]:!w-[1100px]">
+        <div className="[&>div]:!w-[1100px] pt-30">
           <Dashboard>
             <div className="flex gap-50">
               <div className="w-500 p-8">
@@ -199,7 +199,7 @@ function SchedulesRegisterPage() {
           </Dashboard>
         </div>
         {/* 등록 버튼 */}
-        <div className="flex gap-800 pt-5 pb-24">
+        <div className="flex gap-800 pt-10 pb-24">
           <Button small text="이전" onClick={() => navigate("/event-register")} />
           <Button small text="공연 일정 등록" onClick={handleSubmit} />
         </div>

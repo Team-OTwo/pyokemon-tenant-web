@@ -167,7 +167,10 @@ function EventRegisterPage() {
               <div className="text-[16px] font-medium text-black mt-24 mb-8">등급별 가격 설정</div>
               <div className="space-y-4">
                 {eventFormData.priceGrades.map((grade, index) => (
-                  <div key={index} className="grid grid-cols-[1fr_1fr_1fr] gap-10 items-center">
+                  <div
+                    key={index}
+                    className="max-w-300 grid grid-cols-[1fr_1fr_1fr] gap-10 items-center"
+                  >
                     <Select
                       options={gradeOptions}
                       value={grade.grade || undefined}
@@ -193,7 +196,7 @@ function EventRegisterPage() {
           </div>
         </Dashboard>
         {/* 등록 버튼 */}
-        <div className="pt-5 pb-24 ml-620">
+        <div className="pt-10 pb-24 flex justify-end">
           <Button text="다음" onClick={handleNext} />
         </div>
       </main>
