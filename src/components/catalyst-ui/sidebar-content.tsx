@@ -5,6 +5,8 @@ import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline"
 import { isAfter, parseISO } from "date-fns"
 import { useLocation, useNavigate } from "react-router-dom"
 
+import Logo from "@/assets/images/logo.svg"
+
 import {
   Sidebar,
   SidebarBody,
@@ -75,11 +77,8 @@ export const SidebarContent: React.FC<SidebarContentProps> = ({ className = "" }
   return (
     <Sidebar className={`w-64 bg-zinc-100 ${className}`}>
       <SidebarHeader>
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">P</span>
-          </div>
-          <span className="font-semibold text-lg">Pyokemon</span>
+        <div className="flex items-center justify-center">
+          <img src={Logo} alt="logo" className="h-6 w-1/2" />
         </div>
       </SidebarHeader>
 
