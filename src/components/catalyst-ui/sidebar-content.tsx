@@ -44,7 +44,7 @@ export const SidebarContent: React.FC<SidebarContentProps> = ({ className = "" }
     {
       icon: TicketIcon,
       label: "예매 현황",
-      path: "/event-register",
+      path: "/bookings",
       current:
         location.pathname === "/event-register" || location.pathname === "/schedules-register",
     },

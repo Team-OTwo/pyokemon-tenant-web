@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react"
 import { eventList } from "@/constants/event"
 import { getFilteredEvents } from "@/utils/search"
 import { PlusIcon } from "@heroicons/react/16/solid"
+import { useNavigate } from "react-router-dom"
 
 import { EventType } from "@/types/event"
 import { Badge } from "@/components/catalyst-ui/badge"
@@ -18,7 +19,7 @@ const EventsPage = () => {
   const [activeStatus, setActiveStatus] = useState(0)
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState("name")
-
+  const navigate = useNavigate()
   const sortOptions = [
     { value: "name", label: "이름순" },
     { value: "date", label: "날짜순" },
@@ -42,7 +43,7 @@ const EventsPage = () => {
       <div className="flex items-center gap-4 mb-8">
         <Input
           type="search"
-          placeholder="Q Search events..."
+          placeholder="Search events..."
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
           className="!w-100"
@@ -56,7 +57,11 @@ const EventsPage = () => {
           ))}
         </Listbox>
 
-        <Button color="dark/zinc" className="ml-auto">
+        <Button
+          color="dark/zinc"
+          className="ml-auto cursor-pointer"
+          onClick={() => navigate("/event-register")}
+        >
           <PlusIcon data-slot="icon" />
           공연 등록
         </Button>

@@ -8,12 +8,15 @@ import { Text } from "@/components/catalyst-ui/text"
 
 interface EventCardProps {
   event: EventType
+  disableClick?: boolean
 }
 
-const EventCard = ({ event }: EventCardProps) => {
+const EventCard = ({ event, disableClick = false }: EventCardProps) => {
   const navigation = useNavigate()
   const handleClick = () => {
-    navigation(`/events/${event.eventId}`)
+    if (!disableClick) {
+      navigation(`/events/${event.eventId}`)
+    }
   }
 
   const getEventStatus = (eventDate: string) => {
@@ -36,7 +39,9 @@ const EventCard = ({ event }: EventCardProps) => {
 
   return (
     <div
-      className="group relative flex cursor-pointer items-start space-x-4 bg-white p-4 hover:bg-zinc-50 dark:bg-zinc-900 dark:hover:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-800 last:border-b-0"
+      className={`group relative flex items-start space-x-4 bg-white p-4 border-b border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800 last:border-b-0 ${
+        !disableClick ? "cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800" : ""
+      }`}
       onClick={handleClick}
     >
       <div className="flex-shrink-0">

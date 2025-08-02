@@ -48,7 +48,7 @@ const SummaryCards: React.FC<SummaryCardsProps> = ({ events, loading, className 
                 <SkeletonMain variant="text" width={100} className="mb-2" />
                 <SkeletonMain variant="text" width={80} className="text-2xl font-bold" />
               </div>
-              <SkeletonMain variant="circular" width={40} height={40} />
+              <SkeletonMain variant="rectangular" width={40} height={40} />
             </div>
             <div className="mt-4">
               <SkeletonMain variant="text" width={120} height={24} />
