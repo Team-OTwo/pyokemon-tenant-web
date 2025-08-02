@@ -2,7 +2,7 @@ import React from "react"
 
 interface SkeletonProps {
   className?: string
-  variant?: "text" | "circular" | "rectangular"
+  variant?: "text" | "rectangular"
   width?: string | number
   height?: string | number
   animation?: "pulse" | "wave"
@@ -23,7 +23,6 @@ const SkeletonMain: React.FC<SkeletonProps> = ({
 
   const variantClasses = {
     text: "h-4 rounded",
-    circular: "rounded-full",
     rectangular: "rounded",
   }
 

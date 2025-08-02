@@ -1,5 +1,7 @@
 import React from "react"
 import { event } from "@/constants/event"
+import { mockEventStats, mockRecentOrders } from "@/mock/booking-mock"
+import EventCard from "@/pages/events-page/_components/event-card"
 import { useScheduleFormStore } from "@/store/schedule-form-store"
 import { convertEventToScheduleFormData } from "@/util/convertEventToScheduleFormData"
 import { format } from "date-fns"
@@ -8,11 +10,17 @@ import { useNavigate } from "react-router-dom"
 
 import { EventFormData, EventType, PriceGrade } from "@/types/event"
 import Button from "@/components/ui/button"
-import GenreBadge from "@/components/ui/genre-badge"
-import Dashboard from "@/components/dashboard/dashboard"
-import Sidebar from "@/components/sidebar/sidebar"
+import { Button as CatalystButton } from "@/components/catalyst-ui/button"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/catalyst-ui/table"
 
-const EvenDetailPage = () => {
+const EventDetailPage = () => {
   const navigate = useNavigate()
   const prices: PriceGrade[] = [
     { grade: "VIP", price: 198000 },
@@ -20,6 +28,7 @@ const EvenDetailPage = () => {
     { grade: "A", price: 148000 },
     { grade: "B", price: 0 },
   ]
+
   const handleGoBack = () => {
     navigate(-1)
   }
@@ -31,9 +40,9 @@ const EvenDetailPage = () => {
       ageLimit: event.ageLimit.toString(),
       genre: event.genre,
       description: event.description,
-      thumbnail: null, // 수정 시 파일은 사용자가 새로 업로드해야 함
-      thumbnailPreview: event.thumbnailUrl || "", // 이미지 URL에서 미리보기
-      priceGrades: prices || [], // null일 경우 []로 처리
+      thumbnail: null,
+      thumbnailPreview: event.thumbnailUrl || "",
+      priceGrades: prices || [],
     }
   }
 
@@ -46,82 +55,66 @@ const EvenDetailPage = () => {
     })
   }
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("ko-KR", {
+      style: "currency",
+      currency: "KRW",
+      minimumFractionDigits: 0,
+    }).format(amount)
+  }
+
+  const formatDate = (dateString: string) => {
+    return format(new Date(dateString), "MMM d, yyyy")
+  }
+
   return (
     <div className="flex">
-      <Sidebar />
       <div className="p-32 w-full">
-        <Dashboard>
-          <div className="flex gap-12 items-center mb-16">
-            <IoChevronBackOutline
-              color="#686764"
-              onClick={handleGoBack}
-              className="cursor-pointer"
-            />
-            <h1 className="text-2xl font-bold">공연 상세 조회</h1>
-          </div>
-          <div>
-            <div className="py-12">
-              <GenreBadge genre={event.genre} />
+        {/* Header */}
+        <div className="flex gap-12 items-center mb-16">
+          <IoChevronBackOutline color="#686764" onClick={handleGoBack} className="cursor-pointer" />
+          <h1 className="text-2xl font-bold">공연 상세 조회</h1>
+        </div>
 
-              <h1 className="head2 pt-8">{event.title}</h1>
-            </div>
+        {/* Event Card with Edit Button */}
+        <div className="mb-32">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-lg font-semibold text-gray-900">공연 정보</h2>
+            <CatalystButton outline onClick={handleEdit}>
+              수정
+            </CatalystButton>
           </div>
-
-          {/* event */}
-          {/* info */}
-          <div className="flex gap-24 mb-36">
-            <img
-              src={event.thumbnailUrl}
-              alt="thumbnail"
-              width="320"
-              height="420"
-              className="rounded-lg object-cover"
-            />
-            <div className="flex gap-12">
-              <ul className="w-90 flex flex-col gap-16">
-                <li>장소</li>
-                <li>일시</li>
-                <li>연령</li>
-                <li>등급 및 가격</li>
-              </ul>
-
-              <ul className="flex flex-col gap-16">
-                <li>{event.venueName}</li>
-                <li>{format(new Date(event.eventDate), "yyyy.MM.dd")}</li>
-                <li>{event.ageLimit}세</li>
-                <li>
-                  <ul className="text-gray-700">
-                    {prices
-                      .filter((price: PriceGrade) => price.price != 0)
-                      .map((price: PriceGrade) => {
-                        return (
-                          <li key={price.grade}>
-                            {price.grade}{" "}
-                            <span className="font-bold text-black">
-                              {price.price.toLocaleString()}원
-                            </span>
-                          </li>
-                        )
-                      })}
-                  </ul>
-                </li>
-              </ul>
-            </div>
+          <div className="bg-white rounded-lg overflow-hidden">
+            <EventCard event={event} key={`${event.eventId}-detail`} disableClick={true} />
           </div>
-          <div className="flex justify-end gap-16">
-            <Button text="수정" small border onClick={handleEdit} />
-            <Button
-              text="예매/결제 현황"
-              small
-              border
-              onClick={() => navigation(`/bookings/${event.eventId}`)}
-            />
-
-          </div>
-        </Dashboard>
+        </div>
+        {/* Recent Orders Table */}
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-16">Recent orders</h2>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableHeader>Order number</TableHeader>
+                <TableHeader>Purchase date</TableHeader>
+                <TableHeader>Customer</TableHeader>
+                <TableHeader>Amount</TableHeader>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {mockRecentOrders.map((order) => (
+                <TableRow key={order.orderNumber} href={`/orders/${order.orderNumber}`}>
+                  <TableCell className="font-medium">{order.orderNumber}</TableCell>
+                  <TableCell>{formatDate(order.purchaseDate)}</TableCell>
+                  <TableCell>{order.customer}</TableCell>
+                  <TableCell>{formatCurrency(order.amount)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   )
 }
 
-export default EvenDetailPage
+export default EventDetailPage

@@ -108,18 +108,22 @@ const BookingsTable: React.FC<BookingsTableProps> = ({ bookings, loading }) => {
       <table className="w-full">
         <thead className="bg-gray-50 border-b border-gray-200">
           <tr>
-            <th className="px-6 py-[17px] text-center text-[16px] font-bold text-black">예매자</th>
-            <th className="px-6 py-[17px] text-center text-[16px] font-bold text-black">예매PID</th>
-            <th className="px-6 py-[17px] text-center text-[16px] font-bold text-black">
+            <th className="px-6 py-[17px] text-center text-[16px] font-bold text-black w-[120px]">
+              예매자
+            </th>
+            <th className="px-6 py-[17px] text-center text-[16px] font-bold text-black w-[120px]">
+              예매PID
+            </th>
+            <th className="px-6 py-[17px] text-center text-[16px] font-bold text-black w-[100px]">
               예매좌석
             </th>
-            <th className="px-6 py-[17px] text-center text-[16px] font-bold text-black">
+            <th className="px-6 py-[17px] text-center text-[16px] font-bold text-black w-[120px]">
               결제 금액
             </th>
-            <th className="px-6 py-[17px] text-center text-[16px] font-bold text-black">
+            <th className="px-6 py-[17px] text-center text-[16px] font-bold text-black w-[150px]">
               결제 방식
             </th>
-            <th className="px-6 py-[17px] text-center text-[16px] font-bold text-black">
+            <th className="px-6 py-[17px] text-center text-[16px] font-bold text-black w-[120px]">
               결제 상태
             </th>
           </tr>

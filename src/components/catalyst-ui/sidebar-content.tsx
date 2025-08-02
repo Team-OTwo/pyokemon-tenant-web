@@ -1,0 +1,127 @@
+import React from "react"
+import { eventList } from "@/constants/event"
+import { HomeIcon, Square2StackIcon, TicketIcon } from "@heroicons/react/20/solid"
+import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline"
+import { useLocation, useNavigate } from "react-router-dom"
+
+import {
+  Sidebar,
+  SidebarBody,
+  SidebarDivider,
+  SidebarHeader,
+  SidebarHeading,
+  SidebarItem,
+  SidebarLabel,
+  SidebarSection,
+  SidebarSpacer,
+} from "./sidebar"
+import { Text } from "./text"
+
+interface SidebarContentProps {
+  className?: string
+}
+
+export const SidebarContent: React.FC<SidebarContentProps> = ({ className = "" }) => {
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  const menuItems = [
+    {
+      icon: HomeIcon,
+      label: "대시보드",
+      path: "/main",
+      current: location.pathname === "/main",
+    },
+    {
+      icon: Square2StackIcon,
+      label: "공연 리스트 조회",
+      path: "/events",
+      current:
+        location.pathname === "/events" ||
+        location.pathname.startsWith("/events/") ||
+        location.pathname.startsWith("/bookings/"),
+    },
+    {
+      icon: TicketIcon,
+      label: "예매 현황",
+      path: "/bookings",
+      current:
+        location.pathname === "/event-register" || location.pathname === "/schedules-register",
+    },
+  ]
+
+  // 임박한 이벤트 5개 정렬 (날짜순)
+  const upcomingEvents = eventList
+    .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime())
+    .slice(0, 5)
+
+  const formatEventDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString("ko-KR", {
+      month: "short",
+      day: "numeric",
+    })
+  }
+
+  return (
+    <Sidebar className={`w-64 bg-zinc-100 ${className}`}>
+      <SidebarHeader>
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">P</span>
+          </div>
+          <span className="font-semibold text-lg">Pyokemon</span>
+        </div>
+      </SidebarHeader>
+
+      <SidebarBody>
+        <SidebarSection>
+          {menuItems.map((item, index) => {
+            const Icon = item.icon
+            return (
+              <SidebarItem
+                key={index}
+                href={item.path}
+                current={item.current}
+                onClick={() => navigate(item.path)}
+              >
+                <Icon data-slot="icon" />
+                <SidebarLabel>{item.label}</SidebarLabel>
+              </SidebarItem>
+            )
+          })}
+        </SidebarSection>
+
+        <SidebarSection>
+          <SidebarHeading className="text-xs">Upcoming Events</SidebarHeading>
+          {upcomingEvents.map((event) => (
+            <SidebarItem
+              key={event.eventId}
+              href={`/events/${event.eventId}`}
+              onClick={() => navigate(`/events/${event.eventId}`)}
+              className="px-0.5 py-0.5"
+            >
+              <div className="flex flex-col items-start min-w-0 flex-1">
+                <Text className="text-[10px] font-medium text-zinc-900 dark:text-white truncate w-full">
+                  {event.title}
+                </Text>
+                <Text className="text-xs text-zinc-500 dark:text-zinc-400">
+                  {formatEventDate(event.eventDate)}
+                </Text>
+              </div>
+            </SidebarItem>
+          ))}
+        </SidebarSection>
+
+        <SidebarSpacer />
+
+        <SidebarSection>
+          <SidebarItem href="/login">
+            <ArrowRightStartOnRectangleIcon data-slot="icon" />
+            <SidebarLabel>Sign out</SidebarLabel>
+          </SidebarItem>
+        </SidebarSection>
+      </SidebarBody>
+    </Sidebar>
+  )
+}
