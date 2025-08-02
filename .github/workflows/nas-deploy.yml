@@ -1,0 +1,72 @@
+name: NAS 배포
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v3
+
+      - name: pnpm 설정
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'pnpm'
+
+      - name: 의존성 설치
+        run: pnpm install --no-frozen-lockfile
+
+      - name: 빌드
+        run: pnpm build
+        env:
+          CI: false
+
+      - name: 빌드 결과 확인
+        run: |
+          echo "===== 프로젝트 디렉토리 구조 ====="
+          ls -la
+          echo "=========================="
+
+      - name: SSH 도구 설치
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openssh-client sshpass
+
+      - name: 배포
+        run: |
+          # 빌드 디렉토리 확인
+          if [ -d "dist" ]; then
+            BUILD_DIR="dist"
+          elif [ -d "build" ]; then
+            BUILD_DIR="build"
+          else
+            echo "오류: dist 또는 build 디렉토리를 찾을 수 없습니다"
+            exit 1
+          fi
+          
+          echo "사용할 빌드 디렉토리: $BUILD_DIR"
+          echo "빌드 디렉토리 내용:"
+          ls -la $BUILD_DIR
+          
+          # NAS 디렉토리 권한 확인
+          echo "NAS 디렉토리 권한 확인 중..."
+          sshpass -p "${{ secrets.NAS_PASSWORD }}" ssh -o StrictHostKeyChecking=no -p ${{ secrets.NAS_SSH_PORT || 22 }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} "mkdir -p /volume1/web/ || echo '디렉토리 생성 실패'; ls -la /volume1/web/ || echo '디렉토리 접근 실패'"
+          
+          # tar로 파일 전송 (verbose 모드)
+          echo "파일 전송 시작..."
+          cd $BUILD_DIR
+          tar czf - * | sshpass -p "${{ secrets.NAS_PASSWORD }}" ssh -o StrictHostKeyChecking=no -p ${{ secrets.NAS_SSH_PORT || 22 }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} "cd /volume1/web/ && rm -rf * && tar xzvf - || echo '파일 압축 해제 실패'"
+          echo "파일 전송 완료"
+        env:
+          SSHPASS: ${{ secrets.NAS_PASSWORD }}
