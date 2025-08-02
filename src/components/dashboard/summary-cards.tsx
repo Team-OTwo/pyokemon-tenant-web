@@ -1,5 +1,10 @@
 import React from "react"
-import { CurrencyDollarIcon, ShoppingCartIcon, TicketIcon } from "@heroicons/react/20/solid"
+import {
+  CurrencyDollarIcon,
+  PlayIcon,
+  ShoppingCartIcon,
+  TicketIcon,
+} from "@heroicons/react/20/solid"
 
 import {
   Table,
@@ -28,10 +33,8 @@ const SummaryCards: React.FC<SummaryCardsProps> = ({ events, loading, className 
     }, 0)
   }
 
-  const calculateAverageOrderValue = () => {
-    const totalRevenue = calculateTotalRevenue()
-    const totalBookings = events.reduce((total, event) => total + event.bookingCount, 0)
-    return totalBookings > 0 ? Math.round(totalRevenue / totalBookings) : 0
+  const getOngoingEventsCount = () => {
+    return events.filter((event) => event.status === "진행중").length
   }
 
   const getTotalTicketsSold = () => {
@@ -73,14 +76,12 @@ const SummaryCards: React.FC<SummaryCardsProps> = ({ events, loading, className 
         </div>
       </div>
 
-      {/* Average Order Value */}
+      {/* Ongoing Events */}
       <div className="flex-1 bg-white p-6 border-t border-zinc-200">
         <div className="flex items-center justify-between">
           <div>
-            <Text className="text-sm font-medium text-zinc-500">Average order value</Text>
-            <Text className="text-2xl font-bold text-zinc-900">
-              ₩{calculateAverageOrderValue().toLocaleString()}
-            </Text>
+            <Text className="text-sm font-medium text-zinc-500">진행중인 공연</Text>
+            <Text className="text-2xl font-bold text-zinc-900">{getOngoingEventsCount()}개</Text>
           </div>
         </div>
       </div>

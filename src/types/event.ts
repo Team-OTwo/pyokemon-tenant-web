@@ -3,6 +3,9 @@ export interface PriceGrade {
   price: number
 }
 
+// 이벤트 상태 타입
+export type EventStatus = "PENDING" | "APPROVED" | "REJECTED"
+
 export interface EventFormData {
   title: string
   venue: string
@@ -58,4 +61,6 @@ export interface EventType {
   description: string
   eventScheduleId: number
   thumbnailUrl: string
+  prices?: PriceGrade[]
+  status: EventStatus
 }

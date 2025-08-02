@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react"
 
 import { Heading } from "../components/catalyst-ui/heading"
 import { Text } from "../components/catalyst-ui/text"
-import Dashboard from "../components/dashboard/dashboard"
 import EventsTable from "../components/dashboard/events-table"
 import SummaryCards from "../components/dashboard/summary-cards"
 import { Event, mockEvents } from "../mock/dashboard-mock"
@@ -36,7 +35,7 @@ const DashboardContent: React.FC = () => {
           </Heading>
         </div>
         <Text className="text-gray-700 mt-[15px] mb-[30px]">
-          최근 1년 간 공연들의 예매 현황을 확인하세요
+          이번 달 진행되는 공연들의 현황을 확인하세요
         </Text>
       </div>
 

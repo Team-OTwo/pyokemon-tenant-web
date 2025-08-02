@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react"
-import { eventList } from "@/constants/event"
-import { getFilteredEvents } from "@/utils/search"
+import { eventList, STATUS_FILTER_OPTIONS } from "@/constants/event"
+import { searchEventsByTitle } from "@/utils/search"
 import { PlusIcon } from "@heroicons/react/16/solid"
 import { useNavigate } from "react-router-dom"
 
@@ -15,8 +15,7 @@ import { Text } from "@/components/catalyst-ui/text"
 import EventCard from "./_components/event-card"
 
 const EventsPage = () => {
-  const status = ["전체", "진행 완료", "진행중"]
-  const [activeStatus, setActiveStatus] = useState(0)
+  const [activeStatus, setActiveStatus] = useState("ALL")
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState("name")
   const navigate = useNavigate()
@@ -27,8 +26,29 @@ const EventsPage = () => {
 
   // 검색과 상태 필터링을 모두 적용
   const finalEvents = useMemo(() => {
-    return getFilteredEvents(eventList, searchValue, activeStatus)
-  }, [searchValue, activeStatus])
+    let filteredEvents = eventList
+
+    // 상태 필터링
+    if (activeStatus !== "ALL") {
+      filteredEvents = filteredEvents.filter((event) => event.status === activeStatus)
+    }
+
+    // 검색 필터링
+    if (searchValue) {
+      filteredEvents = searchEventsByTitle(filteredEvents, searchValue)
+    }
+
+    // 정렬
+    if (sortBy === "name") {
+      filteredEvents = [...filteredEvents].sort((a, b) => a.title.localeCompare(b.title))
+    } else if (sortBy === "date") {
+      filteredEvents = [...filteredEvents].sort(
+        (a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime()
+      )
+    }
+
+    return filteredEvents
+  }, [searchValue, activeStatus, sortBy])
 
   return (
     <>
@@ -69,9 +89,18 @@ const EventsPage = () => {
 
       {/* Status Filters */}
       <div className="flex gap-2 mb-6">
-        {status.map((s, i) => (
-          <Badge key={i} color={i === activeStatus ? "zinc" : "zinc"} className="cursor-pointer">
-            {s}
+        {STATUS_FILTER_OPTIONS.map((option) => (
+          <Badge
+            key={option.value}
+            color={activeStatus === option.value ? "zinc" : "zinc"}
+            className={`cursor-pointer transition-colors duration-200 ${
+              activeStatus === option.value
+                ? "!bg-[#222222] !text-white hover:!bg-[#333333]"
+                : "hover:!bg-[#f3f4f6] hover:!text-[#374151]"
+            }`}
+            onClick={() => setActiveStatus(option.value)}
+          >
+            {option.label}
           </Badge>
         ))}
       </div>
