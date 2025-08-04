@@ -130,7 +130,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({ bookings, loading }) => {
       </TableHead>
       <TableBody>
         {bookings.map((booking) => (
-          <TableRow key={booking.id} href={`/bookings/${booking.id}`}>
+          <TableRow key={booking.id} className="hover:bg-zinc-50 transition-colors duration-150">
             <TableCell>
               <Text className="font-medium">{booking.customer}</Text>
             </TableCell>
