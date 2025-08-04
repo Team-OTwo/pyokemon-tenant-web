@@ -94,7 +94,6 @@ export const SidebarItem = forwardRef(function SidebarItem(
   ref: React.ForwardedRef<HTMLAnchorElement | HTMLButtonElement>
 ) {
   // 디버깅을 위한 console.log
-  console.log("SidebarItem current:", current)
 
   const classes = clsx(
     // Base

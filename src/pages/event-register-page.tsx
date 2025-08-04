@@ -104,9 +104,8 @@ function EventRegisterPage() {
         {/* Header */}
         <div className="flex gap-6 items-center mb-16">
           <ArrowUturnLeftIcon
-            color="#686764"
+            className="text-gray-700 cursor-pointer w-5 h-5"
             onClick={handleGoBack}
-            className="cursor-pointer w-5 h-5"
           />
           <h1 className="text-2xl font-bold">공연 정보 등록</h1>
         </div>

@@ -39,17 +39,14 @@ export const SidebarContent: React.FC<SidebarContentProps> = ({ className = "" }
       icon: Square2StackIcon,
       label: "공연 리스트 조회",
       path: "/events",
-      current:
-        location.pathname === "/events" ||
-        location.pathname.startsWith("/events/") ||
-        location.pathname.startsWith("/bookings/"),
+      current: location.pathname === "/events" || location.pathname.startsWith("/events/"),
     },
+
     {
       icon: TicketIcon,
       label: "예매 현황",
       path: "/bookings",
-      current:
-        location.pathname === "/event-register" || location.pathname === "/schedules-register",
+      current: location.pathname === "/bookings" || location.pathname.startsWith("/bookings/"),
     },
   ]
 

@@ -1,124 +1,148 @@
-import React, { useEffect, useMemo, useState } from "react"
-import {
-  bookings,
-  BOOKINGS_PER_PAGE,
-  mockBookingSummary,
-  PAYMENT_STATUS_OPTIONS,
-} from "@/constants/booking"
-import { IoChevronBackOutline } from "react-icons/io5"
+import React, { useEffect, useState } from "react"
+import { getBookings, getBookingsByEvent } from "@/api/booking-api"
 import { useNavigate, useParams } from "react-router-dom"
 
-import { BookingDisplay } from "@/types/booking"
-import Badge from "@/components/ui/badge"
-import Pagination from "@/components/ui/pagination"
-import BookingsTable from "@/components/dashboard/bookings-table"
-import Dashboard from "@/components/dashboard/dashboard"
+import { BookingDisplay, BookingFilters, BookingListResponse } from "@/types/booking"
+import { Button } from "@/components/catalyst-ui/button"
+import { Heading } from "@/components/catalyst-ui/heading"
+import { SimplePagination } from "@/components/catalyst-ui/simple-pagination"
+import BookingFiltersComponent from "@/components/table/booking-filters"
+import BookingsTable from "@/components/table/bookings-table"
 
 const BookingsPage = () => {
   const { eventId } = useParams<{ eventId: string }>()
   const navigate = useNavigate()
-  const [currentPage, setCurrentPage] = useState(1)
-  const [activeStatus, setActiveStatus] = useState(0)
-  const itemsPerPage = 5 // 페이지당 5개
 
-  const statusOptions = PAYMENT_STATUS_OPTIONS
+  const [bookings, setBookings] = useState<BookingDisplay[]>([])
+  const [loading, setLoading] = useState(true)
+  const [filters, setFilters] = useState<BookingFilters>({
+    page: 1,
+    pageSize: 10,
+  })
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalItems, setTotalItems] = useState(0)
 
-  // 필터 변경 시 페이지를 1로 리셋
+  // 데이터 로딩
+  const fetchBookings = async () => {
+    setLoading(true)
+    try {
+      let response: BookingListResponse
+
+      if (eventId) {
+        response = await getBookingsByEvent(parseInt(eventId), filters)
+      } else {
+        response = await getBookings(filters)
+      }
+
+      // API 응답을 테이블 표시용으로 변환
+      const displayBookings: BookingDisplay[] = response.bookings.map((booking) => ({
+        id: booking.booking.bookingId.toString(),
+        orderNumber: `#${booking.booking.bookingId.toString().padStart(4, "0")}`,
+        purchaseDate: booking.booking.createdAt,
+        customer: booking.user.name,
+        event: {
+          name: booking.event.title,
+          thumbnailUrl:
+            booking.event.id <= 3 ? `/src/mock/img/${booking.event.id}.png` : "/placeholder.jpg",
+        },
+        amount: booking.payment.totalPrice,
+        paymentStatus: getPaymentStatusDisplay(booking.payment.status),
+        paymentMethod: booking.payment.method,
+        seatClass: booking.seatClass.className,
+        seatInfo: `${booking.seat.floor} ${booking.seat.seatNumber}`,
+        venue: booking.venue.venueName,
+        eventDate: booking.eventSchedule.eventDate,
+      }))
+
+      setBookings(displayBookings)
+      setTotalPages(response.totalPages)
+      setTotalItems(response.total)
+    } catch (error) {
+      console.error("예매 데이터 로딩 실패:", error)
+      // 에러 시 빈 배열로 설정
+      setBookings([])
+      setTotalPages(1)
+      setTotalItems(0)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // 결제 상태를 한국어로 변환
+  const getPaymentStatusDisplay = (status: string): "결제완료" | "결제대기" | "환불됨" => {
+    switch (status) {
+      case "COMPLETED":
+        return "결제완료"
+      case "PENDING":
+        return "결제대기"
+      case "REFUNDED":
+        return "환불됨"
+      default:
+        return "결제대기"
+    }
+  }
+
+  // 필터 변경 핸들러
+  const handleFiltersChange = (newFilters: BookingFilters) => {
+    setFilters(newFilters)
+  }
+
+  // 필터 초기화
+  const handleResetFilters = () => {
+    setFilters({
+      page: 1,
+      pageSize: 10,
+    })
+  }
+
+  // 페이지 변경 핸들러
+  const handlePageChange = (page: number) => {
+    setFilters((prev) => ({ ...prev, page }))
+  }
+
+  // 데이터 로딩 효과
   useEffect(() => {
-    setCurrentPage(1)
-  }, [activeStatus])
-
-  // eventId와 상태별 필터링
-  const filteredBookings = useMemo(() => {
-    // 먼저 eventId로 필터링 (eventId는 문자열로 받지만, 타입에 맞게 비교)
-    const eventBookings = bookings.filter((booking) => booking.eventId === eventId)
-
-    if (activeStatus === 0) return eventBookings
-
-    const targetStatus = statusOptions[activeStatus] as BookingDisplay["paymentStatus"]
-    return eventBookings.filter((booking) => booking.paymentStatus === targetStatus)
-  }, [eventId, activeStatus])
-
-  // 페이지네이션 todo: 백엔드에서 query로 페이징 해줘야 함.
-  const totalPages = Math.ceil(filteredBookings.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const currentBookings = filteredBookings.slice(startIndex, endIndex)
-
-  const formatAmount = (amount: number) => {
-    return `${amount.toLocaleString()}원`
-  }
-
-  const handleGoBack = () => {
-    navigate(`/events/${eventId}`)
-  }
+    fetchBookings()
+  }, [filters, eventId])
 
   return (
-    <div className="p-30">
-      <Dashboard>
-        <div className="flex gap-12 items-center mb-16">
-          <IoChevronBackOutline color="#686764" onClick={handleGoBack} className="cursor-pointer" />
-          <h1 className="text-2xl font-bold">예매 현황 조회</h1>
-        </div>
-        {/* 이벤트 정보 섹션 */}
-        <div className="bg-white border border-gray-200 rounded-xl p-24 mb-24 shadow-sm">
-          <div className="flex gap-16">
-            <div className="w-120 h-80 rounded-lg overflow-hidden">
-              <img
-                src={filteredBookings[0]?.thumbnailUrl || "/placeholder.jpg"}
-                alt="공연 썸네일"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-bold mb-8">{filteredBookings[0]?.eventTitle}</h2>
-              <p className="text-gray-700 mb-4">{filteredBookings[0]?.eventDate}</p>
-              <p className="text-gray-700 mb-16">{filteredBookings[0]?.venueName}</p>
-
-              <div className="space-y-4">
-                <p className="text-lg font-semibold">
-                  총 매출 : {formatAmount(mockBookingSummary.totalSales)}
-                </p>
-                <div className="flex justify-between items-center">
-                  <p className="text-lg font-semibold">
-                    잔여석 : {mockBookingSummary.remainingSeats}
-                  </p>
-
-                  {/* 상태 필터 버튼들 */}
-                  <div className="flex gap-8">
-                    {statusOptions.map((status, index) => (
-                      <div key={index} onClick={() => setActiveStatus(index)}>
-                        <Badge
-                          text={status}
-                          textColor={index === activeStatus ? "white" : undefined}
-                          bgColor={index === activeStatus ? "#FFD800" : undefined}
-                          borderColor={index === activeStatus ? "#FFD800" : undefined}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+    <div className="min-h-screen bg-white">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        {/* 헤더 */}
+        <div className="mb-8">
+          <div>
+            <Heading level={1} className="text-2xl font-bold text-zinc-900">
+              {eventId ? "공연별 예매 현황" : "전체 예매 현황"}
+            </Heading>
+            <p className="text-sm text-zinc-500 mt-1">예매 및 결제 현황을 관리하세요</p>
           </div>
+        </div>
+
+        {/* 필터 및 검색 */}
+        <div className="mb-6">
+          <BookingFiltersComponent
+            filters={{ ...filters, total: totalItems }}
+            onFiltersChange={handleFiltersChange}
+            onReset={handleResetFilters}
+          />
         </div>
 
         {/* 예매 테이블 */}
-        <BookingsTable bookings={currentBookings} loading={false} />
+        <div className="bg-white overflow-hidden">
+          <BookingsTable bookings={bookings} loading={loading} />
+        </div>
 
         {/* 페이지네이션 */}
-        {totalPages > 1 && (
-          <div className="mt-24 flex justify-center">
-            <Pagination
-              current={currentPage}
-              total={filteredBookings.length}
-              pageSize={5}
-              onChange={setCurrentPage}
-              showSizeChanger={false}
-            />
-          </div>
-        )}
-      </Dashboard>
+        <div className="mt-6 flex justify-center">
+          <SimplePagination
+            current={filters.page || 1}
+            total={totalItems}
+            pageSize={filters.pageSize || 10}
+            onChange={handlePageChange}
+            showSizeChanger={false}
+          />
+        </div>
+      </div>
     </div>
   )
 }

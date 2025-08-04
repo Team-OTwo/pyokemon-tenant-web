@@ -1,6 +1,5 @@
 import React from "react"
 import { event } from "@/constants/event"
-import { mockEventStats, mockRecentOrders } from "@/mock/booking-mock"
 import EventCard from "@/pages/events-page/_components/event-card"
 import { useScheduleFormStore } from "@/store/schedule-form-store"
 import { convertEventToScheduleFormData } from "@/util/convertEventToScheduleFormData"
@@ -9,8 +8,7 @@ import { format } from "date-fns"
 import { useNavigate } from "react-router-dom"
 
 import { EventFormData, EventType, PriceGrade } from "@/types/event"
-import Button from "@/components/ui/button"
-import { Button as CatalystButton } from "@/components/catalyst-ui/button"
+import { Button } from "@/components/catalyst-ui/button"
 import {
   Table,
   TableBody,
@@ -66,9 +64,8 @@ const EventDetailPage = () => {
         {/* Header */}
         <div className="flex gap-6 items-center mb-16">
           <ArrowUturnLeftIcon
-            color="#686764"
+            className="text-gray-700 cursor-pointer w-5 h-5"
             onClick={handleGoBack}
-            className="cursor-pointer w-5 h-5"
           />
           <h1 className="text-2xl font-bold">공연 상세 조회</h1>
         </div>
@@ -82,14 +79,14 @@ const EventDetailPage = () => {
             <EventCard event={event} key={`${event.eventId}-detail`} disableClick={true} />
           </div>
           <div className="flex items-center justify-between gap-2 mt-2">
-            <CatalystButton outline onClick={() => navigate(`/user/event/detail/${event.eventId}`)}>
+            <Button outline onClick={() => navigate(`/user/event/detail/${event.eventId}`)}>
               예매 페이지로 이동
-            </CatalystButton>
+            </Button>
             <div className="flex gap-2">
-              <CatalystButton outline onClick={handleEdit}>
+              <Button outline onClick={handleEdit}>
                 수정
-              </CatalystButton>
-              <CatalystButton>삭제</CatalystButton>
+              </Button>
+              <Button>삭제</Button>
             </div>
           </div>
         </div>

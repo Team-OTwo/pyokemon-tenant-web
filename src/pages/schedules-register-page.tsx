@@ -98,9 +98,8 @@ function SchedulesRegisterPage() {
       {/* Header */}
       <div className="flex gap-6 items-center mb-5">
         <ArrowUturnLeftIcon
-          color="#686764"
+          className="text-gray-700 cursor-pointer w-5 h-5"
           onClick={handleGoBack}
-          className="cursor-pointer w-5 h-5"
         />
         <h1 className="text-2xl font-bold">공연 일정 등록</h1>
       </div>
@@ -173,7 +172,7 @@ function SchedulesRegisterPage() {
                       onChange={(e) => handleTimeChange("eventStartTime", "hour", e.target.value)}
                       className="w-full"
                     >
-                      <option value="">시 선택</option>
+                      <option value="">시 </option>
                       {hourOptions.map((hour) => (
                         <option key={hour.value} value={hour.value}>
                           {hour.label}
@@ -188,7 +187,7 @@ function SchedulesRegisterPage() {
                       onChange={(e) => handleTimeChange("eventStartTime", "minute", e.target.value)}
                       className="w-full"
                     >
-                      <option value="">분 선택</option>
+                      <option value="">분 </option>
                       {minuteOptions.map((minute) => (
                         <option key={minute.value} value={minute.value}>
                           {minute.label}

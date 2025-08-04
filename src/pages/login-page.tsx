@@ -22,6 +22,7 @@ function LoginPage() {
 
     // 임시 로그인 검증
     if (id === "test" && password === "test123") {
+      sessionStorage.setItem("user", JSON.stringify({ id, name: "Test User" }))
       navigate("/main")
     } else {
       setError("아이디 또는 비밀번호가 올바르지 않습니다.")

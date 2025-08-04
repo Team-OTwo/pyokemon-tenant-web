@@ -17,7 +17,7 @@ import {
 import { Text } from "@/components/catalyst-ui/text"
 
 import { Event } from "../../mock/dashboard-mock"
-import { SkeletonMain } from "../ui/skeleton"
+import { SkeletonMain } from "../skeleton"
 
 interface SummaryCardsProps {
   events: Event[]
@@ -45,16 +45,12 @@ const SummaryCards: React.FC<SummaryCardsProps> = ({ events, loading, className 
     return (
       <div className={`flex gap-6 mb-8 ${className}`}>
         {[...Array(3)].map((_, index) => (
-          <div key={index} className="flex-1 bg-white rounded-lg p-6 border border-zinc-200">
+          <div key={index} className="flex-1 bg-white p-6 border-t border-zinc-200">
             <div className="flex items-center justify-between">
               <div>
-                <SkeletonMain variant="text" width={100} className="mb-2" />
-                <SkeletonMain variant="text" width={80} className="text-2xl font-bold" />
+                <SkeletonMain variant="text" width={120} height={16} className="mb-2" />
+                <SkeletonMain variant="text" width={100} height={32} />
               </div>
-              <SkeletonMain variant="rectangular" width={40} height={40} />
-            </div>
-            <div className="mt-4">
-              <SkeletonMain variant="text" width={120} height={24} />
             </div>
           </div>
         ))}
