@@ -75,7 +75,12 @@ export const SidebarContent: React.FC<SidebarContentProps> = ({ className = "" }
     <Sidebar className={`w-64 bg-zinc-100 ${className}`}>
       <SidebarHeader>
         <div className="flex items-center justify-center">
-          <img src={Logo} alt="logo" className="h-6 w-1/2" />
+          <img
+            src={Logo}
+            alt="logo"
+            className="h-6 w-1/2 cursor-pointer"
+            onClick={() => navigate("/main")}
+          />
         </div>
       </SidebarHeader>
 
