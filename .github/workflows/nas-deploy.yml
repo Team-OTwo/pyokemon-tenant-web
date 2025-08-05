@@ -61,12 +61,12 @@ jobs:
           
           # NAS 디렉토리 권한 확인
           echo "NAS 디렉토리 권한 확인 중..."
-          sshpass -p "${{ secrets.NAS_PASSWORD }}" ssh -o StrictHostKeyChecking=no -p ${{ secrets.NAS_SSH_PORT || 22 }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} "mkdir -p /volume1/web/ || echo '디렉토리 생성 실패'; ls -la /volume1/web/ || echo '디렉토리 접근 실패'"
+          sshpass -p "${{ secrets.NAS_PASSWORD }}" ssh -o StrictHostKeyChecking=no -p ${{ secrets.NAS_SSH_PORT || 22 }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} "mkdir -p /volume1/web/tenant || echo '디렉토리 생성 실패'; ls -la /volume1/web/tenant || echo '디렉토리 접근 실패'"
           
           # tar로 파일 전송 (verbose 모드)
           echo "파일 전송 시작..."
           cd $BUILD_DIR
-          tar czf - * | sshpass -p "${{ secrets.NAS_PASSWORD }}" ssh -o StrictHostKeyChecking=no -p ${{ secrets.NAS_SSH_PORT || 22 }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} "cd /volume1/web/ && rm -rf * && tar xzvf - || echo '파일 압축 해제 실패'"
+          tar czf - * | sshpass -p "${{ secrets.NAS_PASSWORD }}" ssh -o StrictHostKeyChecking=no -p ${{ secrets.NAS_SSH_PORT || 22 }} ${{ secrets.NAS_USER }}@${{ secrets.NAS_HOST }} "cd /volume1/web/tenant && rm -rf * && tar xzvf - || echo '파일 압축 해제 실패'"
           echo "파일 전송 완료"
         env:
           SSHPASS: ${{ secrets.NAS_PASSWORD }}
