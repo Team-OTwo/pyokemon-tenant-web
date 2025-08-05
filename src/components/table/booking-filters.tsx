@@ -1,5 +1,4 @@
 import React from "react"
-import { MagnifyingGlassIcon } from "@heroicons/react/20/solid"
 
 import { BookingFilters } from "@/types/booking"
 import { Badge } from "@/components/catalyst-ui/badge"
@@ -19,13 +18,6 @@ const BookingFiltersComponent: React.FC<BookingFiltersProps> = ({
   onFiltersChange,
   onReset,
 }) => {
-  const statusOptions = [
-    { value: "", label: "전체 상태" },
-    { value: "PENDING", label: "대기중" },
-    { value: "BOOKED", label: "예매완료" },
-    { value: "CANCELED", label: "취소됨" },
-  ]
-
   const paymentStatusOptions = [
     { value: "", label: "전체 결제상태" },
     { value: "PENDING", label: "결제대기" },
@@ -35,10 +27,6 @@ const BookingFiltersComponent: React.FC<BookingFiltersProps> = ({
 
   const handleSearchChange = (value: string) => {
     onFiltersChange({ ...filters, search: value, page: 1 })
-  }
-
-  const handleStatusChange = (value: string) => {
-    onFiltersChange({ ...filters, status: value || undefined, page: 1 })
   }
 
   const handlePaymentStatusChange = (value: string) => {
@@ -65,8 +53,12 @@ const BookingFiltersComponent: React.FC<BookingFiltersProps> = ({
           <Text className="text-lg font-semibold text-zinc-900">예매 관리</Text>
           <Text className="text-sm text-zinc-500">총 {filters.total || 0}개의 예매 내역</Text>
         </div>
-        <Button onClick={handleReset} color="zinc" className="px-4 py-2 text-sm">
-          필터 초기화
+        <Button
+          onClick={handleReset}
+          color="zinc"
+          className="px-4 py-2 text-sm cursor-pointer hover:bg-zinc-800 hover:text-white transition-colors duration-200"
+        >
+          초기화
         </Button>
       </div>
 

@@ -19,7 +19,7 @@ import { Select } from "@/components/catalyst-ui/select"
 function SchedulesRegisterPage() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { eventData, mode = "create" } = location.state || {}
+  const { eventData, mode = "create", eventId } = location.state || {}
   const { resetEventFormData } = useEventStore()
   const { scheduleFormData } = useScheduleFormStore()
 
@@ -40,7 +40,7 @@ function SchedulesRegisterPage() {
     const { setScheduleFormData } = useScheduleFormStore.getState()
     setScheduleFormData(scheduleForm)
 
-    navigate("/event-register", { state: { mode: "back" } })
+    navigate("/event-register", { state: { mode: "back", eventId } })
   }
 
   useEffect(() => {
@@ -71,16 +71,29 @@ function SchedulesRegisterPage() {
       return
     }
 
+    // 로그인된 사용자 정보 가져오기
+    const userStr = sessionStorage.getItem("user")
+    let accountId = 1 // 기본값
+
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr)
+        accountId = parseInt(user.id) || 1
+      } catch (e) {
+        console.warn("사용자 정보 파싱 실패:", e)
+      }
+    }
+
     // API 요청 데이터 구성 및 제출
-    const requestData = createEventRequestData(eventData, scheduleForm)
+    const requestData = createEventRequestData(eventData, scheduleForm, eventId)
     console.log("생성된 requestData:", requestData)
 
     try {
       if (mode === "edit") {
-        await updateEvent(requestData)
+        await updateEvent(requestData, eventId, accountId)
         alert("공연이 성공적으로 수정되었습니다.")
       } else {
-        await submitEvent(requestData)
+        await submitEvent(requestData, accountId)
         alert("공연이 성공적으로 등록되었습니다.")
       }
 
@@ -101,7 +114,9 @@ function SchedulesRegisterPage() {
           className="text-gray-700 cursor-pointer w-5 h-5"
           onClick={handleGoBack}
         />
-        <h1 className="text-2xl font-bold">공연 일정 등록</h1>
+        <h1 className="text-2xl font-bold">
+          {mode === "edit" ? "공연 일정 수정" : "공연 일정 등록"}
+        </h1>
       </div>
 
       <div className="bg-white p-6">
@@ -268,11 +283,18 @@ function SchedulesRegisterPage() {
 
       {/* 등록 버튼 */}
       <div className="flex justify-between items-center pt-8 pb-6">
-        <Button outline onClick={handleGoBack}>
+        <Button
+          outline
+          onClick={handleGoBack}
+          className="cursor-pointer hover:bg-zinc-100 hover:text-zinc-900 transition-colors duration-200"
+        >
           이전
         </Button>
-        <Button onClick={handleSubmit}>
-          {mode === "edit" ? "공연 일정 수정" : "공연 일정 등록"}
+        <Button
+          onClick={handleSubmit}
+          className="cursor-pointer hover:bg-zinc-800 hover:text-white transition-colors duration-200"
+        >
+          {mode === "edit" ? "공연 정보 수정" : "공연 정보 등록"}
         </Button>
       </div>
     </div>

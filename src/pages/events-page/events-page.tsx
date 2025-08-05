@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
+import { getEvents } from "@/api/event-register-api"
 import { eventList, STATUS_FILTER_OPTIONS } from "@/constants/event"
 import { searchEventsByTitle } from "@/utils/search"
 import { PlusIcon } from "@heroicons/react/16/solid"
@@ -18,15 +19,59 @@ const EventsPage = () => {
   const [activeStatus, setActiveStatus] = useState("ALL")
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState("name")
+  const [events, setEvents] = useState<EventType[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [useMockData, setUseMockData] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage] = useState(7) // 페이지당 7개로 변경
   const navigate = useNavigate()
+
   const sortOptions = [
     { value: "name", label: "이름순" },
     { value: "date", label: "날짜순" },
   ]
 
+  // API에서 이벤트 목록 가져오기
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        // 로그인된 사용자 정보 가져오기
+        const userStr = sessionStorage.getItem("user")
+        let accountId = 1 // 기본값
+
+        if (userStr) {
+          try {
+            const user = JSON.parse(userStr)
+            // 사용자 ID를 account_id로 사용 (실제로는 별도의 account_id 필드가 있을 수 있음)
+            accountId = parseInt(user.id) || 1
+          } catch (e) {
+            console.warn("사용자 정보 파싱 실패:", e)
+          }
+        }
+
+        const eventsData = await getEvents(accountId)
+        setEvents(eventsData)
+        setUseMockData(false)
+      } catch (err) {
+        console.warn("API 호출 실패, mock 데이터 사용:", err)
+        setEvents(eventList)
+        setUseMockData(true)
+        setError("백엔드 API에 연결할 수 없어 샘플 데이터를 표시합니다.")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchEvents()
+  }, [])
+
   // 검색과 상태 필터링을 모두 적용
   const finalEvents = useMemo(() => {
-    let filteredEvents = eventList
+    let filteredEvents = events
 
     // 상태 필터링
     if (activeStatus !== "ALL") {
@@ -48,11 +93,128 @@ const EventsPage = () => {
     }
 
     return filteredEvents
-  }, [searchValue, activeStatus, sortBy])
+  }, [events, searchValue, activeStatus, sortBy])
+
+  // 페이지네이션 계산
+  const totalPages = Math.ceil(finalEvents.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentEvents = finalEvents.slice(startIndex, endIndex)
+
+  // 디버깅용 로그
+  console.log("페이지네이션 정보:", {
+    totalEvents: finalEvents.length,
+    itemsPerPage,
+    totalPages,
+    currentPage,
+    startIndex,
+    endIndex,
+    currentEventsLength: currentEvents.length,
+  })
+
+  // 페이지 변경 핸들러
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  // 간단한 페이지네이션 컴포넌트
+  const renderPagination = () => {
+    if (totalPages <= 1) return null
+
+    return (
+      <div className="flex items-center justify-center gap-2 mt-8">
+        {/* 이전 버튼 */}
+        <Button
+          plain
+          disabled={currentPage <= 1}
+          onClick={() => handlePageChange(currentPage - 1)}
+          className="px-3 py-2"
+        >
+          이전
+        </Button>
+
+        {/* 페이지 번호들 */}
+        <div className="flex items-center gap-1">
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <Button
+              key={page}
+              plain
+              onClick={() => handlePageChange(page)}
+              className={`px-3 py-2 min-w-[40px] ${
+                page === currentPage
+                  ? "bg-zinc-950 !text-white dark:bg-white dark:!text-zinc-950"
+                  : "hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              }`}
+            >
+              {page}
+            </Button>
+          ))}
+        </div>
+
+        {/* 다음 버튼 */}
+        <Button
+          plain
+          disabled={currentPage >= totalPages}
+          onClick={() => handlePageChange(currentPage + 1)}
+          className="px-3 py-2"
+        >
+          다음
+        </Button>
+      </div>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          <Text className="text-zinc-500 mt-4">공연 목록을 불러오는 중...</Text>
+        </div>
+      </div>
+    )
+  }
+
+  if (error && !useMockData) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <Text className="text-red-500 mb-4">{error}</Text>
+          <Button
+            onClick={() => window.location.reload()}
+            className="cursor-pointer hover:bg-zinc-800 hover:text-white transition-colors duration-200"
+          >
+            다시 시도
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        {/* Mock 데이터 사용 시 경고 메시지 */}
+        {useMockData && (
+          <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path
+                    fillRule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-yellow-800">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* 헤더 */}
         <div className="mb-8">
           <div>
@@ -83,7 +245,7 @@ const EventsPage = () => {
 
           <Button
             color="dark/zinc"
-            className="ml-auto cursor-pointer"
+            className="ml-auto cursor-pointer hover:bg-zinc-800 hover:text-white transition-colors duration-200"
             onClick={() => navigate("/event-register")}
           >
             <PlusIcon data-slot="icon" />
@@ -111,8 +273,8 @@ const EventsPage = () => {
 
         {/* Events List */}
         <div className="space-y-4">
-          {finalEvents.length > 0 ? (
-            finalEvents.map((event: EventType, index: number) => (
+          {currentEvents.length > 0 ? (
+            currentEvents.map((event: EventType, index: number) => (
               <EventCard event={event} key={`${event.eventId}-${index}`} />
             ))
           ) : (
@@ -138,6 +300,17 @@ const EventsPage = () => {
             </div>
           )}
         </div>
+
+        {/* Pagination */}
+        {renderPagination()}
+
+        {/* 총 개수 표시 */}
+        {finalEvents.length > 0 && (
+          <div className="mt-4 text-center text-sm text-zinc-500">
+            총 {finalEvents.length}개의 공연 중 {startIndex + 1}-
+            {Math.min(endIndex, finalEvents.length)}번째 표시
+          </div>
+        )}
       </div>
     </div>
   )
