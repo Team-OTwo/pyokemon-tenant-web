@@ -22,9 +22,6 @@
     ]
   },
   "dependencies": {
-    "@ant-design/colors": "^7.2.0",
-    "@ant-design/icons": "^5.6.1",
-    "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@headlessui/react": "^2.2.7",
@@ -36,7 +33,6 @@
     "@tanstack/react-query-devtools": "^5.66.0",
     "@types/react-calendar": "^4.1.0",
     "@use-funnel/react-router": "^0.0.1",
-    "antd": "^5.24.0",
     "axios": "^1.7.9",
     "clsx": "^2.1.1",
     "crypto-js": "^4.2.0",

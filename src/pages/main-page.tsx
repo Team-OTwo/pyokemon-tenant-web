@@ -2,9 +2,8 @@ import React, { useEffect, useState } from "react"
 
 import { Heading } from "../components/catalyst-ui/heading"
 import { Text } from "../components/catalyst-ui/text"
-import Dashboard from "../components/dashboard/dashboard"
-import EventsTable from "../components/dashboard/events-table"
-import SummaryCards from "../components/dashboard/summary-cards"
+import EventsTable from "../components/table/events-table"
+import SummaryCards from "../components/table/summary-cards"
 import { Event, mockEvents } from "../mock/dashboard-mock"
 
 const DashboardContent: React.FC = () => {
@@ -28,21 +27,27 @@ const DashboardContent: React.FC = () => {
   }, [])
 
   return (
-    <>
-      <div className="mb-8">
-        <div className="flex items-center space-x-3 mb-2">
-          <Heading level={1} className="text-2xl font-bold text-black">
-            최근 공연 현황
-          </Heading>
+    <div className="min-h-screen bg-white">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        {/* 헤더 */}
+        <div className="mb-8">
+          <div>
+            <Heading level={1} className="text-2xl font-bold text-zinc-900">
+              최근 공연 현황
+            </Heading>
+            <p className="text-sm text-zinc-500 mt-1">
+              이번 달 진행되는 공연들의 현황을 확인하세요
+            </p>
+          </div>
         </div>
-        <Text className="text-gray-700 mt-[15px] mb-[30px]">
-          최근 1년 간 공연들의 예매 현황을 확인하세요
-        </Text>
-      </div>
 
-      <SummaryCards className="mt-10 mb-10" events={events} loading={loading} />
-      <EventsTable events={events} loading={loading} />
-    </>
+        {/* 대시보드 콘텐츠 */}
+        <div className="space-y-6">
+          <SummaryCards events={events} loading={loading} />
+          <EventsTable events={events} loading={loading} />
+        </div>
+      </div>
+    </div>
   )
 }
 

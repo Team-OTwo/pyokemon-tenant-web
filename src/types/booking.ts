@@ -1,105 +1,163 @@
-// ERD 기반 타입 정의
-export interface User {
-  id: number
-  userId: string
-  name: string
-  phone: string
-  email: string
-  birth: string
-  gender: string
-  created_at: string
-  updated_at: string
+// ERD 기반 실제 API 구조에 맞는 타입 정의
+
+export interface Booking {
+  bookingId: number
+  eventScheduleId: number
+  accountId: number
+  seatClassId: number
+  paymentId: number
+  status: "PENDING" | "BOOKED" | "CANCELED"
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Payment {
+  paymentId: number
+  bookingId: number
+  eventScheduleId: number
+  totalPrice: number
+  method: string
+  status: "PENDING" | "COMPLETED" | "REFUNDED"
+  createdAt: string
+  updatedAt: string
+}
+
+export interface EventSchedule {
+  eventScheduleId: number
+  eventId: number
+  eventDate: string
+  eventTime: string
+  ticketOpenAt: string
+  ticketCloseAt: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface Event {
   id: number
-  eventId: string
+  eventId: number
   title: string
   description: string
-  ageLimit: number
-  genre: string
-  status: "ACTIVE" | "INACTIVE" | "CANCELLED"
-  created_at: string
-  updated_at: string
+  totalSeatCount: number
+  status: "PENDING" | "ACTIVE" | "COMPLETED" | "CANCELED"
+  createdAt: string
+  updatedAt: string
 }
 
 export interface Venue {
-  id: number
-  venue_name: string
+  venueId: number
+  venueName: string
   address: string
-  phone: string
-  email: string
-  created_at: string
-  updated_at: string
-}
-
-export interface EventSchedule {
-  id: number
-  event_id: number
-  venue_id: number
-  event_date: string
-  ticket_open_at: string
-  created_at: string
-  updated_at: string
+  city: string
+  state: string
+  zipcode: string
+  country: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface SeatClass {
-  id: number
-  event_schedule_id: number
-  seat_class_name: string
+  seatClassId: number
+  className: string
+  seatCount: number
+}
+
+export interface Seat {
+  seatId: number
+  seatClassId: number
+  floor: string
+  row: string
+  column: string
+  seatNumber: string
+  isAvailable: boolean
+}
+
+export interface Price {
+  priceId: number
+  eventScheduleId: number
+  seatClassId: number
   price: number
-  priority: number
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
 }
 
-export interface Payment {
-  id: number
-  booking_id: number
-  payment_key: string
-  method: string
-  total_price: number
-  status: "PENDING" | "COMPLETED" | "CANCELLED" | "FAILED"
-  created_at: string
-  updated_at: string
+export interface Account {
+  accountId: number
+  role: string
+  username: string
+  isActiveDeleted: "ACTIVE" | "DELETED"
+  createdAt: string
+  updatedAt: string
 }
 
-export interface Booking {
-  id: number
-  booking_id: string
-  user_id: number
-  event_schedule_id: number
-  payment_id: number
-  status: "PENDING" | "CONFIRMED" | "CANCELLED"
-  created_at: string
-  updated_at: string
-
-  // 조인된 데이터
-  user?: User
-  event_schedule?: EventSchedule
-  payment?: Payment
-  event?: Event
-  venue?: Venue
-  seat_class?: SeatClass
+export interface User {
+  userId: number
+  accountId: number
+  name: string
+  phone: string
+  birth: string
+  isVerified: boolean
 }
 
+// API 응답용 통합 타입
+export interface BookingWithDetails {
+  booking: Booking
+  payment: Payment
+  eventSchedule: EventSchedule
+  event: Event
+  venue: Venue
+  seatClass: SeatClass
+  seat: Seat
+  price: Price
+  account: Account
+  user: User
+}
+
+// 테이블 표시용 타입
 export interface BookingDisplay {
   id: string
-  purchaser: string
-  bookingPid: string
-  seat: string
+  orderNumber: string
+  purchaseDate: string
+  customer: string
+  event: {
+    name: string
+    thumbnailUrl: string
+  }
   amount: number
+  paymentStatus: "결제완료" | "결제대기" | "환불됨"
   paymentMethod: string
-  paymentStatus: "결제대기" | "결제완료" | "결제취소"
-  eventId: string
-  eventTitle: string
+  seatClass: string
+  seatInfo: string
+  venue: string
   eventDate: string
-  venueName: string
-  thumbnailUrl: string
 }
 
+// 검색 및 필터링 옵션
+export interface BookingFilters {
+  search?: string
+  status?: string
+  dateFrom?: string
+  dateTo?: string
+  paymentStatus?: string
+  page?: number
+  pageSize?: number
+}
+
+// API 응답 타입
+export interface BookingListResponse {
+  bookings: BookingWithDetails[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
+// 통계 정보
 export interface BookingSummary {
-  totalSales: number
-  remainingSeats: number
   totalBookings: number
+  totalRevenue: number
+  completedPayments: number
+  pendingPayments: number
+  canceledBookings: number
+  averageTicketPrice: number
 }

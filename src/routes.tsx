@@ -21,6 +21,10 @@ const router = createBrowserRouter(
       element: <Navigate to="/login" replace />,
     },
     {
+      path: "/login",
+      Component: LoginPage,
+    },
+    {
       path: "/",
       Component: RootLayout,
       children: [
@@ -42,15 +46,15 @@ const router = createBrowserRouter(
                   path: "schedules-register",
                   Component: SchedulesRegisterPage,
                 },
+                {
+                  path: "bookings",
+                  Component: BookingsPage,
+                },
+                {
+                  path: "bookings/:eventId",
+                  Component: BookingsPage,
+                },
               ],
-            },
-            {
-              path: "bookings/:eventId",
-              Component: BookingsPage,
-            },
-            {
-              path: "login",
-              Component: LoginPage,
             },
             {
               path: "main",

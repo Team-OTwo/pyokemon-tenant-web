@@ -2,7 +2,10 @@ import React from "react"
 import { eventList } from "@/constants/event"
 import { HomeIcon, Square2StackIcon, TicketIcon } from "@heroicons/react/20/solid"
 import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline"
+import { isAfter, parseISO } from "date-fns"
 import { useLocation, useNavigate } from "react-router-dom"
+
+import Logo from "@/assets/images/logo.svg"
 
 import {
   Sidebar,
@@ -36,27 +39,32 @@ export const SidebarContent: React.FC<SidebarContentProps> = ({ className = "" }
       icon: Square2StackIcon,
       label: "공연 리스트 조회",
       path: "/events",
-      current:
-        location.pathname === "/events" ||
-        location.pathname.startsWith("/events/") ||
-        location.pathname.startsWith("/bookings/"),
+      current: location.pathname === "/events" || location.pathname.startsWith("/events/"),
     },
+
     {
       icon: TicketIcon,
       label: "예매 현황",
       path: "/bookings",
-      current:
-        location.pathname === "/event-register" || location.pathname === "/schedules-register",
+      current: location.pathname === "/bookings" || location.pathname.startsWith("/bookings/"),
     },
   ]
 
-  // 임박한 이벤트 5개 정렬 (날짜순)
+  // 날짜가 지나지 않은 이벤트 중에서 임박한 순으로 5개 정렬
   const upcomingEvents = eventList
-    .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime())
+    .filter((event) => {
+      const eventDate = parseISO(event.eventDate)
+      return isAfter(eventDate, new Date())
+    })
+    .sort((a, b) => {
+      const dateA = parseISO(a.eventDate)
+      const dateB = parseISO(b.eventDate)
+      return dateA.getTime() - dateB.getTime()
+    })
     .slice(0, 5)
 
   const formatEventDate = (dateString: string) => {
-    const date = new Date(dateString)
+    const date = parseISO(dateString)
     return date.toLocaleDateString("ko-KR", {
       month: "short",
       day: "numeric",
@@ -66,11 +74,13 @@ export const SidebarContent: React.FC<SidebarContentProps> = ({ className = "" }
   return (
     <Sidebar className={`w-64 bg-zinc-100 ${className}`}>
       <SidebarHeader>
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">P</span>
-          </div>
-          <span className="font-semibold text-lg">Pyokemon</span>
+        <div className="flex items-center justify-center">
+          <img
+            src={Logo}
+            alt="logo"
+            className="h-6 w-1/2 cursor-pointer"
+            onClick={() => navigate("/main")}
+          />
         </div>
       </SidebarHeader>
 

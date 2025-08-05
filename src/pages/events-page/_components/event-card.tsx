@@ -1,9 +1,8 @@
 import React from "react"
-import { isBefore } from "date-fns"
+import { EVENT_STATUS_COLORS, EVENT_STATUS_LABELS } from "@/constants/event"
 import { useNavigate } from "react-router-dom"
 
 import { EventType } from "@/types/event"
-import { Badge } from "@/components/catalyst-ui/badge"
 import { Text } from "@/components/catalyst-ui/text"
 
 interface EventCardProps {
@@ -18,24 +17,6 @@ const EventCard = ({ event, disableClick = false }: EventCardProps) => {
       navigation(`/events/${event.eventId}`)
     }
   }
-
-  const getEventStatus = (eventDate: string) => {
-    const isCompleted = isBefore(new Date(), new Date(eventDate)) === false
-
-    if (isCompleted) {
-      return {
-        text: "진행 완료",
-        color: "amber" as const,
-      }
-    } else {
-      return {
-        text: "진행중",
-        color: "green" as const,
-      }
-    }
-  }
-
-  const status = getEventStatus(event.eventDate)
 
   return (
     <div
@@ -58,7 +39,11 @@ const EventCard = ({ event, disableClick = false }: EventCardProps) => {
         <div className="mt-1 space-y-1">
           <div className="flex items-center justify-between">
             <Text className="text-sm text-zinc-600 dark:text-zinc-400">{event.eventDate}</Text>
-            <Badge color={status.color}>{status.text}</Badge>
+            <span
+              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${EVENT_STATUS_COLORS[event.status]}`}
+            >
+              {EVENT_STATUS_LABELS[event.status]}
+            </span>
           </div>
           <Text className="text-sm text-zinc-600 dark:text-zinc-400">{event.venueName}</Text>
         </div>

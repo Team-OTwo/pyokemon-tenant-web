@@ -13,7 +13,7 @@ import {
 import { Text } from "@/components/catalyst-ui/text"
 
 import { Event } from "../../mock/dashboard-mock"
-import { SkeletonMain } from "../ui/skeleton"
+import { SkeletonMain } from "../skeleton"
 
 interface EventsTableProps {
   events: Event[]
@@ -48,28 +48,27 @@ const EventsTable: React.FC<EventsTableProps> = ({ events, loading }) => {
           {[...Array(5)].map((_, index) => (
             <TableRow key={index}>
               <TableCell>
-                <div className="flex justify-center">
-                  <SkeletonMain variant="text" width={120} />
+                <SkeletonMain variant="text" width={140} height={20} />
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <SkeletonMain variant="text" width={16} height={16} />
+                  <SkeletonMain variant="text" width={100} height={20} />
                 </div>
               </TableCell>
               <TableCell>
-                <div className="flex justify-center">
-                  <SkeletonMain variant="text" width={100} />
+                <div className="flex items-center gap-2">
+                  <SkeletonMain variant="text" width={16} height={16} />
+                  <SkeletonMain variant="text" width={80} height={20} />
                 </div>
               </TableCell>
               <TableCell>
-                <div className="flex justify-center">
-                  <SkeletonMain variant="text" width={80} />
-                </div>
+                <SkeletonMain variant="text" width={60} height={24} className="rounded-full" />
               </TableCell>
               <TableCell>
-                <div className="flex justify-center">
-                  <SkeletonMain variant="text" width={60} height={32} />
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="flex justify-center">
-                  <SkeletonMain variant="text" width={60} />
+                <div className="flex items-center gap-2">
+                  <SkeletonMain variant="text" width={16} height={16} />
+                  <SkeletonMain variant="text" width={50} height={20} />
                 </div>
               </TableCell>
             </TableRow>

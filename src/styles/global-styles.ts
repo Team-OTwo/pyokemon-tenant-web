@@ -1,7 +1,5 @@
 import { createGlobalStyle } from "styled-components"
 
-import cssAntd from "./antd/styled-css"
-
 const styled = { createGlobalStyle }
 
 const GlobalStyles = styled.createGlobalStyle`
@@ -209,9 +207,6 @@ const GlobalStyles = styled.createGlobalStyle`
   [hidden] {
     display: none;
   }
-
-  // antd styles override
-  ${cssAntd}
 `
 
 export default GlobalStyles
