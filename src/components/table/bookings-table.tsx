@@ -54,7 +54,6 @@ const BookingsTable: React.FC<BookingsTableProps> = ({ bookings, loading }) => {
           <TableRow>
             <TableHeader>예매자</TableHeader>
             <TableHeader>예매번호</TableHeader>
-            <TableHeader>공연</TableHeader>
             <TableHeader>예매좌석</TableHeader>
             <TableHeader>결제금액</TableHeader>
             <TableHeader>결제상태</TableHeader>
@@ -69,15 +68,7 @@ const BookingsTable: React.FC<BookingsTableProps> = ({ bookings, loading }) => {
               <TableCell>
                 <SkeletonMain variant="text" width={100} height={20} />
               </TableCell>
-              <TableCell>
-                <div className="flex items-center gap-3">
-                  <SkeletonMain variant="rectangular" width={40} height={40} className="rounded" />
-                  <div>
-                    <SkeletonMain variant="text" width={150} height={20} />
-                    <SkeletonMain variant="text" width={100} height={16} />
-                  </div>
-                </div>
-              </TableCell>
+
               <TableCell>
                 <div>
                   <SkeletonMain variant="text" width={80} height={20} />
@@ -122,7 +113,6 @@ const BookingsTable: React.FC<BookingsTableProps> = ({ bookings, loading }) => {
         <TableRow>
           <TableHeader>예매자</TableHeader>
           <TableHeader>예매번호</TableHeader>
-          <TableHeader>공연</TableHeader>
           <TableHeader>예매좌석</TableHeader>
           <TableHeader>결제금액</TableHeader>
           <TableHeader>결제상태</TableHeader>
@@ -136,19 +126,6 @@ const BookingsTable: React.FC<BookingsTableProps> = ({ bookings, loading }) => {
             </TableCell>
             <TableCell>
               <Text className="font-medium">{booking.orderNumber}</Text>
-            </TableCell>
-            <TableCell>
-              <div className="flex items-center gap-3">
-                <img
-                  src={booking.event.thumbnailUrl}
-                  alt={booking.event.name}
-                  className="h-10 w-10 rounded object-cover"
-                />
-                <div>
-                  <Text className="font-medium">{booking.event.name}</Text>
-                  <Text className="text-sm text-zinc-500">{formatDate(booking.eventDate)}</Text>
-                </div>
-              </div>
             </TableCell>
             <TableCell>
               <div>

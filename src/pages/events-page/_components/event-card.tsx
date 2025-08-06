@@ -8,13 +8,20 @@ import { Text } from "@/components/catalyst-ui/text"
 interface EventCardProps {
   event: EventType
   disableClick?: boolean
+  showStatus?: boolean
+  onClick?: () => void
 }
 
-const EventCard = ({ event, disableClick = false }: EventCardProps) => {
+const EventCard = ({ event, disableClick = false, showStatus = true, onClick }: EventCardProps) => {
   const navigation = useNavigate()
 
   const handleClick = () => {
-    if (!disableClick) {
+    if (disableClick) return
+
+    if (onClick) {
+      onClick()
+    } else {
+      // 기본 동작: event-detail-page로 이동
       navigation(`/events/${event.eventId}`)
     }
   }
@@ -93,13 +100,15 @@ const EventCard = ({ event, disableClick = false }: EventCardProps) => {
         </div>
       </div>
 
-      <div className="flex-shrink-0">
-        <span
-          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusInfo.color}`}
-        >
-          {statusInfo.label}
-        </span>
-      </div>
+      {showStatus && (
+        <div className="flex-shrink-0">
+          <span
+            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusInfo.color}`}
+          >
+            {statusInfo.label}
+          </span>
+        </div>
+      )}
     </div>
   )
 }

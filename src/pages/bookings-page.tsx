@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react"
-import { getBookings, getBookingsByEvent } from "@/api/booking-api"
-import { useNavigate, useParams } from "react-router-dom"
+import { getBookings, getBookingsByEvent, getBookingsByEventSchedule } from "@/api/booking-api"
+import { ArrowUturnLeftIcon } from "@heroicons/react/24/outline"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 
 import { BookingDisplay, BookingFilters, BookingListResponse } from "@/types/booking"
 import { Button } from "@/components/catalyst-ui/button"
@@ -10,8 +11,12 @@ import BookingFiltersComponent from "@/components/table/booking-filters"
 import BookingsTable from "@/components/table/bookings-table"
 
 const BookingsPage = () => {
-  const { eventId } = useParams<{ eventId: string }>()
+  const { eventId, eventScheduleId } = useParams<{ eventId?: string; eventScheduleId?: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // 이전 페이지에서 전달된 이벤트 정보
+  const eventInfo = location.state?.eventInfo
 
   const [bookings, setBookings] = useState<BookingDisplay[]>([])
   const [loading, setLoading] = useState(true)
@@ -22,13 +27,23 @@ const BookingsPage = () => {
   const [totalPages, setTotalPages] = useState(1)
   const [totalItems, setTotalItems] = useState(0)
 
+  const handleGoBack = () => {
+    navigate("/bookinglist")
+  }
+
   // 데이터 로딩
   const fetchBookings = async () => {
     setLoading(true)
     try {
+      // API가 아직 없으므로 바로 mock 데이터 사용
+      console.log("Mock 데이터 사용 - eventScheduleId:", eventScheduleId)
+
       let response: BookingListResponse
 
-      if (eventId) {
+      if (eventScheduleId) {
+        // ERD 구조에 맞게 event_schedule_id로 조회
+        response = await getBookingsByEventSchedule(parseInt(eventScheduleId), filters)
+      } else if (eventId) {
         response = await getBookingsByEvent(parseInt(eventId), filters)
       } else {
         response = await getBookings(filters)
@@ -40,11 +55,6 @@ const BookingsPage = () => {
         orderNumber: `#${booking.booking.bookingId.toString().padStart(4, "0")}`,
         purchaseDate: booking.booking.createdAt,
         customer: booking.user.name,
-        event: {
-          name: booking.event.title,
-          thumbnailUrl:
-            booking.event.id <= 3 ? `/src/mock/img/${booking.event.id}.png` : "/placeholder.jpg",
-        },
         amount: booking.payment.totalPrice,
         paymentStatus: getPaymentStatusDisplay(booking.payment.status),
         paymentMethod: booking.payment.method,
@@ -95,6 +105,13 @@ const BookingsPage = () => {
     })
   }
 
+  // 일괄 환불 핸들러
+  const handleBulkRefund = () => {
+    // 선택된 예매들을 환불 처리하는 로직
+    console.log("일괄 환불 처리")
+    // TODO: 선택된 예매들의 환불 처리 로직 구현
+  }
+
   // 페이지 변경 핸들러
   const handlePageChange = (page: number) => {
     setFilters((prev) => ({ ...prev, page }))
@@ -103,18 +120,24 @@ const BookingsPage = () => {
   // 데이터 로딩 효과
   useEffect(() => {
     fetchBookings()
-  }, [filters, eventId])
+  }, [filters, eventId, eventScheduleId])
 
   return (
     <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         {/* 헤더 */}
-        <div className="mb-8">
+        <div className="flex gap-6 items-center mb-16">
+          <ArrowUturnLeftIcon
+            className="text-gray-700 cursor-pointer w-5 h-5"
+            onClick={handleGoBack}
+          />
           <div>
-            <Heading level={1} className="text-2xl font-bold text-zinc-900">
-              {eventId ? "공연별 예매 현황" : "전체 예매 현황"}
-            </Heading>
-            <p className="text-sm text-zinc-500 mt-1">예매 및 결제 현황을 관리하세요</p>
+            <h1 className="text-2xl font-bold">{`${eventInfo.title} 예매 현황`}</h1>
+            {eventInfo?.title && (
+              <p className="text-sm text-zinc-500 mt-1">
+                {eventInfo.venueName} • {new Date(eventInfo.eventDate).toLocaleDateString("ko-KR")}
+              </p>
+            )}
           </div>
         </div>
 
@@ -124,6 +147,7 @@ const BookingsPage = () => {
             filters={{ ...filters, total: totalItems }}
             onFiltersChange={handleFiltersChange}
             onReset={handleResetFilters}
+            onBulkRefund={handleBulkRefund}
           />
         </div>
 

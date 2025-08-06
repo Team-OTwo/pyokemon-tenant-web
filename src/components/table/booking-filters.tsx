@@ -1,36 +1,34 @@
 import React from "react"
 
 import { BookingFilters } from "@/types/booking"
-import { Badge } from "@/components/catalyst-ui/badge"
 import { Button } from "@/components/catalyst-ui/button"
 import { Input } from "@/components/catalyst-ui/input"
 import { Listbox, ListboxOption } from "@/components/catalyst-ui/listbox"
 import { Text } from "@/components/catalyst-ui/text"
 
-interface BookingFiltersProps {
+interface BookingFiltersComponentProps {
   filters: BookingFilters & { total?: number }
   onFiltersChange: (filters: BookingFilters) => void
   onReset: () => void
+  onBulkRefund?: () => void
 }
 
-const BookingFiltersComponent: React.FC<BookingFiltersProps> = ({
+const BookingFiltersComponent: React.FC<BookingFiltersComponentProps> = ({
   filters,
   onFiltersChange,
   onReset,
+  onBulkRefund,
 }) => {
-  const paymentStatusOptions = [
-    { value: "", label: "전체 결제상태" },
-    { value: "PENDING", label: "결제대기" },
-    { value: "COMPLETED", label: "결제완료" },
-    { value: "REFUNDED", label: "환불됨" },
-  ]
-
   const handleSearchChange = (value: string) => {
     onFiltersChange({ ...filters, search: value, page: 1 })
   }
 
+  const handleStatusChange = (value: string) => {
+    onFiltersChange({ ...filters, status: value, page: 1 })
+  }
+
   const handlePaymentStatusChange = (value: string) => {
-    onFiltersChange({ ...filters, paymentStatus: value || undefined, page: 1 })
+    onFiltersChange({ ...filters, paymentStatus: value, page: 1 })
   }
 
   const handleDateFromChange = (value: string) => {
@@ -41,47 +39,56 @@ const BookingFiltersComponent: React.FC<BookingFiltersProps> = ({
     onFiltersChange({ ...filters, dateTo: value || undefined, page: 1 })
   }
 
-  const handleReset = () => {
-    onReset()
-  }
+  const statusOptions = [
+    { label: "전체", value: "" },
+    { label: "예매완료", value: "BOOKED" },
+    { label: "예매대기", value: "PENDING" },
+    { label: "취소됨", value: "CANCELED" },
+  ]
+
+  const paymentStatusOptions = [
+    { label: "전체", value: "" },
+    { label: "결제완료", value: "COMPLETED" },
+    { label: "결제대기", value: "PENDING" },
+    { label: "환불됨", value: "REFUNDED" },
+  ]
 
   return (
-    <div className="space-y-6">
-      {/* 검색 및 필터 헤더 */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Text className="text-lg font-semibold text-zinc-900">예매 관리</Text>
-          <Text className="text-sm text-zinc-500">총 {filters.total || 0}개의 예매 내역</Text>
-        </div>
-        <Button
-          onClick={handleReset}
-          color="zinc"
-          className="px-4 py-2 text-sm cursor-pointer hover:bg-zinc-800 hover:text-white transition-colors duration-200"
-        >
-          초기화
-        </Button>
-      </div>
-
-      {/* 검색 및 필터 컨트롤 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 w-full mb-10">
+    <div className="space-y-4">
+      {/* 필터 및 버튼들 */}
+      <div className="flex items-center gap-4">
         {/* 검색 */}
-        <div className="w-full lg:col-span-2">
+        <div className="flex-1">
           <Input
             type="search"
-            placeholder="고객명, 공연명 검색..."
+            placeholder="예매자명, 공연장명으로 검색..."
             value={filters.search || ""}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="w-full"
           />
         </div>
 
+        {/* 예매 상태 */}
+        <div className="w-32">
+          <Listbox
+            value={filters.status || ""}
+            onChange={handleStatusChange}
+            placeholder="예매 상태"
+          >
+            {statusOptions.map((option) => (
+              <ListboxOption key={option.value} value={option.value}>
+                {option.label}
+              </ListboxOption>
+            ))}
+          </Listbox>
+        </div>
+
         {/* 결제 상태 */}
-        <div className="w-full">
+        <div className="w-32">
           <Listbox
             value={filters.paymentStatus || ""}
             onChange={handlePaymentStatusChange}
             placeholder="결제 상태"
-            className="w-full"
           >
             {paymentStatusOptions.map((option) => (
               <ListboxOption key={option.value} value={option.value}>
@@ -92,7 +99,7 @@ const BookingFiltersComponent: React.FC<BookingFiltersProps> = ({
         </div>
 
         {/* 날짜 범위 - 시작일 */}
-        <div className="w-full">
+        <div className="w-40">
           <Input
             type="date"
             value={filters.dateFrom || ""}
@@ -102,7 +109,7 @@ const BookingFiltersComponent: React.FC<BookingFiltersProps> = ({
         </div>
 
         {/* 날짜 범위 - 종료일 */}
-        <div className="w-full">
+        <div className="w-40">
           <Input
             type="date"
             value={filters.dateTo || ""}
@@ -110,28 +117,30 @@ const BookingFiltersComponent: React.FC<BookingFiltersProps> = ({
             className="w-full"
           />
         </div>
+
+        {/* 초기화 버튼 */}
+        <Button
+          plain
+          onClick={onReset}
+          className="px-4 py-2 text-sm border border-zinc-300 hover:bg-zinc-50"
+        >
+          초기화
+        </Button>
       </div>
 
-      {/* 활성 필터 표시 */}
-      {(filters.search || filters.paymentStatus || filters.dateFrom || filters.dateTo) && (
-        <div className="flex items-center gap-2 flex-wrap">
-          <Text className="text-sm text-zinc-500">활성 필터:</Text>
-          {filters.search && (
-            <Badge color="zinc" className="text-xs">
-              검색: {filters.search}
-            </Badge>
-          )}
-          {filters.paymentStatus && (
-            <Badge color="zinc" className="text-xs">
-              결제: {paymentStatusOptions.find((opt) => opt.value === filters.paymentStatus)?.label}
-            </Badge>
-          )}
-          {(filters.dateFrom || filters.dateTo) && (
-            <Badge color="zinc" className="text-xs">
-              날짜: {filters.dateFrom || "시작일"} ~ {filters.dateTo || "종료일"}
-            </Badge>
-          )}
-        </div>
+      {/* 일괄 환불 버튼 */}
+      <div className="flex justify-end">
+        <Button
+          onClick={onBulkRefund}
+          className="px-4 py-2 text-sm bg-red-600 text-white hover:bg-red-700"
+        >
+          일괄 환불
+        </Button>
+      </div>
+
+      {/* 결과 개수 */}
+      {filters.total !== undefined && (
+        <div className="text-sm text-zinc-500">총 {filters.total}건의 예매 내역</div>
       )}
     </div>
   )
