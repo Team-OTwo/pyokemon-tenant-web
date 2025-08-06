@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from "react"
-import { getEventById } from "@/api/event-register-api"
+import { convertSeatClassIdToGrade, getTenantEventDetail } from "@/api/event-register-api"
 import { event } from "@/constants/event"
 import EventCard from "@/pages/events-page/_components/event-card"
 import { useScheduleFormStore } from "@/store/schedule-form-store"
 import { convertEventToScheduleFormData } from "@/util/convertEventToScheduleFormData"
 import { ArrowUturnLeftIcon } from "@heroicons/react/16/solid"
-import { format } from "date-fns"
 import { useNavigate, useParams } from "react-router-dom"
 
-import { EventFormData, EventType, PriceGrade } from "@/types/event"
-import { Badge } from "@/components/catalyst-ui/badge"
+import { EventFormData, EventType } from "@/types/event"
 import { Button } from "@/components/catalyst-ui/button"
 import {
   Table,
@@ -41,21 +39,10 @@ const EventDetailPage = () => {
         setLoading(true)
         setError(null)
 
-        // 로그인된 사용자 정보 가져오기
-        const userStr = sessionStorage.getItem("user")
-        let accountId = 1 // 기본값
+        // 임시로 accountId를 1로 하드코딩
+        const accountId = 1
 
-        if (userStr) {
-          try {
-            const user = JSON.parse(userStr)
-            // 사용자 ID를 account_id로 사용 (실제로는 별도의 account_id 필드가 있을 수 있음)
-            accountId = parseInt(user.id) || 1
-          } catch (e) {
-            console.warn("사용자 정보 파싱 실패:", e)
-          }
-        }
-
-        const data = await getEventById(parseInt(eventId), accountId)
+        const data = await getTenantEventDetail(parseInt(eventId), accountId)
         setEventData(data)
         setUseMockData(false)
       } catch (err) {
@@ -77,7 +64,7 @@ const EventDetailPage = () => {
   }, [eventId])
 
   const handleGoBack = () => {
-    navigate(-1)
+    navigate("/events")
   }
 
   function convertEventToFormData(event: EventType): EventFormData {
@@ -114,28 +101,6 @@ const EventDetailPage = () => {
       currency: "KRW",
       minimumFractionDigits: 0,
     }).format(amount)
-  }
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return ""
-
-    // T를 공백으로 변환
-    const formatted = dateString.replace("T", " ")
-
-    // 날짜와 시간을 분리하여 더 읽기 쉽게 표시
-    const [datePart, timePart] = formatted.split(" ")
-    if (datePart && timePart) {
-      const date = new Date(datePart)
-      const formattedDate = date.toLocaleDateString("ko-KR", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      })
-      const formattedTime = timePart.substring(0, 5) // HH:MM 형식으로 자르기
-      return `${formattedDate} ${formattedTime}`
-    }
-
-    return formatted
   }
 
   if (loading) {
@@ -217,25 +182,6 @@ const EventDetailPage = () => {
         <div className="mb-12">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-lg font-semibold text-gray-900">공연 정보</h2>
-            <Badge
-              color={
-                eventData.status === "APPROVED"
-                  ? "green"
-                  : eventData.status === "PENDING"
-                    ? "yellow"
-                    : eventData.status === "REJECTED"
-                      ? "red"
-                      : "zinc"
-              }
-            >
-              {eventData.status === "APPROVED"
-                ? "승인완료"
-                : eventData.status === "PENDING"
-                  ? "승인대기"
-                  : eventData.status === "REJECTED"
-                    ? "반려"
-                    : eventData.status}
-            </Badge>
           </div>
           <div className="bg-white rounded-lg overflow-hidden">
             <EventCard event={eventData} key={`${eventData.eventId}-detail`} disableClick={true} />
@@ -277,7 +223,11 @@ const EventDetailPage = () => {
                 ?.filter((price) => price.price > 0)
                 .map((price, index) => (
                   <TableRow key={index}>
-                    <TableCell className="font-medium">{price.grade}</TableCell>
+                    <TableCell className="font-medium">
+                      {price.seatClassId
+                        ? convertSeatClassIdToGrade(price.seatClassId)
+                        : price.grade}
+                    </TableCell>
                     <TableCell>{formatCurrency(price.price)}</TableCell>
                   </TableRow>
                 ))}

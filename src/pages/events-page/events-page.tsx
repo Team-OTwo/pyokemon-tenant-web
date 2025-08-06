@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react"
-import { getEvents } from "@/api/event-register-api"
+import { getTenantSchedules } from "@/api/event-register-api"
 import { eventList, STATUS_FILTER_OPTIONS } from "@/constants/event"
 import { searchEventsByTitle } from "@/utils/search"
 import { PlusIcon } from "@heroicons/react/16/solid"
@@ -39,21 +39,10 @@ const EventsPage = () => {
         setLoading(true)
         setError(null)
 
-        // 로그인된 사용자 정보 가져오기
-        const userStr = sessionStorage.getItem("user")
-        let accountId = 1 // 기본값
+        // 임시로 accountId를 1로 하드코딩
+        const accountId = 1
 
-        if (userStr) {
-          try {
-            const user = JSON.parse(userStr)
-            // 사용자 ID를 account_id로 사용 (실제로는 별도의 account_id 필드가 있을 수 있음)
-            accountId = parseInt(user.id) || 1
-          } catch (e) {
-            console.warn("사용자 정보 파싱 실패:", e)
-          }
-        }
-
-        const eventsData = await getEvents(accountId)
+        const eventsData = await getTenantSchedules(accountId)
         setEvents(eventsData)
         setUseMockData(false)
       } catch (err) {
@@ -129,7 +118,7 @@ const EventsPage = () => {
           plain
           disabled={currentPage <= 1}
           onClick={() => handlePageChange(currentPage - 1)}
-          className="px-3 py-2"
+          className="px-3 py-2 cursor-pointer hover:!text-black transition-colors duration-200"
         >
           이전
         </Button>
@@ -141,7 +130,7 @@ const EventsPage = () => {
               key={page}
               plain
               onClick={() => handlePageChange(page)}
-              className={`px-3 py-2 min-w-[40px] ${
+              className={`px-3 py-2 min-w-[40px] cursor-pointer transition-colors duration-200 ${
                 page === currentPage
                   ? "bg-zinc-950 !text-white dark:bg-white dark:!text-zinc-950"
                   : "hover:bg-zinc-100 dark:hover:bg-zinc-800"
@@ -157,7 +146,7 @@ const EventsPage = () => {
           plain
           disabled={currentPage >= totalPages}
           onClick={() => handlePageChange(currentPage + 1)}
-          className="px-3 py-2"
+          className="px-3 py-2 cursor-pointer hover:!text-black transition-colors duration-200"
         >
           다음
         </Button>

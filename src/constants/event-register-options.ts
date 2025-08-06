@@ -10,8 +10,8 @@ export const ageLimit = [
 export const gradeOptions = [
   { label: "VIP", value: "VIP" },
   { label: "R", value: "R" },
-  { label: "S", value: "S" },
   { label: "A", value: "A" },
+  { label: "B", value: "B" },
 ]
 
 // 장르 옵션

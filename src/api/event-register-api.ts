@@ -31,16 +31,16 @@ interface DbEventResponse {
 }
 
 // 좌석 등급 ID를 등급명으로 변환
-const convertSeatClassIdToGrade = (seatClassId: number): string => {
+export const convertSeatClassIdToGrade = (seatClassId: number): string => {
   switch (seatClassId) {
     case 1:
       return "VIP"
     case 2:
       return "R"
     case 3:
-      return "S"
-    case 4:
       return "A"
+    case 4:
+      return "B"
     default:
       return "VIP"
   }
@@ -63,6 +63,7 @@ const convertDbResponseToEventType = (dbResponse: DbEventResponse): EventType =>
     prices: dbResponse.prices.map((price) => ({
       grade: price.seatClassName || convertSeatClassIdToGrade(price.seatClassId),
       price: price.price,
+      seatClassId: price.seatClassId,
     })),
   }
 }
@@ -88,9 +89,9 @@ const convertGradeToSeatClassId = (grade: string): number => {
       return 1
     case "R":
       return 2
-    case "S":
-      return 3
     case "A":
+      return 3
+    case "B":
       return 4
     default:
       return 1
@@ -327,14 +328,204 @@ export const getEventById = async (eventId: number, accountId: number = 1): Prom
       throw new Error(`공연 상세 조회에 실패했습니다. (${response.status})`)
     }
 
-    const data = await response.json()
+    const responseText = await response.text()
+    console.log("API 응답 텍스트:", responseText)
+
+    // JSON 파싱 시도
+    let data
+    try {
+      data = JSON.parse(responseText)
+    } catch (parseError) {
+      console.error("JSON 파싱 실패:", parseError)
+      console.error("응답이 JSON이 아닙니다:", responseText)
+      throw new Error("서버에서 유효하지 않은 JSON 응답을 받았습니다.")
+    }
     console.log("API 응답 데이터:", data)
+
+    // API 응답에서 data 필드 추출
+    const eventData = data.data || data
+    console.log("이벤트 상세 데이터:", eventData)
 
     // status와 thumbnailUrl에 기본값 설정
     const eventWithDefaults = {
-      ...data,
-      status: data.status || "PENDING",
-      thumbnailUrl: data.thumbnailUrl || "https://via.placeholder.com/300x200?text=No+Image",
+      ...eventData,
+      status: eventData.status || "PENDING",
+      thumbnailUrl: eventData.thumbnailUrl || "https://via.placeholder.com/300x200?text=No+Image",
+    }
+
+    // 이미 EventType 형식인 경우 그대로 사용
+    if (eventWithDefaults.title && eventWithDefaults.venueName) {
+      return eventWithDefaults as unknown as EventType
+    }
+    const event = convertDbResponseToEventType(eventWithDefaults as DbEventResponse)
+    return event
+  } catch (error) {
+    console.error("API 호출 중 에러:", error)
+    throw error
+  }
+}
+
+export const getTenantSchedules = async (accountId: number = 1): Promise<EventType[]> => {
+  console.log(`테넌트별 공연 리스트 API 호출 시작 - accountId: ${accountId}`)
+
+  try {
+    const response = await fetch(`/event/api/events/tenant?account_id=${accountId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+
+    console.log("API 응답 상태:", response.status)
+    console.log("API 응답 헤더:", response.headers)
+
+    // 응답 텍스트를 먼저 확인
+    const responseText = await response.text()
+    console.log("API 응답 텍스트:", responseText)
+
+    if (!response.ok) {
+      console.error("API 에러 응답:", responseText)
+      throw new Error(`테넌트 스케줄 조회에 실패했습니다. (${response.status})`)
+    }
+
+    // JSON 파싱 시도
+    let data
+    try {
+      data = JSON.parse(responseText)
+    } catch (parseError) {
+      console.error("JSON 파싱 실패:", parseError)
+      console.error("응답이 JSON이 아닙니다:", responseText)
+      throw new Error("서버에서 유효하지 않은 JSON 응답을 받았습니다.")
+    }
+    console.log("API 응답 데이터:", data)
+
+    // API 응답에서 data 필드 추출
+    const eventsData = data.data || data
+    console.log("이벤트 데이터:", eventsData)
+
+    // DB 응답을 EventType 배열로 변환
+    let events: EventType[] = []
+
+    if (Array.isArray(eventsData)) {
+      // 같은 eventId를 가진 항목들을 그룹화
+      const eventGroups = new Map<number, DbEventResponse[]>()
+
+      eventsData.forEach((item: DbEventResponse) => {
+        const eventId = item.eventId
+        if (!eventGroups.has(eventId)) {
+          eventGroups.set(eventId, [])
+        }
+        eventGroups.get(eventId)!.push(item)
+      })
+
+      // 그룹화된 데이터를 EventType으로 변환
+      events = Array.from(eventGroups.values()).map((group) => {
+        // 첫 번째 항목을 기준으로 기본 정보 설정
+        const firstItem = group[0]
+
+        // status가 없으면 기본값 설정
+        const eventWithStatus = {
+          ...firstItem,
+          status: firstItem.status || "PENDING", // 기본값으로 PENDING 설정
+          thumbnailUrl:
+            firstItem.thumbnailUrl || "https://via.placeholder.com/300x200?text=No+Image", // 기본 이미지 설정
+        }
+
+        // 이미 EventType 형식인 경우 그대로 사용
+        if (eventWithStatus.title && eventWithStatus.venueName) {
+          return eventWithStatus as unknown as EventType
+        }
+        // DB 응답 형식인 경우 변환
+        return convertDbResponseToEventType(eventWithStatus as DbEventResponse)
+      })
+    } else if (eventsData.content && Array.isArray(eventsData.content)) {
+      // 페이징된 응답인 경우도 동일하게 처리
+      const eventGroups = new Map<number, DbEventResponse[]>()
+
+      eventsData.content.forEach((item: DbEventResponse) => {
+        const eventId = item.eventId
+        if (!eventGroups.has(eventId)) {
+          eventGroups.set(eventId, [])
+        }
+        eventGroups.get(eventId)!.push(item)
+      })
+
+      events = Array.from(eventGroups.values()).map((group) => {
+        const firstItem = group[0]
+        const eventWithStatus = {
+          ...firstItem,
+          status: firstItem.status || "PENDING",
+          thumbnailUrl:
+            firstItem.thumbnailUrl || "https://via.placeholder.com/300x200?text=No+Image",
+        }
+
+        if (eventWithStatus.title && eventWithStatus.venueName) {
+          return eventWithStatus as unknown as EventType
+        }
+        return convertDbResponseToEventType(eventWithStatus as DbEventResponse)
+      })
+    }
+
+    console.log("변환된 이벤트:", events)
+
+    return events
+  } catch (error) {
+    console.error("API 호출 중 에러:", error)
+    throw error
+  }
+}
+
+export const getTenantEventDetail = async (
+  eventId: number,
+  accountId: number = 1
+): Promise<EventType> => {
+  console.log(
+    `테넌트 이벤트 상세 조회 API 호출 시작 - eventId: ${eventId}, accountId: ${accountId}`
+  )
+
+  try {
+    const response = await fetch(
+      `/event/api/events/tenant/${eventId}/detail?account_id=${accountId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+
+    console.log("API 응답 상태:", response.status)
+    console.log("API 응답 헤더:", response.headers)
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error("API 에러 응답:", errorText)
+      throw new Error(`테넌트 이벤트 상세 조회에 실패했습니다. (${response.status})`)
+    }
+
+    const responseText = await response.text()
+    console.log("API 응답 텍스트:", responseText)
+
+    // JSON 파싱 시도
+    let data
+    try {
+      data = JSON.parse(responseText)
+    } catch (parseError) {
+      console.error("JSON 파싱 실패:", parseError)
+      console.error("응답이 JSON이 아닙니다:", responseText)
+      throw new Error("서버에서 유효하지 않은 JSON 응답을 받았습니다.")
+    }
+    console.log("API 응답 데이터:", data)
+
+    // API 응답에서 data 필드 추출
+    const eventData = data.data || data
+    console.log("이벤트 상세 데이터:", eventData)
+
+    // status와 thumbnailUrl에 기본값 설정
+    const eventWithDefaults = {
+      ...eventData,
+      status: eventData.status || "PENDING",
+      thumbnailUrl: eventData.thumbnailUrl || "https://via.placeholder.com/300x200?text=No+Image",
     }
 
     // 이미 EventType 형식인 경우 그대로 사용

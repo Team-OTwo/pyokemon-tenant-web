@@ -6,12 +6,11 @@ import { ArrowUturnLeftIcon } from "@heroicons/react/16/solid"
 import { useLocation, useNavigate } from "react-router-dom"
 
 import { Button } from "@/components/catalyst-ui/button"
-import { Heading } from "@/components/catalyst-ui/heading"
 import { Input } from "@/components/catalyst-ui/input"
 import { Select } from "@/components/catalyst-ui/select"
 
 import { ageLimit, genreOptions, gradeOptions } from "../constants/event-register-options"
-import { EventFormData, PriceGrade } from "../types/event"
+import { PriceGrade } from "../types/event"
 
 function EventRegisterPage() {
   const navigate = useNavigate()
@@ -46,7 +45,10 @@ function EventRegisterPage() {
   }
 
   const handleAddPriceGrade = () => {
-    const newPriceGrades = [...eventFormData.priceGrades, { grade: "", price: 0 }]
+    const newPriceGrades = [
+      ...eventFormData.priceGrades,
+      { grade: "", price: 0, seatClassId: undefined },
+    ]
     updateEventFormData({ priceGrades: newPriceGrades })
   }
 
