@@ -1,6 +1,7 @@
 export interface PriceGrade {
   grade: string
   price: number
+  seatClassId?: number
 }
 
 // 이벤트 상태 타입
@@ -26,7 +27,7 @@ export const initialEventFormData: EventFormData = {
   description: "",
   thumbnail: null,
   thumbnailPreview: "",
-  priceGrades: [{ grade: "", price: 0 }],
+  priceGrades: [{ grade: "", price: 0, seatClassId: undefined }],
 }
 
 // event-register API 요청 관련 타입들
@@ -63,4 +64,20 @@ export interface EventType {
   thumbnailUrl: string
   prices?: PriceGrade[]
   status: EventStatus
+}
+
+export interface MonthlyEvent {
+  title: string
+  venueName: string
+  eventDate: string
+  ticketCount: number
+}
+
+export interface MonthlySummary {
+  events: MonthlyEvent[]
+  summary: {
+    totalRevenue: number
+    activeEventCount: number
+    totalTicketsSold: number
+  }
 }

@@ -1,5 +1,6 @@
 import React from "react"
 import { CalendarIcon, MapPinIcon, UsersIcon } from "@heroicons/react/20/solid"
+import { format, isAfter, isBefore, startOfDay } from "date-fns"
 
 import { Badge } from "@/components/catalyst-ui/badge"
 import {
@@ -12,24 +13,28 @@ import {
 } from "@/components/catalyst-ui/table"
 import { Text } from "@/components/catalyst-ui/text"
 
-import { Event } from "../../mock/dashboard-mock"
+import { MonthlyEvent } from "../../types/event"
 import { SkeletonMain } from "../skeleton"
 
 interface EventsTableProps {
-  events: Event[]
+  events: MonthlyEvent[]
   loading: boolean
 }
 
 const EventsTable: React.FC<EventsTableProps> = ({ events, loading }) => {
-  const getStatusBadge = (status: string) => {
-    if (status === "진행중") {
-      return <Badge color="green">{status}</Badge>
+  const getStatusBadge = (eventDate: string) => {
+    const today = startOfDay(new Date())
+    const eventDay = startOfDay(new Date(eventDate))
+
+    if (isBefore(eventDay, today)) {
+      return <Badge color="amber">마감</Badge>
+    } else {
+      return <Badge color="green">진행중</Badge>
     }
-    return <Badge color="amber">{status}</Badge>
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("ko-KR")
+    return format(new Date(dateString), "yyyy년 MM월 dd일")
   }
 
   if (loading) {
@@ -78,6 +83,18 @@ const EventsTable: React.FC<EventsTableProps> = ({ events, loading }) => {
     )
   }
 
+  if (events.length === 0) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <CalendarIcon className="mx-auto h-12 w-12 text-zinc-400 mb-4" />
+          <Text className="text-lg font-semibold text-zinc-900">등록된 공연이 없습니다.</Text>
+          <Text className="text-zinc-500">새로운 공연을 등록해보세요.</Text>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <Table>
       <TableHead>
@@ -90,40 +107,33 @@ const EventsTable: React.FC<EventsTableProps> = ({ events, loading }) => {
         </TableRow>
       </TableHead>
       <TableBody>
-        {events.map((event) => (
-          <TableRow key={event.id}>
+        {events.map((event, index) => (
+          <TableRow key={index}>
             <TableCell>
-              <Text className="font-medium">{event.name}</Text>
+              <Text className="font-medium">{event.title}</Text>
             </TableCell>
             <TableCell>
               <div className="flex items-center gap-2">
                 <MapPinIcon className="h-4 w-4 text-zinc-500" />
-                <Text>{event.venue}</Text>
+                <Text>{event.venueName}</Text>
               </div>
             </TableCell>
             <TableCell>
               <div className="flex items-center gap-2">
                 <CalendarIcon className="h-4 w-4 text-zinc-500" />
-                <Text>{formatDate(event.date)}</Text>
+                <Text>{formatDate(event.eventDate)}</Text>
               </div>
             </TableCell>
-            <TableCell>{getStatusBadge(event.status)}</TableCell>
+            <TableCell>{getStatusBadge(event.eventDate)}</TableCell>
             <TableCell>
               <div className="flex items-center gap-2">
                 <UsersIcon className="h-4 w-4 text-zinc-500" />
-                <Text className="font-semibold">{event.bookingCount.toLocaleString()}</Text>
+                <Text className="font-semibold">{event.ticketCount.toLocaleString()}</Text>
               </div>
             </TableCell>
           </TableRow>
         ))}
       </TableBody>
-      {events.length === 0 && (
-        <div className="text-center py-12">
-          <CalendarIcon className="mx-auto h-12 w-12 text-zinc-400 mb-4" />
-          <Text className="text-lg font-semibold text-zinc-900">등록된 공연이 없습니다.</Text>
-          <Text className="text-zinc-500">새로운 공연을 등록해보세요.</Text>
-        </div>
-      )}
     </Table>
   )
 }

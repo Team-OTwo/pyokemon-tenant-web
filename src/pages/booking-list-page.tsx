@@ -14,9 +14,9 @@ import { Input } from "@/components/catalyst-ui/input"
 import { Listbox, ListboxOption } from "@/components/catalyst-ui/listbox"
 import { Text } from "@/components/catalyst-ui/text"
 
-import EventCard from "./_components/event-card"
+import EventCard from "./events-page/_components/event-card"
 
-const EventsPage = () => {
+const BookingListPage = () => {
   const [activeStatus, setActiveStatus] = useState("ALL")
   const [searchValue, setSearchValue] = useState("")
   const [sortBy, setSortBy] = useState("name")
@@ -40,7 +40,6 @@ const EventsPage = () => {
         setLoading(true)
         setError(null)
 
-        // 로그인된 사용자의 accountId 사용
         const accountId = getAccountId()
 
         const eventsData = await getTenantSchedules(accountId)
@@ -63,10 +62,8 @@ const EventsPage = () => {
   const finalEvents = useMemo(() => {
     let filteredEvents = events
 
-    // 상태 필터링
-    if (activeStatus !== "ALL") {
-      filteredEvents = filteredEvents.filter((event) => event.status === activeStatus)
-    }
+    // booking-list-page에서는 APPROVED 상태의 이벤트만 표시
+    filteredEvents = filteredEvents.filter((event) => event.status === "APPROVED")
 
     // 검색 필터링
     if (searchValue) {
@@ -90,6 +87,17 @@ const EventsPage = () => {
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
   const currentEvents = finalEvents.slice(startIndex, endIndex)
+
+  // 디버깅용 로그
+  console.log("페이지네이션 정보:", {
+    totalEvents: finalEvents.length,
+    itemsPerPage,
+    totalPages,
+    currentPage,
+    startIndex,
+    endIndex,
+    currentEventsLength: currentEvents.length,
+  })
 
   // 페이지 변경 핸들러
   const handlePageChange = (page: number) => {
@@ -198,9 +206,9 @@ const EventsPage = () => {
         <div className="mb-8">
           <div>
             <Heading level={1} className="text-2xl font-bold text-zinc-900">
-              Events
+              예매 현황
             </Heading>
-            <p className="text-sm text-zinc-500 mt-1">등록된 공연 목록을 확인하고 관리하세요</p>
+            <p className="text-sm text-zinc-500 mt-1">공연별 예매 현황을 확인하세요.</p>
           </div>
         </div>
 
@@ -221,40 +229,22 @@ const EventsPage = () => {
               </ListboxOption>
             ))}
           </Listbox>
-
-          <Button
-            color="dark/zinc"
-            className="ml-auto cursor-pointer hover:bg-zinc-800 hover:text-white transition-colors duration-200"
-            onClick={() => navigate("/event-register")}
-          >
-            <PlusIcon data-slot="icon" />
-            공연 등록
-          </Button>
-        </div>
-
-        {/* Status Filters */}
-        <div className="flex gap-2 mb-6">
-          {STATUS_FILTER_OPTIONS.map((option) => (
-            <Badge
-              key={option.value}
-              color={activeStatus === option.value ? "zinc" : "zinc"}
-              className={`cursor-pointer transition-colors duration-200 ${
-                activeStatus === option.value
-                  ? "!bg-black !text-white hover:!bg-gray-800"
-                  : "hover:!bg-gray-100 hover:!text-gray-700"
-              }`}
-              onClick={() => setActiveStatus(option.value)}
-            >
-              {option.label}
-            </Badge>
-          ))}
         </div>
 
         {/* Events List */}
         <div className="space-y-4">
           {currentEvents.length > 0 ? (
             currentEvents.map((event: EventType, index: number) => (
-              <EventCard event={event} key={`${event.eventId}-${index}`} />
+              <EventCard
+                event={event}
+                key={`${event.eventId}-${index}`}
+                showStatus={false}
+                onClick={() =>
+                  navigate(`/bookings/schedule/${event.eventScheduleId}`, {
+                    state: { eventInfo: event },
+                  })
+                }
+              />
             ))
           ) : (
             <div className="text-center py-16">
@@ -295,4 +285,4 @@ const EventsPage = () => {
   )
 }
 
-export default EventsPage
+export default BookingListPage

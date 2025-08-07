@@ -33,6 +33,16 @@ export const getBookingsByEvent = async (
   return await mockGetBookingsByEvent(eventId, filters)
 }
 
+// 특정 이벤트 스케줄의 예매 목록 조회 (ERD 구조에 맞게)
+export const getBookingsByEventSchedule = async (
+  eventScheduleId: number,
+  filters: Omit<BookingFilters, "eventScheduleId">
+): Promise<BookingListResponse> => {
+  // API가 아직 없으므로 바로 mock 데이터 반환
+  console.log("Mock 데이터 사용 - eventScheduleId:", eventScheduleId)
+  return await mockGetBookingsByEvent(eventScheduleId, filters)
+}
+
 // 예매 통계 조회
 export const getBookingSummary = async (eventId?: number): Promise<BookingSummary> => {
   return await mockGetBookingSummary()
