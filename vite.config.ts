@@ -10,6 +10,16 @@ export default defineConfig({
   base: "/tenant/",
   plugins: [react(), tsconfigPaths(), svgr(), tailwindcss()],
 
+  server: {
+    proxy: {
+      "/event/api": {
+        target: "http://localhost:8081",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
+
   build: {
     rollupOptions: {
       output: {
