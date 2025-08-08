@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from "react"
+import { startOfDay } from "date-fns"
 
 import { useGetMonthlySummaryQuery } from "../api/event/queries/use-get-monthly-summary-query"
 import { Heading } from "../components/catalyst-ui/heading"
@@ -76,7 +77,15 @@ const DashboardContent: React.FC = () => {
         <div className="space-y-6">
           <SummaryCards
             totalRevenue={data?.summary?.totalRevenue || 0}
-            activeEventCount={data?.summary?.activeEventCount || 0}
+            activeEventCount={
+              data?.events
+                ? data.events.filter((event) => {
+                    const eventDate = new Date(event.eventDate)
+                    const today = startOfDay(new Date())
+                    return eventDate >= today
+                  }).length
+                : data?.summary?.activeEventCount || 0
+            }
             totalTicketsSold={data?.summary?.totalTicketsSold || 0}
             loading={isLoading}
           />

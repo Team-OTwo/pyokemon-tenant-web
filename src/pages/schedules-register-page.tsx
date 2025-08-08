@@ -76,7 +76,7 @@ function SchedulesRegisterPage() {
     const accountId = getAccountId()
 
     // API 요청 데이터 구성 및 제출
-    const requestData = createEventRequestData(eventData, scheduleForm)
+    const requestData = createEventRequestData(eventData, scheduleForm, accountId)
 
     try {
       if (mode === "edit") {

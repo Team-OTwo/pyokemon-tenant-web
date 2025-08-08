@@ -42,7 +42,7 @@ export interface EventSchedule {
 }
 
 export interface EventRequestData {
-  tenantId: number
+  accountId: number
   title: string
   ageLimit: number
   description: string

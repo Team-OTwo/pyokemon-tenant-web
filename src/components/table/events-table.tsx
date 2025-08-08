@@ -1,6 +1,6 @@
 import React from "react"
 import { CalendarIcon, MapPinIcon, UsersIcon } from "@heroicons/react/20/solid"
-import { format, isAfter, isBefore, startOfDay } from "date-fns"
+import { format, isBefore } from "date-fns"
 
 import { Badge } from "@/components/catalyst-ui/badge"
 import {
@@ -23,10 +23,10 @@ interface EventsTableProps {
 
 const EventsTable: React.FC<EventsTableProps> = ({ events, loading }) => {
   const getStatusBadge = (eventDate: string) => {
-    const today = startOfDay(new Date())
-    const eventDay = startOfDay(new Date(eventDate))
+    const now = new Date()
+    const eventDateTime = new Date(eventDate)
 
-    if (isBefore(eventDay, today)) {
+    if (isBefore(eventDateTime, now)) {
       return <Badge color="amber">마감</Badge>
     } else {
       return <Badge color="green">진행중</Badge>

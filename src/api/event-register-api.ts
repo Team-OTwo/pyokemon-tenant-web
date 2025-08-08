@@ -1,6 +1,8 @@
 import { EventRequestData, EventType, PriceGrade } from "@/types/event"
 import { ExtendedEventData, ScheduleFormData } from "@/types/schedule"
 
+import { client } from "./client"
+
 // DB 응답 타입 정의 (JOIN 결과)
 interface DbEventResponse {
   // tb_event
@@ -100,7 +102,8 @@ const convertGradeToSeatClassId = (grade: string): number => {
 
 export const createEventRequestData = (
   eventData: ExtendedEventData,
-  scheduleForm: ScheduleFormData
+  scheduleForm: ScheduleFormData,
+  accountId: number
 ): EventRequestData => {
   const isValidTime = (hour: string, minute: string) => {
     return hour && minute && hour !== "" && minute !== ""
@@ -121,7 +124,7 @@ export const createEventRequestData = (
   }
 
   return {
-    tenantId: 1, // todo: 실제로는 로그인된 테넌트 ID를 사용
+    accountId: accountId, // 로그인된 사용자의 accountId 추가
     title: eventData.title,
     ageLimit: convertAgeLimitToNumber(eventData.ageLimit),
     description: eventData.description,
@@ -153,15 +156,15 @@ export const submitEvent = async (
   requestData: EventRequestData,
   accountId: number
 ): Promise<void> => {
-  const response = await fetch(`/event/api/events?accountId=${accountId}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(requestData),
-  })
+  console.log("=== 공연 등록 API 호출 ===")
+  console.log("URL:", `/event/api/events?accountId=${accountId}`)
+  console.log("accountId:", accountId)
+  console.log("requestData:", JSON.stringify(requestData, null, 2))
+  console.log("==========================")
 
-  if (!response.ok) {
+  const response = await client.post(`/event/api/events?accountId=${accountId}`, requestData)
+
+  if (!response.data.success) {
     throw new Error("공연 등록에 실패했습니다.")
   }
 }
@@ -171,57 +174,45 @@ export const updateEvent = async (
   eventId: number,
   accountId: number
 ): Promise<void> => {
-  const response = await fetch(`/event/api/events/${eventId}?accountId=${accountId}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      eventId: eventId,
-      title: requestData.title,
-      ageLimit: requestData.ageLimit,
-      description: requestData.description,
-      genre: requestData.genre,
-      thumbnailUrl: requestData.thumbnailUrl,
-      status: "PENDING",
-      schedules: requestData.schedules.map((schedule) => ({
-        eventScheduleId: 1, // 실제로는 기존 스케줄 ID를 사용해야 함
-        venueId: schedule.venueId,
-        ticketOpenAt: schedule.ticketOpenAt,
-        eventDate: schedule.eventDate,
-        prices: schedule.prices.map((price) => ({
-          priceId: 1, // 실제로는 기존 가격 ID를 사용해야 함
-          seatClassId: price.seatClassId,
-          price: price.price,
-        })),
+  const response = await client.put(`/event/api/events/${eventId}?accountId=${accountId}`, {
+    eventId: eventId,
+    title: requestData.title,
+    ageLimit: requestData.ageLimit,
+    description: requestData.description,
+    genre: requestData.genre,
+    thumbnailUrl: requestData.thumbnailUrl,
+    status: "PENDING",
+    schedules: requestData.schedules.map((schedule) => ({
+      eventScheduleId: 1, // 실제로는 기존 스케줄 ID를 사용해야 함
+      venueId: schedule.venueId,
+      ticketOpenAt: schedule.ticketOpenAt,
+      eventDate: schedule.eventDate,
+      prices: schedule.prices.map((price) => ({
+        priceId: 1, // 실제로는 기존 가격 ID를 사용해야 함
+        seatClassId: price.seatClassId,
+        price: price.price,
       })),
-    }),
+    })),
   })
 
-  if (!response.ok) {
+  if (!response.data.success) {
     throw new Error("공연 수정에 실패했습니다.")
   }
 }
 
 export const getEvents = async (accountId: number): Promise<EventType[]> => {
   try {
-    const response = await fetch(`/event/api/events?accountId=${accountId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
+    const response = await client.get(`/event/api/events?accountId=${accountId}`)
 
     console.log("API 응답 상태:", response.status)
     console.log("API 응답 헤더:", response.headers)
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error("API 에러 응답:", errorText)
+    if (!response.data.success) {
+      console.error("API 에러 응답:", response.data)
       throw new Error(`공연 목록 조회에 실패했습니다. (${response.status})`)
     }
 
-    const data = await response.json()
+    const data = response.data.data
 
     // DB 응답을 EventType 배열로 변환
     let events: EventType[] = []
@@ -347,32 +338,15 @@ export const getEventById = async (eventId: number, accountId: number): Promise<
 
 export const getTenantSchedules = async (accountId: number): Promise<EventType[]> => {
   try {
-    const response = await fetch(`/event/api/events/tenant?account_id=${accountId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
+    const response = await client.get(`/event/api/events/tenant?account_id=${accountId}`)
 
-    // 응답 텍스트를 먼저 확인
-    const responseText = await response.text()
-
-    if (!response.ok) {
-      console.error("API 에러 응답:", responseText)
+    if (!response.data.success) {
+      console.error("API 에러 응답:", response.data)
       throw new Error(`테넌트 스케줄 조회에 실패했습니다. (${response.status})`)
     }
 
-    // JSON 파싱 시도
-    let data
-    try {
-      data = JSON.parse(responseText)
-    } catch (parseError) {
-      console.error("JSON 파싱 실패:", parseError)
-      console.error("응답이 JSON이 아닙니다:", responseText)
-      throw new Error("서버에서 유효하지 않은 JSON 응답을 받았습니다.")
-    }
     // API 응답에서 data 필드 추출
-    const eventsData = data.data || data
+    const eventsData = response.data.data
 
     // DB 응답을 EventType 배열로 변환
     let events: EventType[] = []

@@ -1,5 +1,6 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { usePostLoginMutation } from "@/api/login/mutations/use-post-login-mutation"
+import { useNavigate } from "react-router-dom"
 
 import { AuthLayout } from "@/components/catalyst-ui/auth-layout"
 import { Button } from "@/components/catalyst-ui/button"
@@ -11,8 +12,18 @@ import Logo from "@/assets/images/logo.svg"
 function LoginPage() {
   const [loginId, setLoginId] = useState("")
   const [password, setPassword] = useState("")
+  const navigate = useNavigate()
 
   const loginMutation = usePostLoginMutation()
+
+  // 이미 로그인된 사용자인지 확인
+  useEffect(() => {
+    const accessToken = localStorage.getItem("accessToken")
+    if (accessToken) {
+      // 이미 로그인된 경우 메인 페이지로 리다이렉트
+      navigate("/main", { replace: true })
+    }
+  }, [navigate])
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()

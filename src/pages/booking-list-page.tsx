@@ -88,17 +88,6 @@ const BookingListPage = () => {
   const endIndex = startIndex + itemsPerPage
   const currentEvents = finalEvents.slice(startIndex, endIndex)
 
-  // 디버깅용 로그
-  console.log("페이지네이션 정보:", {
-    totalEvents: finalEvents.length,
-    itemsPerPage,
-    totalPages,
-    currentPage,
-    startIndex,
-    endIndex,
-    currentEventsLength: currentEvents.length,
-  })
-
   // 페이지 변경 핸들러
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
