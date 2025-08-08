@@ -85,6 +85,11 @@ const EventsPage = () => {
     return filteredEvents
   }, [events, searchValue, activeStatus, sortBy])
 
+  // 필터링이나 검색이 변경될 때 첫 페이지로 리셋
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchValue, activeStatus, sortBy])
+
   // 페이지네이션 계산
   const totalPages = Math.ceil(finalEvents.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
