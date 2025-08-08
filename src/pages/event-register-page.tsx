@@ -6,24 +6,23 @@ import { ArrowUturnLeftIcon } from "@heroicons/react/16/solid"
 import { useLocation, useNavigate } from "react-router-dom"
 
 import { Button } from "@/components/catalyst-ui/button"
-import { Heading } from "@/components/catalyst-ui/heading"
 import { Input } from "@/components/catalyst-ui/input"
 import { Select } from "@/components/catalyst-ui/select"
 
 import { ageLimit, genreOptions, gradeOptions } from "../constants/event-register-options"
-import { EventFormData, PriceGrade } from "../types/event"
+import { PriceGrade } from "../types/event"
 
 function EventRegisterPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { eventData, mode = "create" } = location.state || {}
+  const { eventData, mode = "create", eventId } = location.state || {}
 
   const { eventFormData, setEventFormData, updateEventFormData } = useEventStore()
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleGoBack = () => {
-    navigate(-1)
+    navigate("/events")
   }
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -46,7 +45,10 @@ function EventRegisterPage() {
   }
 
   const handleAddPriceGrade = () => {
-    const newPriceGrades = [...eventFormData.priceGrades, { grade: "", price: 0 }]
+    const newPriceGrades = [
+      ...eventFormData.priceGrades,
+      { grade: "", price: 0, seatClassId: undefined },
+    ]
     updateEventFormData({ priceGrades: newPriceGrades })
   }
 
@@ -79,7 +81,7 @@ function EventRegisterPage() {
     console.log(eventFormData)
     // 다음 페이지로 데이터 전달
     navigate("/schedules-register", {
-      state: { eventData: eventFormData, mode },
+      state: { eventData: eventFormData, mode, eventId },
     })
   }
 
@@ -95,6 +97,7 @@ function EventRegisterPage() {
     } else if (mode === "back") {
       // 이전 페이지에서 돌아왔을 때는 상태를 보존
       // eventFormData와 scheduleFormData가 이미 Zustand에 저장되어 있음
+      // eventId도 유지됨
     }
   }, [mode, eventData, setEventFormData, resetScheduleFormData, resetEventFormData])
 
@@ -107,7 +110,9 @@ function EventRegisterPage() {
             className="text-gray-700 cursor-pointer w-5 h-5"
             onClick={handleGoBack}
           />
-          <h1 className="text-2xl font-bold">공연 정보 등록</h1>
+          <h1 className="text-2xl font-bold">
+            {mode === "edit" ? "공연 정보 수정" : "공연 정보 등록"}
+          </h1>
         </div>
 
         <div className="space-y-8">
@@ -205,8 +210,12 @@ function EventRegisterPage() {
                 accept="image/*"
                 onChange={handleThumbnailChange}
               />
-              <Button outline onClick={() => fileInputRef.current?.click()}>
-                추가
+              <Button
+                outline
+                onClick={() => fileInputRef.current?.click()}
+                className="cursor-pointer hover:bg-zinc-100 hover:text-zinc-900 transition-colors duration-200"
+              >
+                썸네일 업로드
               </Button>
             </div>
             {eventFormData.thumbnailPreview && (
@@ -254,7 +263,11 @@ function EventRegisterPage() {
                   </div>
                   <div className="w-20">
                     {index === eventFormData.priceGrades.length - 1 && (
-                      <Button outline onClick={handleAddPriceGrade}>
+                      <Button
+                        outline
+                        onClick={handleAddPriceGrade}
+                        className="cursor-pointer hover:bg-zinc-100 hover:text-zinc-900 transition-colors duration-200"
+                      >
                         추가
                       </Button>
                     )}
@@ -266,8 +279,13 @@ function EventRegisterPage() {
         </div>
 
         {/* 등록 버튼 */}
-        <div className="pt-8 pb-6 flex justify-end">
-          <Button onClick={handleNext}>다음</Button>
+        <div className="pt-8 pb-6 flex justify-end w-full">
+          <Button
+            onClick={handleNext}
+            className="cursor-pointer hover:bg-zinc-800 hover:text-white transition-colors duration-200"
+          >
+            다음
+          </Button>
         </div>
       </div>
     </div>
