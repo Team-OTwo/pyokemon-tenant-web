@@ -122,7 +122,7 @@ const BookingFiltersComponent: React.FC<BookingFiltersComponentProps> = ({
         <Button
           plain
           onClick={onReset}
-          className="px-4 py-2 text-sm border border-zinc-300 hover:bg-zinc-50"
+          className="px-4 py-2 text-sm border border-zinc-300 hover:bg-zinc-50 cursor-pointer"
         >
           초기화
         </Button>
@@ -132,7 +132,7 @@ const BookingFiltersComponent: React.FC<BookingFiltersComponentProps> = ({
       <div className="flex justify-end">
         <Button
           onClick={onBulkRefund}
-          className="px-4 py-2 text-sm bg-red-600 text-white hover:bg-red-700"
+          className="px-4 py-2 text-sm bg- text-white hover:bg-zinc-800 cursor-pointer"
         >
           일괄 환불
         </Button>

@@ -157,12 +157,14 @@ export const submitEvent = async (
   accountId: number
 ): Promise<void> => {
   console.log("=== 공연 등록 API 호출 ===")
-  console.log("URL:", `/event/api/events?accountId=${accountId}`)
+  console.log("URL:", `/event/api/events/tenant`)
   console.log("accountId:", accountId)
   console.log("requestData:", JSON.stringify(requestData, null, 2))
   console.log("==========================")
 
-  const response = await client.post(`/event/api/events?accountId=${accountId}`, requestData)
+  const response = await client.post(`/event/api/events/tenant`, requestData, {
+    params: { accountId },
+  })
 
   if (!response.data.success) {
     throw new Error("공연 등록에 실패했습니다.")
@@ -174,26 +176,39 @@ export const updateEvent = async (
   eventId: number,
   accountId: number
 ): Promise<void> => {
-  const response = await client.put(`/event/api/events/${eventId}?accountId=${accountId}`, {
-    eventId: eventId,
-    title: requestData.title,
-    ageLimit: requestData.ageLimit,
-    description: requestData.description,
-    genre: requestData.genre,
-    thumbnailUrl: requestData.thumbnailUrl,
-    status: "PENDING",
-    schedules: requestData.schedules.map((schedule) => ({
-      eventScheduleId: 1, // 실제로는 기존 스케줄 ID를 사용해야 함
-      venueId: schedule.venueId,
-      ticketOpenAt: schedule.ticketOpenAt,
-      eventDate: schedule.eventDate,
-      prices: schedule.prices.map((price) => ({
-        priceId: 1, // 실제로는 기존 가격 ID를 사용해야 함
-        seatClassId: price.seatClassId,
-        price: price.price,
+  console.log("=== 공연 수정 API 호출 ===")
+  console.log("URL:", `/event/api/events/tenant/${eventId}`)
+  console.log("eventId:", eventId)
+  console.log("accountId:", accountId)
+  console.log("requestData:", JSON.stringify(requestData, null, 2))
+  console.log("==========================")
+
+  const response = await client.put(
+    `/event/api/events/tenant/${eventId}`,
+    {
+      eventId: eventId,
+      title: requestData.title,
+      ageLimit: requestData.ageLimit,
+      description: requestData.description,
+      genre: requestData.genre,
+      thumbnailUrl: requestData.thumbnailUrl,
+      status: "PENDING",
+      schedules: requestData.schedules.map((schedule) => ({
+        eventScheduleId: 1, // 실제로는 기존 스케줄 ID를 사용해야 함
+        venueId: schedule.venueId,
+        ticketOpenAt: schedule.ticketOpenAt,
+        eventDate: schedule.eventDate,
+        prices: schedule.prices.map((price) => ({
+          priceId: 1, // 실제로는 기존 가격 ID를 사용해야 함
+          seatClassId: price.seatClassId,
+          price: price.price,
+        })),
       })),
-    })),
-  })
+    },
+    {
+      params: { accountId },
+    }
+  )
 
   if (!response.data.success) {
     throw new Error("공연 수정에 실패했습니다.")
