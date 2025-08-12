@@ -104,6 +104,7 @@ export interface BookingWithDetails {
   booking: Booking
   payment: Payment
   eventSchedule: EventSchedule
+  event: Event
   venue: Venue
   seatClass: SeatClass
   seat: Seat
@@ -118,6 +119,10 @@ export interface BookingDisplay {
   orderNumber: string
   purchaseDate: string
   customer: string
+  event: {
+    name: string
+    thumbnailUrl: string
+  }
   amount: number
   paymentStatus: "결제완료" | "결제대기" | "환불됨"
   paymentMethod: string

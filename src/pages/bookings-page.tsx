@@ -55,6 +55,11 @@ const BookingsPage = () => {
         orderNumber: `#${booking.booking.bookingId.toString().padStart(4, "0")}`,
         purchaseDate: booking.booking.createdAt,
         customer: booking.user.name,
+        event: {
+          name: booking.event.title,
+          thumbnailUrl:
+            booking.event.id <= 3 ? `/src/mock/img/${booking.event.id}.png` : "/placeholder.jpg",
+        },
         amount: booking.payment.totalPrice,
         paymentStatus: getPaymentStatusDisplay(booking.payment.status),
         paymentMethod: booking.payment.method,
