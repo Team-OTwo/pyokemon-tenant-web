@@ -1,5 +1,6 @@
-import { EventRequestData, EventType, PriceGrade } from "@/types/event"
-import { ExtendedEventData, ScheduleFormData } from "@/types/schedule"
+import { client } from "./client"
+import { EventRequestData, EventType, PriceGrade, EventFormData } from "@/types/event"
+import { ScheduleFormData } from "@/types/schedule"
 
 // DB 응답 타입 정의 (JOIN 결과)
 interface DbEventResponse {
@@ -53,6 +54,7 @@ const convertDbResponseToEventType = (dbResponse: DbEventResponse): EventType =>
     title: dbResponse.title,
     ageLimit: dbResponse.ageLimit || 0,
     venueName: dbResponse.venueName,
+    venueId: dbResponse.venueId || 1, // venueId 추가
     eventDate: dbResponse.eventDate,
     ticketOpenAt: dbResponse.ticketOpenAt || "",
     genre: dbResponse.genre || "",
@@ -61,6 +63,7 @@ const convertDbResponseToEventType = (dbResponse: DbEventResponse): EventType =>
     thumbnailUrl: dbResponse.thumbnailUrl,
     status: dbResponse.status as "PENDING" | "APPROVED" | "REJECTED",
     prices: dbResponse.prices.map((price) => ({
+      priceId: price.priceId || 1, // priceId 추가
       grade: price.seatClassName || convertSeatClassIdToGrade(price.seatClassId),
       price: price.price,
       seatClassId: price.seatClassId,
@@ -99,9 +102,18 @@ const convertGradeToSeatClassId = (grade: string): number => {
 }
 
 export const createEventRequestData = (
-  eventData: ExtendedEventData,
-  scheduleForm: ScheduleFormData
+  eventData: EventFormData, // ExtendedEventData 대신 EventFormData 사용
+  scheduleForm: ScheduleFormData,
+  accountId: number,
+  isEditMode: boolean = false
 ): EventRequestData => {
+  console.log("=== createEventRequestData 디버깅 ===")
+  console.log("isEditMode:", isEditMode)
+  console.log("eventData:", eventData)
+  console.log("scheduleForm:", scheduleForm)
+  console.log("accountId:", accountId)
+  console.log("==========================")
+  
   const isValidTime = (hour: string, minute: string) => {
     return hour && minute && hour !== "" && minute !== ""
   }
@@ -120,8 +132,8 @@ export const createEventRequestData = (
     return `${year}-${month}-${day}T${timeHour}:${timeMinute}:00`
   }
 
-  return {
-    tenantId: 1, // todo: 실제로는 로그인된 테넌트 ID를 사용
+  const result = {
+    accountId: accountId, // 로그인된 사용자의 accountId 추가
     title: eventData.title,
     ageLimit: convertAgeLimitToNumber(eventData.ageLimit),
     description: eventData.description,
@@ -129,7 +141,7 @@ export const createEventRequestData = (
     thumbnailUrl: "", // todo:실제로는 업로드된 이미지 URL
     schedules: [
       {
-        venueId: 1, // 실제로는 선택된 공연장 ID
+        venueId: isEditMode && scheduleForm.venueId ? scheduleForm.venueId : 1, // 수정 모드에서는 기존 venueId 사용
         ticketOpenAt: createDateTimeString(
           scheduleForm.ticketDate,
           scheduleForm.ticketStartTime.hour,
@@ -140,34 +152,40 @@ export const createEventRequestData = (
           scheduleForm.eventStartTime.hour,
           scheduleForm.eventStartTime.minute
         ),
-        prices: eventData.priceGrades.map((grade: PriceGrade) => ({
+        prices: eventData.priceGrades.map((grade: PriceGrade, index: number) => ({
           seatClassId: convertGradeToSeatClassId(grade.grade),
           price: grade.price,
+          // 수정 모드에서는 기존 priceId 사용
+          priceId: isEditMode && scheduleForm.priceIds && scheduleForm.priceIds[index] 
+            ? scheduleForm.priceIds[index] 
+            : 1,
         })),
       },
     ],
   }
+  
+  console.log("=== 생성된 결과 ===")
+  console.log("result:", result)
+  console.log("==========================")
+  
+  return result
 }
 
 export const submitEvent = async (
   requestData: EventRequestData,
-  accountId: number = 1
+  accountId: number
 ): Promise<void> => {
-  console.log("API 요청 데이터:", requestData)
-  console.log("Account ID:", accountId)
+  console.log("=== 공연 등록 API 호출 ===")
+  console.log("URL:", `/event/api/events/tenant`)
+  console.log("accountId:", accountId)
+  console.log("requestData:", JSON.stringify(requestData, null, 2))
+  console.log("==========================")
 
-  const response = await fetch(`/event/api/events?account_id=${accountId}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(requestData),
+  const response = await client.post(`/event/api/events/tenant`, requestData, {
+    params: { accountId },
   })
 
-  console.log("API 응답 상태:", response.status)
-  console.log("API 응답:", await response.text())
-
-  if (!response.ok) {
+  if (!response.data.success) {
     throw new Error("공연 등록에 실패했습니다.")
   }
 }
@@ -175,17 +193,18 @@ export const submitEvent = async (
 export const updateEvent = async (
   requestData: EventRequestData,
   eventId: number,
-  accountId: number = 1
+  accountId: number
 ): Promise<void> => {
-  console.log("이벤트 수정 API 요청 데이터:", requestData)
-  console.log("Account ID:", accountId)
+  console.log("=== 공연 수정 API 호출 ===")
+  console.log("URL:", `/event/api/events/tenant/${eventId}`)
+  console.log("eventId:", eventId)
+  console.log("accountId:", accountId)
+  console.log("requestData:", JSON.stringify(requestData, null, 2))
+  console.log("==========================")
 
-  const response = await fetch(`/event/api/events/${eventId}?account_id=${accountId}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
+  const response = await client.put(
+    `/event/api/events/tenant/${eventId}`,
+    {
       eventId: eventId,
       title: requestData.title,
       ageLimit: requestData.ageLimit,
@@ -194,49 +213,40 @@ export const updateEvent = async (
       thumbnailUrl: requestData.thumbnailUrl,
       status: "PENDING",
       schedules: requestData.schedules.map((schedule) => ({
-        eventScheduleId: 1, // 실제로는 기존 스케줄 ID를 사용해야 함
+        eventScheduleId: schedule.eventScheduleId || 1, // requestData에서 전달받은 실제 스케줄 ID 사용
         venueId: schedule.venueId,
         ticketOpenAt: schedule.ticketOpenAt,
         eventDate: schedule.eventDate,
         prices: schedule.prices.map((price) => ({
-          priceId: 1, // 실제로는 기존 가격 ID를 사용해야 함
+          priceId: price.priceId || 1, // requestData에서 전달받은 실제 가격 ID 사용
           seatClassId: price.seatClassId,
           price: price.price,
         })),
       })),
-    }),
-  })
+    },
+    {
+      params: { accountId },
+    }
+  )
 
-  console.log("이벤트 수정 API 응답 상태:", response.status)
-  console.log("이벤트 수정 API 응답:", await response.text())
-
-  if (!response.ok) {
+  if (!response.data.success) {
     throw new Error("공연 수정에 실패했습니다.")
   }
 }
 
-export const getEvents = async (accountId: number = 1): Promise<EventType[]> => {
-  console.log(`공연 목록 조회 API 호출 시작 - accountId: ${accountId}`)
-
+export const getEvents = async (accountId: number): Promise<EventType[]> => {
   try {
-    const response = await fetch(`/event/api/events?account_id=${accountId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
+    const response = await client.get(`/event/api/events?accountId=${accountId}`)
 
     console.log("API 응답 상태:", response.status)
     console.log("API 응답 헤더:", response.headers)
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error("API 에러 응답:", errorText)
+    if (!response.data.success) {
+      console.error("API 에러 응답:", response.data)
       throw new Error(`공연 목록 조회에 실패했습니다. (${response.status})`)
     }
 
-    const data = await response.json()
-    console.log("API 응답 데이터:", data)
+    const data = response.data.data
 
     // DB 응답을 EventType 배열로 변환
     let events: EventType[] = []
@@ -308,19 +318,14 @@ export const getEvents = async (accountId: number = 1): Promise<EventType[]> => 
   }
 }
 
-export const getEventById = async (eventId: number, accountId: number = 1): Promise<EventType> => {
-  console.log(`공연 상세 조회 API 호출 시작 - eventId: ${eventId}, accountId: ${accountId}`)
-
+export const getEventById = async (eventId: number, accountId: number): Promise<EventType> => {
   try {
-    const response = await fetch(`/event/api/events/${eventId}?account_id=${accountId}`, {
+    const response = await fetch(`/event/api/events/${eventId}?accountId=${accountId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
       },
     })
-
-    console.log("API 응답 상태:", response.status)
-    console.log("API 응답 헤더:", response.headers)
 
     if (!response.ok) {
       const errorText = await response.text()
@@ -365,43 +370,17 @@ export const getEventById = async (eventId: number, accountId: number = 1): Prom
   }
 }
 
-export const getTenantSchedules = async (accountId: number = 1): Promise<EventType[]> => {
-  console.log(`테넌트별 공연 리스트 API 호출 시작 - accountId: ${accountId}`)
-
+export const getTenantSchedules = async (accountId: number): Promise<EventType[]> => {
   try {
-    const response = await fetch(`/event/api/events/tenant?account_id=${accountId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
+    const response = await client.get(`/event/api/events/tenant?account_id=${accountId}`)
 
-    console.log("API 응답 상태:", response.status)
-    console.log("API 응답 헤더:", response.headers)
-
-    // 응답 텍스트를 먼저 확인
-    const responseText = await response.text()
-    console.log("API 응답 텍스트:", responseText)
-
-    if (!response.ok) {
-      console.error("API 에러 응답:", responseText)
+    if (!response.data.success) {
+      console.error("API 에러 응답:", response.data)
       throw new Error(`테넌트 스케줄 조회에 실패했습니다. (${response.status})`)
     }
 
-    // JSON 파싱 시도
-    let data
-    try {
-      data = JSON.parse(responseText)
-    } catch (parseError) {
-      console.error("JSON 파싱 실패:", parseError)
-      console.error("응답이 JSON이 아닙니다:", responseText)
-      throw new Error("서버에서 유효하지 않은 JSON 응답을 받았습니다.")
-    }
-    console.log("API 응답 데이터:", data)
-
     // API 응답에서 data 필드 추출
-    const eventsData = data.data || data
-    console.log("이벤트 데이터:", eventsData)
+    const eventsData = response.data.data
 
     // DB 응답을 EventType 배열로 변환
     let events: EventType[] = []
@@ -466,8 +445,6 @@ export const getTenantSchedules = async (accountId: number = 1): Promise<EventTy
       })
     }
 
-    console.log("변환된 이벤트:", events)
-
     return events
   } catch (error) {
     console.error("API 호출 중 에러:", error)
@@ -477,15 +454,11 @@ export const getTenantSchedules = async (accountId: number = 1): Promise<EventTy
 
 export const getTenantEventDetail = async (
   eventId: number,
-  accountId: number = 1
+  accountId: number
 ): Promise<EventType> => {
-  console.log(
-    `테넌트 이벤트 상세 조회 API 호출 시작 - eventId: ${eventId}, accountId: ${accountId}`
-  )
-
   try {
     const response = await fetch(
-      `/event/api/events/tenant/${eventId}/detail?account_id=${accountId}`,
+      `/event/api/events/tenant/${eventId}/detail?accountId=${accountId}`,
       {
         method: "GET",
         headers: {

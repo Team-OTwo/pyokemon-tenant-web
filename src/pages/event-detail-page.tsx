@@ -4,6 +4,7 @@ import { event } from "@/constants/event"
 import EventCard from "@/pages/events-page/_components/event-card"
 import { useScheduleFormStore } from "@/store/schedule-form-store"
 import { convertEventToScheduleFormData } from "@/util/convertEventToScheduleFormData"
+import { getAccountId } from "@/utils/auth"
 import { ArrowUturnLeftIcon } from "@heroicons/react/16/solid"
 import { useNavigate, useParams } from "react-router-dom"
 
@@ -39,8 +40,7 @@ const EventDetailPage = () => {
         setLoading(true)
         setError(null)
 
-        // 임시로 accountId를 1로 하드코딩
-        const accountId = 1
+        const accountId = getAccountId()
 
         const data = await getTenantEventDetail(parseInt(eventId), accountId)
         setEventData(data)
@@ -70,26 +70,46 @@ const EventDetailPage = () => {
   function convertEventToFormData(event: EventType): EventFormData {
     return {
       title: event.title,
-      venue: event.venueName,
+      venue: String(event.venueId || ""), // venueId를 venue 필드에 설정
       ageLimit: event.ageLimit.toString(),
       genre: event.genre,
       description: event.description,
       thumbnail: null,
       thumbnailPreview: event.thumbnailUrl || "",
-      priceGrades: event.prices || [],
+      priceGrades: event.prices?.map(price => ({
+        priceId: price.priceId,
+        grade: price.grade,
+        price: price.price,
+        seatClassId: price.seatClassId,
+      })) || [],
     }
   }
 
   const handleEdit = () => {
     if (!eventData) return
 
+    console.log("=== 수정 버튼 클릭 디버깅 ===")
+    console.log("eventData:", eventData)
+    console.log("==========================")
+
+    // 기존 공연의 실제 데이터를 스케줄 폼에 설정
     const scheduleData = convertEventToScheduleFormData(eventData)
+    console.log("=== 변환된 스케줄 데이터 ===")
+    console.log("scheduleData:", scheduleData)
+    console.log("==========================")
+    
     useScheduleFormStore.getState().setScheduleFormData(scheduleData)
+
+    // 기존 공연의 실제 데이터를 이벤트 폼에 설정
+    const eventFormData = convertEventToFormData(eventData)
+    console.log("=== 변환된 이벤트 폼 데이터 ===")
+    console.log("eventFormData:", eventFormData)
+    console.log("==========================")
 
     navigate("/event-register", {
       state: {
         mode: "edit",
-        eventData: convertEventToFormData(eventData),
+        eventData: eventFormData,
         eventId: eventData.eventId,
       },
     })

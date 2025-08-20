@@ -56,26 +56,18 @@ const router = createBrowserRouter(
                   Component: BookingListPage,
                 },
                 {
-                  path: "bookings/:eventId",
-                  Component: BookingsPage,
-                },
-                {
                   path: "bookings/schedule/:eventScheduleId",
                   Component: BookingsPage,
                 },
+                {
+                  path: "events",
+                  Component: EventsPage,
+                },
+                {
+                  path: "events/:eventId",
+                  Component: EventDetailPage,
+                },
               ],
-            },
-            {
-              path: "main",
-              Component: MainPage,
-            },
-            {
-              path: "events",
-              Component: EventsPage,
-            },
-            {
-              path: "events/:eventId",
-              Component: EventDetailPage,
             },
           ],
         },

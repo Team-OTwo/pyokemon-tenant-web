@@ -19,9 +19,9 @@ const EventCard = ({ event, disableClick = false, showStatus = true, onClick }: 
     if (disableClick) return
 
     if (onClick) {
-      onClick()
+      onClick() //예매현황 페이지에서는
     } else {
-      // 기본 동작: event-detail-page로 이동
+      // 기본은 event-detail-page로 이동함
       navigation(`/events/${event.eventId}`)
     }
   }

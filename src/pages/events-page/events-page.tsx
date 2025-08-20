@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { getTenantSchedules } from "@/api/event-register-api"
 import { eventList, STATUS_FILTER_OPTIONS } from "@/constants/event"
+import { getAccountId } from "@/utils/auth"
 import { searchEventsByTitle } from "@/utils/search"
 import { PlusIcon } from "@heroicons/react/16/solid"
 import { useNavigate } from "react-router-dom"
@@ -39,8 +40,8 @@ const EventsPage = () => {
         setLoading(true)
         setError(null)
 
-        // 임시로 accountId를 1로 하드코딩
-        const accountId = 1
+        // 로그인된 사용자의 accountId 사용
+        const accountId = getAccountId()
 
         const eventsData = await getTenantSchedules(accountId)
         setEvents(eventsData)
@@ -84,22 +85,16 @@ const EventsPage = () => {
     return filteredEvents
   }, [events, searchValue, activeStatus, sortBy])
 
+  // 필터링이나 검색이 변경될 때 첫 페이지로 리셋
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchValue, activeStatus, sortBy])
+
   // 페이지네이션 계산
   const totalPages = Math.ceil(finalEvents.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
   const currentEvents = finalEvents.slice(startIndex, endIndex)
-
-  // 디버깅용 로그
-  console.log("페이지네이션 정보:", {
-    totalEvents: finalEvents.length,
-    itemsPerPage,
-    totalPages,
-    currentPage,
-    startIndex,
-    endIndex,
-    currentEventsLength: currentEvents.length,
-  })
 
   // 페이지 변경 핸들러
   const handlePageChange = (page: number) => {

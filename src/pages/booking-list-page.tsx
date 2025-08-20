@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { getTenantSchedules } from "@/api/event-register-api"
 import { eventList, STATUS_FILTER_OPTIONS } from "@/constants/event"
+import { getAccountId } from "@/utils/auth"
 import { searchEventsByTitle } from "@/utils/search"
 import { PlusIcon } from "@heroicons/react/16/solid"
 import { useNavigate } from "react-router-dom"
@@ -39,8 +40,7 @@ const BookingListPage = () => {
         setLoading(true)
         setError(null)
 
-        // 임시로 accountId를 1로 하드코딩
-        const accountId = 1
+        const accountId = getAccountId()
 
         const eventsData = await getTenantSchedules(accountId)
         setEvents(eventsData)
@@ -87,17 +87,6 @@ const BookingListPage = () => {
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
   const currentEvents = finalEvents.slice(startIndex, endIndex)
-
-  // 디버깅용 로그
-  console.log("페이지네이션 정보:", {
-    totalEvents: finalEvents.length,
-    itemsPerPage,
-    totalPages,
-    currentPage,
-    startIndex,
-    endIndex,
-    currentEventsLength: currentEvents.length,
-  })
 
   // 페이지 변경 핸들러
   const handlePageChange = (page: number) => {

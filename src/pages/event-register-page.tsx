@@ -78,7 +78,6 @@ function EventRegisterPage() {
       alert("모든 필수 필드를 입력해주세요.")
       return
     }
-    console.log(eventFormData)
     // 다음 페이지로 데이터 전달
     navigate("/schedules-register", {
       state: { eventData: eventFormData, mode, eventId },

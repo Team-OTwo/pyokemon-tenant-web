@@ -1,46 +1,24 @@
 import React from "react"
-import {
-  CurrencyDollarIcon,
-  PlayIcon,
-  ShoppingCartIcon,
-  TicketIcon,
-} from "@heroicons/react/20/solid"
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/catalyst-ui/table"
 import { Text } from "@/components/catalyst-ui/text"
 
-import { Event } from "../../mock/dashboard-mock"
 import { SkeletonMain } from "../skeleton"
 
 interface SummaryCardsProps {
-  events: Event[]
+  totalRevenue: number
+  activeEventCount: number
+  totalTicketsSold: number
   loading: boolean
   className?: string
 }
 
-const SummaryCards: React.FC<SummaryCardsProps> = ({ events, loading, className = "" }) => {
-  const calculateTotalRevenue = () => {
-    return events.reduce((total, event) => {
-      const avgTicketPrice = 50000
-      return total + event.bookingCount * avgTicketPrice
-    }, 0)
-  }
-
-  const getOngoingEventsCount = () => {
-    return events.filter((event) => event.status === "진행중").length
-  }
-
-  const getTotalTicketsSold = () => {
-    return events.reduce((total, event) => total + event.bookingCount, 0)
-  }
-
+const SummaryCards: React.FC<SummaryCardsProps> = ({
+  totalRevenue,
+  activeEventCount,
+  totalTicketsSold,
+  loading,
+  className = "",
+}) => {
   if (loading) {
     return (
       <div className={`flex gap-6 mb-8 ${className}`}>
@@ -66,7 +44,7 @@ const SummaryCards: React.FC<SummaryCardsProps> = ({ events, loading, className 
           <div>
             <Text className="text-sm font-medium text-zinc-500">Total revenue</Text>
             <Text className="text-2xl font-bold text-zinc-900">
-              ₩{(calculateTotalRevenue() / 1000000).toFixed(1)}M
+              ₩{(totalRevenue / 1000000).toFixed(1)}M
             </Text>
           </div>
         </div>
@@ -77,7 +55,7 @@ const SummaryCards: React.FC<SummaryCardsProps> = ({ events, loading, className 
         <div className="flex items-center justify-between">
           <div>
             <Text className="text-sm font-medium text-zinc-500">진행중인 공연</Text>
-            <Text className="text-2xl font-bold text-zinc-900">{getOngoingEventsCount()}개</Text>
+            <Text className="text-2xl font-bold text-zinc-900">{activeEventCount}개</Text>
           </div>
         </div>
       </div>
@@ -88,7 +66,7 @@ const SummaryCards: React.FC<SummaryCardsProps> = ({ events, loading, className 
           <div>
             <Text className="text-sm font-medium text-zinc-500">Tickets sold</Text>
             <Text className="text-2xl font-bold text-zinc-900">
-              {getTotalTicketsSold().toLocaleString()}
+              {totalTicketsSold.toLocaleString()}
             </Text>
           </div>
         </div>

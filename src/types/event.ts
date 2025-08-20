@@ -42,7 +42,7 @@ export interface EventSchedule {
 }
 
 export interface EventRequestData {
-  tenantId: number
+  accountId: number
   title: string
   ageLimit: number
   description: string
@@ -64,4 +64,20 @@ export interface EventType {
   thumbnailUrl: string
   prices?: PriceGrade[]
   status: EventStatus
+}
+
+export interface MonthlyEvent {
+  title: string
+  venueName: string
+  eventDate: string
+  ticketCount: number
+}
+
+export interface MonthlySummary {
+  events: MonthlyEvent[]
+  summary: {
+    totalRevenue: number
+    activeEventCount: number
+    totalTicketsSold: number
+  }
 }
