@@ -1,7 +1,6 @@
-import { EventRequestData, EventType, PriceGrade } from "@/types/event"
-import { ExtendedEventData, ScheduleFormData } from "@/types/schedule"
-
 import { client } from "./client"
+import { EventRequestData, EventType, PriceGrade, EventFormData } from "@/types/event"
+import { ScheduleFormData } from "@/types/schedule"
 
 // DB 응답 타입 정의 (JOIN 결과)
 interface DbEventResponse {
@@ -55,6 +54,7 @@ const convertDbResponseToEventType = (dbResponse: DbEventResponse): EventType =>
     title: dbResponse.title,
     ageLimit: dbResponse.ageLimit || 0,
     venueName: dbResponse.venueName,
+    venueId: dbResponse.venueId || 1, // venueId 추가
     eventDate: dbResponse.eventDate,
     ticketOpenAt: dbResponse.ticketOpenAt || "",
     genre: dbResponse.genre || "",
@@ -63,6 +63,7 @@ const convertDbResponseToEventType = (dbResponse: DbEventResponse): EventType =>
     thumbnailUrl: dbResponse.thumbnailUrl,
     status: dbResponse.status as "PENDING" | "APPROVED" | "REJECTED",
     prices: dbResponse.prices.map((price) => ({
+      priceId: price.priceId || 1, // priceId 추가
       grade: price.seatClassName || convertSeatClassIdToGrade(price.seatClassId),
       price: price.price,
       seatClassId: price.seatClassId,
@@ -101,10 +102,18 @@ const convertGradeToSeatClassId = (grade: string): number => {
 }
 
 export const createEventRequestData = (
-  eventData: ExtendedEventData,
+  eventData: EventFormData, // ExtendedEventData 대신 EventFormData 사용
   scheduleForm: ScheduleFormData,
-  accountId: number
+  accountId: number,
+  isEditMode: boolean = false
 ): EventRequestData => {
+  console.log("=== createEventRequestData 디버깅 ===")
+  console.log("isEditMode:", isEditMode)
+  console.log("eventData:", eventData)
+  console.log("scheduleForm:", scheduleForm)
+  console.log("accountId:", accountId)
+  console.log("==========================")
+  
   const isValidTime = (hour: string, minute: string) => {
     return hour && minute && hour !== "" && minute !== ""
   }
@@ -123,7 +132,7 @@ export const createEventRequestData = (
     return `${year}-${month}-${day}T${timeHour}:${timeMinute}:00`
   }
 
-  return {
+  const result = {
     accountId: accountId, // 로그인된 사용자의 accountId 추가
     title: eventData.title,
     ageLimit: convertAgeLimitToNumber(eventData.ageLimit),
@@ -132,7 +141,7 @@ export const createEventRequestData = (
     thumbnailUrl: "", // todo:실제로는 업로드된 이미지 URL
     schedules: [
       {
-        venueId: 1, // 실제로는 선택된 공연장 ID
+        venueId: isEditMode && scheduleForm.venueId ? scheduleForm.venueId : 1, // 수정 모드에서는 기존 venueId 사용
         ticketOpenAt: createDateTimeString(
           scheduleForm.ticketDate,
           scheduleForm.ticketStartTime.hour,
@@ -143,13 +152,23 @@ export const createEventRequestData = (
           scheduleForm.eventStartTime.hour,
           scheduleForm.eventStartTime.minute
         ),
-        prices: eventData.priceGrades.map((grade: PriceGrade) => ({
+        prices: eventData.priceGrades.map((grade: PriceGrade, index: number) => ({
           seatClassId: convertGradeToSeatClassId(grade.grade),
           price: grade.price,
+          // 수정 모드에서는 기존 priceId 사용
+          priceId: isEditMode && scheduleForm.priceIds && scheduleForm.priceIds[index] 
+            ? scheduleForm.priceIds[index] 
+            : 1,
         })),
       },
     ],
   }
+  
+  console.log("=== 생성된 결과 ===")
+  console.log("result:", result)
+  console.log("==========================")
+  
+  return result
 }
 
 export const submitEvent = async (
@@ -194,12 +213,12 @@ export const updateEvent = async (
       thumbnailUrl: requestData.thumbnailUrl,
       status: "PENDING",
       schedules: requestData.schedules.map((schedule) => ({
-        eventScheduleId: 1, // 실제로는 기존 스케줄 ID를 사용해야 함
+        eventScheduleId: schedule.eventScheduleId || 1, // requestData에서 전달받은 실제 스케줄 ID 사용
         venueId: schedule.venueId,
         ticketOpenAt: schedule.ticketOpenAt,
         eventDate: schedule.eventDate,
         prices: schedule.prices.map((price) => ({
-          priceId: 1, // 실제로는 기존 가격 ID를 사용해야 함
+          priceId: price.priceId || 1, // requestData에서 전달받은 실제 가격 ID 사용
           seatClassId: price.seatClassId,
           price: price.price,
         })),

@@ -75,8 +75,21 @@ function SchedulesRegisterPage() {
     // 로그인된 사용자의 accountId 사용
     const accountId = getAccountId()
 
+    // 디버깅을 위한 로그 추가
+    console.log("=== 공연 수정 디버깅 ===")
+    console.log("mode:", mode)
+    console.log("eventData:", eventData)
+    console.log("scheduleForm:", scheduleForm)
+    console.log("eventId:", eventId)
+    console.log("accountId:", accountId)
+    console.log("==========================")
+
     // API 요청 데이터 구성 및 제출
-    const requestData = createEventRequestData(eventData, scheduleForm, accountId)
+    const requestData = createEventRequestData(eventData, scheduleForm, accountId, mode === "edit")
+    
+    console.log("=== 생성된 요청 데이터 ===")
+    console.log("requestData:", requestData)
+    console.log("==========================")
 
     try {
       if (mode === "edit") {
@@ -94,6 +107,7 @@ function SchedulesRegisterPage() {
       navigate("/events")
     } catch (error) {
       console.error("Error:", error)
+      alert(`공연 ${mode === "edit" ? "수정" : "등록"}에 실패했습니다: ${error}`)
     }
   }
 
