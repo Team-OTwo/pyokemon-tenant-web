@@ -2,7 +2,7 @@ import React from "react"
 import { format } from "date-fns"
 import { ko } from "date-fns/locale"
 
-import { BookingDisplay } from "@/types/booking"
+import { BookingApiItem } from "@/types/booking"
 import { Badge } from "@/components/catalyst-ui/badge"
 import {
   Table,
@@ -17,22 +17,37 @@ import { Text } from "@/components/catalyst-ui/text"
 import { SkeletonMain } from "../skeleton"
 
 interface BookingsTableProps {
-  bookings: BookingDisplay[]
+  bookings: BookingApiItem[]
   loading: boolean
 }
 
 const BookingsTable: React.FC<BookingsTableProps> = ({ bookings, loading }) => {
-  const getPaymentStatusBadge = (status: BookingDisplay["paymentStatus"]) => {
+  const getPaymentStatusBadge = (status: string) => {
+    // 결제 상태를 한국어로 변환
+    let displayStatus: string
+    let badgeColor: "green" | "amber" | "red"
+
     switch (status) {
-      case "결제완료":
-        return <Badge color="green">결제완료</Badge>
-      case "결제대기":
-        return <Badge color="amber">결제대기</Badge>
-      case "환불됨":
-        return <Badge color="red">환불됨</Badge>
+      case "결제 완료":
+        displayStatus = "결제완료"
+        badgeColor = "green"
+        break
+      case "결제 대기":
+        displayStatus = "결제대기"
+        badgeColor = "amber"
+        break
+      case "결제 취소":
+      case "결제 실패":
+        displayStatus = "결제취소"
+        badgeColor = "red"
+        break
       default:
-        return <Badge color="zinc">{status}</Badge>
+        console.warn("알 수 없는 결제 상태:", status)
+        displayStatus = status || "알 수 없음"
+        badgeColor = "amber"
     }
+
+    return <Badge color={badgeColor}>{displayStatus}</Badge>
   }
 
   const formatCurrency = (amount: number) => {
@@ -120,23 +135,42 @@ const BookingsTable: React.FC<BookingsTableProps> = ({ bookings, loading }) => {
       </TableHead>
       <TableBody>
         {bookings.map((booking) => (
-          <TableRow key={booking.id} className="hover:bg-zinc-50 transition-colors duration-150">
+          <TableRow
+            key={booking.bookingId}
+            className="hover:bg-zinc-50 transition-colors duration-150"
+          >
             <TableCell>
-              <Text className="font-medium">{booking.customer}</Text>
+              <Text className="font-medium">{booking.userName}</Text>
             </TableCell>
             <TableCell>
-              <Text className="font-medium">{booking.orderNumber}</Text>
+              <Text className="font-medium">#{booking.bookingId.toString().padStart(4, "0")}</Text>
             </TableCell>
             <TableCell>
               <div>
-                <Text className="font-medium">{booking.seatClass}</Text>
-                <Text className="text-sm text-zinc-500">{booking.seatInfo}</Text>
+                <Text className="font-medium">{booking.seat.className}</Text>
+                <Text className="text-sm text-zinc-500">
+                  {`${booking.seat.floor} ${booking.seat.row} ${booking.seat.col}`
+                    .split(" ")
+                    .map((part: string, index: number) => {
+                      if (index === 0) return `${part}층`
+                      if (index === 1) return `${part}열`
+                      if (index === 2) return `${part}석`
+                      return part
+                    })
+                    .join(" ")}
+                </Text>
               </div>
             </TableCell>
             <TableCell>
-              <Text className="font-semibold">{formatCurrency(booking.amount)}</Text>
+              <Text className="font-semibold">
+                {formatCurrency(
+                  typeof booking.totalPrice === "string"
+                    ? parseInt(booking.totalPrice)
+                    : booking.totalPrice
+                )}
+              </Text>
             </TableCell>
-            <TableCell>{getPaymentStatusBadge(booking.paymentStatus)}</TableCell>
+            <TableCell>{getPaymentStatusBadge(booking.status)}</TableCell>
           </TableRow>
         ))}
       </TableBody>

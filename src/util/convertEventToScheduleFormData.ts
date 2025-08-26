@@ -22,5 +22,9 @@ export const convertEventToScheduleFormData = (event: EventType): ScheduleFormDa
     ticketDate: ticketDate,
     eventStartTime,
     ticketStartTime,
+    // 기존 공연의 실제 ID들을 포함
+    venueId: event.venueId || 1,
+    eventScheduleId: event.eventScheduleId || 1,
+    priceIds: event.prices?.map((price) => price.priceId) || [1],
   }
 }
