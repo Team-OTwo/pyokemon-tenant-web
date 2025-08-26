@@ -11,19 +11,10 @@ export interface ScheduleFormData {
     hour: string
     minute: string
   }
-}
-
-export interface ExtendedEventData extends EventFormData {
-  date: Date | null
-  ticketDate: Date | null
-  eventStartTime: {
-    hour: string
-    minute: string
-  }
-  ticketStartTime: {
-    hour: string
-    minute: string
-  }
+  // 기존 공연 수정을 위한 ID들
+  venueId?: number
+  eventScheduleId?: number
+  priceIds?: number[]
 }
 
 export const initialScheduleFormData: ScheduleFormData = {
@@ -37,4 +28,7 @@ export const initialScheduleFormData: ScheduleFormData = {
     hour: "",
     minute: "",
   },
+  venueId: undefined,
+  eventScheduleId: undefined,
+  priceIds: undefined,
 }

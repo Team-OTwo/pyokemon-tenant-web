@@ -47,7 +47,7 @@ function EventRegisterPage() {
   const handleAddPriceGrade = () => {
     const newPriceGrades = [
       ...eventFormData.priceGrades,
-      { grade: "", price: 0, seatClassId: undefined },
+      { priceId: undefined, grade: "", price: 0, seatClassId: undefined },
     ]
     updateEventFormData({ priceGrades: newPriceGrades })
   }
@@ -88,8 +88,17 @@ function EventRegisterPage() {
   const { resetEventFormData } = useEventStore()
 
   useEffect(() => {
+    console.log("=== EventRegisterPage useEffect 디버깅 ===")
+    console.log("mode:", mode)
+    console.log("eventData:", eventData)
+    console.log("eventId:", eventId)
+    console.log("==========================")
+
     if (mode === "edit" && eventData) {
+      console.log("=== 수정 모드 데이터 설정 ===")
+      console.log("설정할 eventData:", eventData)
       setEventFormData(eventData)
+      console.log("==========================")
     } else if (mode === "create") {
       resetEventFormData()
       resetScheduleFormData()
