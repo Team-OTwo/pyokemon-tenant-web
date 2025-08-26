@@ -61,6 +61,7 @@ const EventCard = ({ event, disableClick = false, showStatus = true, onClick }: 
       APPROVED: "승인완료",
       PENDING: "승인대기",
       REJECTED: "반려",
+      CANCELED: "공연취소",
     }
 
     return {

@@ -3,12 +3,14 @@ export const EVENT_STATUS = {
   PENDING: "PENDING",
   APPROVED: "APPROVED",
   REJECTED: "REJECTED",
+  CANCELED: "CANCELED",
 } as const
 
 export const EVENT_STATUS_LABELS = {
   [EVENT_STATUS.PENDING]: "승인대기",
   [EVENT_STATUS.APPROVED]: "승인완료",
   [EVENT_STATUS.REJECTED]: "반려",
+  [EVENT_STATUS.CANCELED]: "공연취소",
 } as const
 
 export const EVENT_STATUS_COLORS = {
@@ -23,6 +25,7 @@ export const STATUS_FILTER_OPTIONS = [
   { value: EVENT_STATUS.APPROVED, label: "승인완료" },
   { value: EVENT_STATUS.PENDING, label: "승인대기" },
   { value: EVENT_STATUS.REJECTED, label: "반려" },
+  { value: EVENT_STATUS.CANCELED, label: "공연취소" },
 ] as const
 
 export const eventList = [
