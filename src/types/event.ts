@@ -1,4 +1,5 @@
 export interface PriceGrade {
+  priceId?: number // 기존 공연 수정을 위한 가격 ID
   grade: string
   price: number
   seatClassId?: number
@@ -27,15 +28,17 @@ export const initialEventFormData: EventFormData = {
   description: "",
   thumbnail: null,
   thumbnailPreview: "",
-  priceGrades: [{ grade: "", price: 0, seatClassId: undefined }],
+  priceGrades: [{ priceId: undefined, grade: "", price: 0, seatClassId: undefined }],
 }
 
 // event-register API 요청 관련 타입들
 export interface EventSchedule {
+  eventScheduleId?: number // 기존 공연 수정을 위한 스케줄 ID
   venueId: number
   ticketOpenAt: string
   eventDate: string
   prices: Array<{
+    priceId?: number // 기존 공연 수정을 위한 가격 ID
     seatClassId: number
     price: number
   }>
@@ -56,13 +59,19 @@ export interface EventType {
   title: string
   ageLimit: number
   venueName: string
+  venueId: number // 공연장 ID 추가
   eventDate: string
   ticketOpenAt: string
   genre: string
   description: string
   eventScheduleId: number
   thumbnailUrl: string
-  prices?: PriceGrade[]
+  prices?: Array<{
+    priceId: number // 가격 ID 추가
+    grade: string
+    price: number
+    seatClassId?: number
+  }>
   status: EventStatus
 }
 

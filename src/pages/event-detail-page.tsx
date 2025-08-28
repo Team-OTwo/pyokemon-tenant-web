@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react"
-import { convertSeatClassIdToGrade, getTenantEventDetail } from "@/api/event-register-api"
+import {
+  convertSeatClassIdToGrade,
+  deleteEvent,
+  getTenantEventDetail,
+} from "@/api/event-register-api"
 import { event } from "@/constants/event"
 import EventCard from "@/pages/events-page/_components/event-card"
 import { useScheduleFormStore } from "@/store/schedule-form-store"
@@ -76,35 +80,26 @@ const EventDetailPage = () => {
       description: event.description,
       thumbnail: null,
       thumbnailPreview: event.thumbnailUrl || "",
-      priceGrades: event.prices?.map(price => ({
-        priceId: price.priceId,
-        grade: price.grade,
-        price: price.price,
-        seatClassId: price.seatClassId,
-      })) || [],
+      priceGrades:
+        event.prices?.map((price) => ({
+          priceId: price.priceId,
+          grade: price.grade,
+          price: price.price,
+          seatClassId: price.seatClassId,
+        })) || [],
     }
   }
 
   const handleEdit = () => {
     if (!eventData) return
 
-    console.log("=== 수정 버튼 클릭 디버깅 ===")
-    console.log("eventData:", eventData)
-    console.log("==========================")
-
     // 기존 공연의 실제 데이터를 스케줄 폼에 설정
     const scheduleData = convertEventToScheduleFormData(eventData)
-    console.log("=== 변환된 스케줄 데이터 ===")
-    console.log("scheduleData:", scheduleData)
-    console.log("==========================")
-    
+
     useScheduleFormStore.getState().setScheduleFormData(scheduleData)
 
     // 기존 공연의 실제 데이터를 이벤트 폼에 설정
     const eventFormData = convertEventToFormData(eventData)
-    console.log("=== 변환된 이벤트 폼 데이터 ===")
-    console.log("eventFormData:", eventFormData)
-    console.log("==========================")
 
     navigate("/event-register", {
       state: {
@@ -113,6 +108,22 @@ const EventDetailPage = () => {
         eventId: eventData.eventId,
       },
     })
+  }
+
+  const handleDelete = async () => {
+    if (!eventData) return
+
+    const isConfirmed = window.confirm("공연을 삭제하시겠습니까?")
+    if (!isConfirmed) return
+
+    try {
+      await deleteEvent(eventData.eventId)
+      alert("공연이 성공적으로 삭제되었습니다.")
+      navigate("/events") // 이벤트 목록 페이지로 이동
+    } catch (error) {
+      console.error("공연 삭제 실패:", error)
+      alert("공연 삭제에 실패했습니다. 다시 시도해주세요.")
+    }
   }
 
   const formatCurrency = (amount: number) => {
@@ -222,7 +233,10 @@ const EventDetailPage = () => {
               >
                 수정
               </Button>
-              <Button className="cursor-pointer hover:bg-zinc-800 hover:text-white transition-colors duration-200">
+              <Button
+                onClick={handleDelete}
+                className="cursor-pointer hover:bg-zinc-800 hover:text-white transition-colors duration-200"
+              >
                 삭제
               </Button>
             </div>

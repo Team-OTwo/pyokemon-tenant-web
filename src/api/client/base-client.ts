@@ -4,6 +4,18 @@ const baseClient = axios.create({})
 
 baseClient.interceptors.request.use(
   (config) => {
+    // accessToken을 localStorage에서 가져와서 Authorization 헤더 설정
+    const accessToken = localStorage.getItem("accessToken")
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`
+    }
+
+    // accountId를 localStorage에서 가져와서 x-auth-accountId 헤더 설정
+    const accountId = localStorage.getItem("accountId")
+    if (accountId) {
+      config.headers["x-auth-accountId"] = accountId
+    }
+
     return config
   },
   (error) => {}

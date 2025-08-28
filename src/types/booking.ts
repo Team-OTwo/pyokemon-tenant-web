@@ -1,5 +1,3 @@
-// ERD 기반 실제 API 구조에 맞는 타입 정의
-
 export interface Booking {
   bookingId: number
   eventScheduleId: number
@@ -104,6 +102,7 @@ export interface BookingWithDetails {
   booking: Booking
   payment: Payment
   eventSchedule: EventSchedule
+  event: Event
   venue: Venue
   seatClass: SeatClass
   seat: Seat
@@ -112,28 +111,10 @@ export interface BookingWithDetails {
   user: User
 }
 
-// 테이블 표시용 타입
-export interface BookingDisplay {
-  id: string
-  orderNumber: string
-  purchaseDate: string
-  customer: string
-  amount: number
-  paymentStatus: "결제완료" | "결제대기" | "환불됨"
-  paymentMethod: string
-  seatClass: string
-  seatInfo: string
-  venue: string
-  eventDate: string
-}
-
 // 검색 및 필터링 옵션
 export interface BookingFilters {
   search?: string
   status?: string
-  dateFrom?: string
-  dateTo?: string
-  paymentStatus?: string
   page?: number
   pageSize?: number
 }
@@ -155,4 +136,31 @@ export interface BookingSummary {
   pendingPayments: number
   canceledBookings: number
   averageTicketPrice: number
+}
+
+// 예매현황 BFF 응답 타입
+export interface BookingApiResponse {
+  content: Array<{
+    eventId: number
+    eventTitle: string
+    eventDate: string
+    venueName: string
+    thumbnailUrl: string
+    items: BookingApiItem[]
+  }>
+  page: number
+  totalCount: number
+}
+
+export interface BookingApiItem {
+  bookingId: string
+  userName: string
+  seat: {
+    className: string
+    floor: string
+    row: string
+    col: string
+  }
+  totalPrice: string
+  status: string
 }

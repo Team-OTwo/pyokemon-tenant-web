@@ -22,3 +22,9 @@ export const getAccountId = (): number => {
 export const setAccountId = (accountId: number) => {
   localStorage.setItem("accountId", accountId.toString())
 }
+
+export const ACCESS_TOKEN_KEY = "accessToken"
+
+export function getAccessToken() {
+  return localStorage.getItem(ACCESS_TOKEN_KEY)
+}

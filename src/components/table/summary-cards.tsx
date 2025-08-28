@@ -10,6 +10,7 @@ interface SummaryCardsProps {
   totalTicketsSold: number
   loading: boolean
   className?: string
+  summaryEventCount?: number // summary의 activeEventCount 추가
 }
 
 const SummaryCards: React.FC<SummaryCardsProps> = ({
@@ -18,6 +19,7 @@ const SummaryCards: React.FC<SummaryCardsProps> = ({
   totalTicketsSold,
   loading,
   className = "",
+  summaryEventCount,
 }) => {
   if (loading) {
     return (
@@ -56,6 +58,8 @@ const SummaryCards: React.FC<SummaryCardsProps> = ({
           <div>
             <Text className="text-sm font-medium text-zinc-500">진행중인 공연</Text>
             <Text className="text-2xl font-bold text-zinc-900">{activeEventCount}개</Text>
+            {/* events 개수가 summary와 일치하지 않을 때만 표시 */}
+            {summaryEventCount !== undefined && activeEventCount !== summaryEventCount}
           </div>
         </div>
       </div>
