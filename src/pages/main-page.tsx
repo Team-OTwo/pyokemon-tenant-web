@@ -45,6 +45,18 @@ const DashboardContent: React.FC = () => {
     }, 1000)
   }, [isLoadingMore, hasMore, data?.events, page])
 
+  // events 개수를 세어서 summary의 activeEventCount와 비교
+  const getActiveEventCount = () => {
+    if (!data?.events) return 0
+
+    const actualEventCount = data.events.length
+    const summaryEventCount = data.summary?.activeEventCount || 0
+
+    // events 개수와 summary의 activeEventCount가 일치하지 않으면
+    // 프론트에서 센 개수를 사용
+    return actualEventCount !== summaryEventCount ? actualEventCount : summaryEventCount
+  }
+
   if (error) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -77,17 +89,10 @@ const DashboardContent: React.FC = () => {
         <div className="space-y-6">
           <SummaryCards
             totalRevenue={data?.summary?.totalRevenue || 0}
-            activeEventCount={
-              data?.events
-                ? data.events.filter((event) => {
-                    const eventDate = new Date(event.eventDate)
-                    const today = startOfDay(new Date())
-                    return eventDate >= today
-                  }).length
-                : data?.summary?.activeEventCount || 0
-            }
+            activeEventCount={getActiveEventCount()}
             totalTicketsSold={data?.summary?.totalTicketsSold || 0}
             loading={isLoading}
+            summaryEventCount={data?.summary?.activeEventCount}
           />
           <EventsTable events={allEvents} loading={isLoading || isLoadingMore} />
         </div>
