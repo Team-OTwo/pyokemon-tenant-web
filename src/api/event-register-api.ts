@@ -1,303 +1,531 @@
-import React, { ChangeEvent, useEffect, useRef } from "react"
-import { mockVenues } from "@/mock/venue-mock"
-import { useEventStore } from "@/store/eventStore"
-import { useScheduleFormStore } from "@/store/schedule-form-store"
-import { ArrowUturnLeftIcon } from "@heroicons/react/16/solid"
-import { useLocation, useNavigate } from "react-router-dom"
+import { EventFormData, EventRequestData, EventType, PriceGrade } from "@/types/event"
+import { ScheduleFormData } from "@/types/schedule"
 
-import { Button } from "@/components/catalyst-ui/button"
-import { Input } from "@/components/catalyst-ui/input"
-import { Select } from "@/components/catalyst-ui/select"
+import { client } from "./client"
 
-import { ageLimit, genreOptions, gradeOptions } from "../constants/event-register-options"
-import { PriceGrade } from "../types/event"
+// DB 응답 타입 정의 (JOIN 결과)
+interface DbEventResponse {
+  // tb_event
+  eventId: number
+  title: string
+  thumbnailUrl: string
+  status: string
+  ageLimit?: number
+  genre?: string
+  description?: string
 
-function EventRegisterPage() {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const { eventData, mode = "create", eventId } = location.state || {}
+  // tb_event_schedule
+  eventDate: string
+  ticketOpenAt?: string
+  eventScheduleId?: number
 
-  const { eventFormData, setEventFormData, updateEventFormData } = useEventStore()
+  // tb_venue
+  venueName: string
+  venueId?: number
 
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const handleGoBack = () => {
-    navigate("/events")
-  }
-
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    updateEventFormData({ [name]: value })
-  }
-
-  const handleSelectChange = (name: string) => (e: ChangeEvent<HTMLSelectElement>) => {
-    updateEventFormData({ [name]: e.target.value })
-  }
-
-  const handleThumbnailChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      updateEventFormData({
-        thumbnail: file,
-        thumbnailPreview: URL.createObjectURL(file),
-      })
-    }
-  }
-
-  const handleAddPriceGrade = () => {
-    const newPriceGrades = [
-      ...eventFormData.priceGrades,
-      { priceId: undefined, grade: "", price: 0, seatClassId: undefined },
-    ]
-    updateEventFormData({ priceGrades: newPriceGrades })
-  }
-
-  const handlePriceGradeChange = (
-    index: number,
-    field: keyof PriceGrade,
-    value: string | number
-  ) => {
-    const newPriceGrades = [...eventFormData.priceGrades]
-
-    if (field === "grade" && typeof value === "string") {
-      newPriceGrades[index].grade = value
-    } else if (field === "price" && typeof value === "number") {
-      newPriceGrades[index].price = value
-    }
-    updateEventFormData({ priceGrades: newPriceGrades })
-  }
-
-  const handleNext = () => {
-    // 필수 필드 검증
-    if (
-      !eventFormData.title ||
-      !eventFormData.venue ||
-      !eventFormData.ageLimit ||
-      !eventFormData.description
-    ) {
-      alert("모든 필수 필드를 입력해주세요.")
-      return
-    }
-    // 다음 페이지로 데이터 전달
-    navigate("/schedules-register", {
-      state: { eventData: eventFormData, mode, eventId },
-    })
-  }
-
-  const { resetScheduleFormData } = useScheduleFormStore()
-  const { resetEventFormData } = useEventStore()
-
-  useEffect(() => {
-    console.log("=== EventRegisterPage useEffect 디버깅 ===")
-    console.log("mode:", mode)
-    console.log("eventData:", eventData)
-    console.log("eventId:", eventId)
-    console.log("==========================")
-
-    if (mode === "edit" && eventData) {
-      console.log("=== 수정 모드 데이터 설정 ===")
-      console.log("설정할 eventData:", eventData)
-      setEventFormData(eventData)
-      console.log("==========================")
-    } else if (mode === "create") {
-      resetEventFormData()
-      resetScheduleFormData()
-    } else if (mode === "back") {
-      // 이전 페이지에서 돌아왔을 때는 상태를 보존
-      // eventFormData와 scheduleFormData가 이미 Zustand에 저장되어 있음
-      // eventId도 유지됨
-    }
-  }, [mode, eventData, setEventFormData, resetScheduleFormData, resetEventFormData])
-
-  return (
-    <div className="flex">
-      <div className="p-5 w-full">
-        {/* Header */}
-        <div className="flex gap-6 items-center mb-16">
-          <ArrowUturnLeftIcon
-            className="text-gray-700 cursor-pointer w-5 h-5"
-            onClick={handleGoBack}
-          />
-          <h1 className="text-2xl font-bold">
-            {mode === "edit" ? "공연 정보 수정" : "공연 정보 등록"}
-          </h1>
-        </div>
-
-        <div className="space-y-8">
-          {/* 공연명 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">공연명</label>
-            <Input
-              type="text"
-              name="title"
-              value={eventFormData.title}
-              onChange={handleInputChange}
-              placeholder="공연명을 입력하세요"
-              className="max-w-md"
-            />
-          </div>
-
-          {/* 공연장 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">공연장</label>
-            <Select
-              value={eventFormData.venue || ""}
-              onChange={handleSelectChange("venue")}
-              className="max-w-md"
-            >
-              <option value="">공연장을 선택하세요</option>
-              {mockVenues.map((venue) => (
-                <option key={venue.value} value={venue.value}>
-                  {venue.label}
-                </option>
-              ))}
-            </Select>
-          </div>
-
-          {/* 장르 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">장르 선택</label>
-            <Select
-              value={eventFormData.genre || ""}
-              onChange={handleSelectChange("genre")}
-              className="max-w-md"
-            >
-              <option value="">장르를 선택하세요</option>
-              {genreOptions.map((genre) => (
-                <option key={genre.value} value={genre.value}>
-                  {genre.label}
-                </option>
-              ))}
-            </Select>
-          </div>
-
-          {/* 연령 제한 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">연령 제한</label>
-            <Select
-              value={eventFormData.ageLimit || ""}
-              onChange={handleSelectChange("ageLimit")}
-              className="max-w-md"
-            >
-              <option value="">연령 제한을 선택하세요</option>
-              {ageLimit.map((age) => (
-                <option key={age.value} value={age.value}>
-                  {age.label}
-                </option>
-              ))}
-            </Select>
-          </div>
-
-          {/* 공연 상세정보 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">공연 상세정보</label>
-            <textarea
-              name="description"
-              value={eventFormData.description}
-              onChange={handleInputChange}
-              className="w-[70%] px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[120px] resize-none"
-              placeholder="공연 상세정보를 입력하세요"
-            />
-          </div>
-
-          {/* 썸네일 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">썸네일</label>
-            <div className="flex items-center gap-4">
-              <Input
-                type="text"
-                placeholder="썸네일 불러오기"
-                value={eventFormData.thumbnail?.name || ""}
-                readOnly
-                className="max-w-md"
-              />
-              <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={handleThumbnailChange}
-              />
-              <Button
-                outline
-                onClick={() => fileInputRef.current?.click()}
-                className="cursor-pointer hover:bg-zinc-100 hover:text-zinc-900 transition-colors duration-200"
-              >
-                썸네일 업로드
-              </Button>
-            </div>
-            {eventFormData.thumbnailPreview && (
-              <div className="mt-4">
-                <img
-                  src={eventFormData.thumbnailPreview}
-                  alt="썸네일 미리보기"
-                  className="max-w-[200px] rounded-lg shadow-md"
-                />
-              </div>
-            )}
-          </div>
-
-          {/* 등급별 가격 설정 */}
-          <div className="w-[70%]">
-            <label className="block text-sm font-medium text-gray-700 mb-4">등급별 가격 설정</label>
-            <div className="space-y-4">
-              {eventFormData.priceGrades.map((grade, index) => (
-                <div key={index} className="grid grid-cols-[1fr_1fr_auto] gap-4 items-center">
-                  <div className="w-full">
-                    <Select
-                      value={grade.grade || ""}
-                      onChange={(e) => handlePriceGradeChange(index, "grade", e.target.value)}
-                      className="w-full"
-                    >
-                      <option value="">등급을 선택하세요</option>
-                      {gradeOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </Select>
-                  </div>
-                  <div className="w-full">
-                    <Input
-                      type="number"
-                      value={grade.price}
-                      onChange={(e) =>
-                        handlePriceGradeChange(index, "price", parseInt(e.target.value))
-                      }
-                      placeholder="가격을 입력하세요"
-                      step="1000"
-                      className="w-full"
-                    />
-                  </div>
-                  <div className="w-20">
-                    {index === eventFormData.priceGrades.length - 1 && (
-                      <Button
-                        outline
-                        onClick={handleAddPriceGrade}
-                        className="cursor-pointer hover:bg-zinc-100 hover:text-zinc-900 transition-colors duration-200"
-                      >
-                        추가
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* 등록 버튼 */}
-        <div className="pt-8 pb-6 flex justify-end w-full">
-          <Button
-            onClick={handleNext}
-            className="cursor-pointer hover:bg-zinc-800 hover:text-white transition-colors duration-200"
-          >
-            다음
-          </Button>
-        </div>
-      </div>
-    </div>
-  )
+  // tb_price와 tb_seat_class 조인 결과
+  prices: Array<{
+    priceId?: number
+    seatClassId: number
+    price: number
+    seatClassName?: string // tb_seat_class에서 가져온 등급명
+  }>
 }
 
-export default EventRegisterPage
+// 좌석 등급 ID를 등급명으로 변환
+export const convertSeatClassIdToGrade = (seatClassId: number): string => {
+  switch (seatClassId) {
+    case 1:
+      return "VIP"
+    case 2:
+      return "R"
+    case 3:
+      return "A"
+    case 4:
+      return "B"
+    default:
+      return "VIP"
+  }
+}
+
+// DB 응답을 EventType으로 변환
+const convertDbResponseToEventType = (dbResponse: DbEventResponse): EventType => {
+  return {
+    eventId: dbResponse.eventId,
+    title: dbResponse.title,
+    ageLimit: dbResponse.ageLimit || 0,
+    venueName: dbResponse.venueName,
+    venueId: dbResponse.venueId || 1, // venueId 추가
+    eventDate: dbResponse.eventDate,
+    ticketOpenAt: dbResponse.ticketOpenAt || "",
+    genre: dbResponse.genre || "",
+    description: dbResponse.description || "",
+    eventScheduleId: dbResponse.eventScheduleId || 1,
+    thumbnailUrl: dbResponse.thumbnailUrl,
+    status: dbResponse.status as "PENDING" | "APPROVED" | "REJECTED",
+    prices: dbResponse.prices.map((price) => ({
+      priceId: price.priceId || 1, // priceId 추가
+      grade: price.seatClassName || convertSeatClassIdToGrade(price.seatClassId),
+      price: price.price,
+      seatClassId: price.seatClassId,
+    })),
+  }
+}
+
+const convertAgeLimitToNumber = (ageLimit: string): number => {
+  switch (ageLimit) {
+    case "전체관람가":
+      return 0
+    case "12세 이상":
+      return 12
+    case "15세 이상":
+      return 15
+    case "19세 이상":
+      return 19
+    default:
+      return 0
+  }
+}
+
+const convertGradeToSeatClassId = (grade: string): number => {
+  switch (grade) {
+    case "VIP":
+      return 1
+    case "R":
+      return 2
+    case "A":
+      return 3
+    case "B":
+      return 4
+    default:
+      return 1
+  }
+}
+
+export const createEventRequestData = (
+  eventData: EventFormData, // ExtendedEventData 대신 EventFormData 사용
+  scheduleForm: ScheduleFormData,
+  accountId: number,
+  isEditMode: boolean = false
+): EventRequestData => {
+  console.log("=== createEventRequestData 디버깅 ===")
+  console.log("isEditMode:", isEditMode)
+  console.log("eventData:", eventData)
+  console.log("scheduleForm:", scheduleForm)
+  console.log("accountId:", accountId)
+  console.log("==========================")
+
+  const isValidTime = (hour: string, minute: string) => {
+    return hour && minute && hour !== "" && minute !== ""
+  }
+
+  const createDateTimeString = (date: Date | null, hour: string, minute: string) => {
+    if (!date || !isValidTime(hour, minute)) {
+      return ""
+    }
+
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, "0")
+    const day = String(date.getDate()).padStart(2, "0")
+    const timeHour = hour.padStart(2, "0")
+    const timeMinute = minute.padStart(2, "0")
+
+    return `${year}-${month}-${day}T${timeHour}:${timeMinute}:00`
+  }
+
+  const result = {
+    accountId: accountId, // 로그인된 사용자의 accountId 추가
+    title: eventData.title,
+    ageLimit: convertAgeLimitToNumber(eventData.ageLimit),
+    description: eventData.description,
+    genre: eventData.genre,
+    thumbnailUrl: "", // todo:실제로는 업로드된 이미지 URL
+    schedules: [
+      {
+        venueId: isEditMode && scheduleForm.venueId ? scheduleForm.venueId : 1, // 수정 모드에서는 기존 venueId 사용
+        ticketOpenAt: createDateTimeString(
+          scheduleForm.ticketDate,
+          scheduleForm.ticketStartTime.hour,
+          scheduleForm.ticketStartTime.minute
+        ),
+        eventDate: createDateTimeString(
+          scheduleForm.date,
+          scheduleForm.eventStartTime.hour,
+          scheduleForm.eventStartTime.minute
+        ),
+        prices: eventData.priceGrades.map((grade: PriceGrade, index: number) => ({
+          seatClassId: convertGradeToSeatClassId(grade.grade),
+          price: grade.price,
+          // 수정 모드에서는 기존 priceId 사용
+          priceId:
+            isEditMode && scheduleForm.priceIds && scheduleForm.priceIds[index]
+              ? scheduleForm.priceIds[index]
+              : 1,
+        })),
+      },
+    ],
+  }
+
+  console.log("=== 생성된 결과 ===")
+  console.log("result:", result)
+  console.log("==========================")
+
+  return result
+}
+
+export const submitEvent = async (
+  requestData: EventRequestData,
+  accountId: number
+): Promise<void> => {
+  console.log("=== 공연 등록 API 호출 ===")
+  console.log("URL:", `/event/api/events/tenant`)
+  console.log("accountId:", accountId)
+  console.log("requestData:", JSON.stringify(requestData, null, 2))
+  console.log("==========================")
+
+  const response = await client.post(`/event/api/events/tenant`, requestData, {
+    params: { accountId },
+  })
+
+  if (!response.data.success) {
+    throw new Error("공연 등록에 실패했습니다.")
+  }
+}
+
+export const updateEvent = async (
+  requestData: EventRequestData,
+  eventId: number,
+  accountId: number
+): Promise<void> => {
+  console.log("=== 공연 수정 API 호출 ===")
+  console.log("URL:", `/event/api/events/tenant/${eventId}`)
+  console.log("eventId:", eventId)
+  console.log("accountId:", accountId)
+  console.log("requestData:", JSON.stringify(requestData, null, 2))
+  console.log("==========================")
+
+  const response = await client.put(
+    `/event/api/events/tenant/${eventId}`,
+    {
+      eventId: eventId,
+      title: requestData.title,
+      ageLimit: requestData.ageLimit,
+      description: requestData.description,
+      genre: requestData.genre,
+      thumbnailUrl: requestData.thumbnailUrl,
+      status: "PENDING",
+      schedules: requestData.schedules.map((schedule) => ({
+        eventScheduleId: schedule.eventScheduleId || 1, // requestData에서 전달받은 실제 스케줄 ID 사용
+        venueId: schedule.venueId,
+        ticketOpenAt: schedule.ticketOpenAt,
+        eventDate: schedule.eventDate,
+        prices: schedule.prices.map((price) => ({
+          priceId: price.priceId || 1, // requestData에서 전달받은 실제 가격 ID 사용
+          seatClassId: price.seatClassId,
+          price: price.price,
+        })),
+      })),
+    },
+    {
+      params: { accountId },
+    }
+  )
+
+  if (!response.data.success) {
+    throw new Error("공연 수정에 실패했습니다.")
+  }
+}
+
+export const getEvents = async (accountId: number): Promise<EventType[]> => {
+  try {
+    const response = await client.get(`/event/api/events?accountId=${accountId}`)
+
+    console.log("API 응답 상태:", response.status)
+    console.log("API 응답 헤더:", response.headers)
+
+    if (!response.data.success) {
+      console.error("API 에러 응답:", response.data)
+      throw new Error(`공연 목록 조회에 실패했습니다. (${response.status})`)
+    }
+
+    const data = response.data.data
+
+    // DB 응답을 EventType 배열로 변환
+    let events: EventType[] = []
+
+    if (Array.isArray(data)) {
+      // 같은 eventId를 가진 항목들을 그룹화
+      const eventGroups = new Map<number, DbEventResponse[]>()
+
+      data.forEach((item: DbEventResponse) => {
+        const eventId = item.eventId
+        if (!eventGroups.has(eventId)) {
+          eventGroups.set(eventId, [])
+        }
+        eventGroups.get(eventId)!.push(item)
+      })
+
+      // 그룹화된 데이터를 EventType으로 변환
+      events = Array.from(eventGroups.values()).map((group) => {
+        // 첫 번째 항목을 기준으로 기본 정보 설정
+        const firstItem = group[0]
+
+        // status가 없으면 기본값 설정
+        const eventWithStatus = {
+          ...firstItem,
+          status: firstItem.status || "PENDING", // 기본값으로 PENDING 설정
+          thumbnailUrl:
+            firstItem.thumbnailUrl || "https://via.placeholder.com/300x200?text=No+Image", // 기본 이미지 설정
+        }
+
+        // 이미 EventType 형식인 경우 그대로 사용
+        if (eventWithStatus.title && eventWithStatus.venueName) {
+          return eventWithStatus as unknown as EventType
+        }
+        // DB 응답 형식인 경우 변환
+        return convertDbResponseToEventType(eventWithStatus as DbEventResponse)
+      })
+    } else if (data.content && Array.isArray(data.content)) {
+      // 페이징된 응답인 경우도 동일하게 처리
+      const eventGroups = new Map<number, DbEventResponse[]>()
+
+      data.content.forEach((item: DbEventResponse) => {
+        const eventId = item.eventId
+        if (!eventGroups.has(eventId)) {
+          eventGroups.set(eventId, [])
+        }
+        eventGroups.get(eventId)!.push(item)
+      })
+
+      events = Array.from(eventGroups.values()).map((group) => {
+        const firstItem = group[0]
+        const eventWithStatus = {
+          ...firstItem,
+          status: firstItem.status || "PENDING",
+          thumbnailUrl:
+            firstItem.thumbnailUrl || "https://via.placeholder.com/300x200?text=No+Image",
+        }
+
+        if (eventWithStatus.title && eventWithStatus.venueName) {
+          return eventWithStatus as unknown as EventType
+        }
+        return convertDbResponseToEventType(eventWithStatus as DbEventResponse)
+      })
+    }
+
+    return events
+  } catch (error) {
+    console.error("API 호출 중 에러:", error)
+    throw error
+  }
+}
+
+export const getEventById = async (eventId: number, accountId: number): Promise<EventType> => {
+  try {
+    const response = await fetch(`/event/api/events/${eventId}?accountId=${accountId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error("API 에러 응답:", errorText)
+      throw new Error(`공연 상세 조회에 실패했습니다. (${response.status})`)
+    }
+
+    const responseText = await response.text()
+    console.log("API 응답 텍스트:", responseText)
+
+    // JSON 파싱 시도
+    let data
+    try {
+      data = JSON.parse(responseText)
+    } catch (parseError) {
+      console.error("JSON 파싱 실패:", parseError)
+      console.error("응답이 JSON이 아닙니다:", responseText)
+      throw new Error("서버에서 유효하지 않은 JSON 응답을 받았습니다.")
+    }
+    console.log("API 응답 데이터:", data)
+
+    // API 응답에서 data 필드 추출
+    const eventData = data.data || data
+    console.log("이벤트 상세 데이터:", eventData)
+
+    // status와 thumbnailUrl에 기본값 설정
+    const eventWithDefaults = {
+      ...eventData,
+      status: eventData.status || "PENDING",
+      thumbnailUrl: eventData.thumbnailUrl || "https://via.placeholder.com/300x200?text=No+Image",
+    }
+
+    // 이미 EventType 형식인 경우 그대로 사용
+    if (eventWithDefaults.title && eventWithDefaults.venueName) {
+      return eventWithDefaults as unknown as EventType
+    }
+    const event = convertDbResponseToEventType(eventWithDefaults as DbEventResponse)
+    return event
+  } catch (error) {
+    console.error("API 호출 중 에러:", error)
+    throw error
+  }
+}
+
+export const getTenantSchedules = async (accountId: number): Promise<EventType[]> => {
+  try {
+    const response = await client.get(`/event/api/events/tenant?account_id=${accountId}`)
+
+    if (!response.data.success) {
+      console.error("API 에러 응답:", response.data)
+      throw new Error(`테넌트 스케줄 조회에 실패했습니다. (${response.status})`)
+    }
+
+    // API 응답에서 data 필드 추출
+    const eventsData = response.data.data
+
+    // DB 응답을 EventType 배열로 변환
+    let events: EventType[] = []
+
+    if (Array.isArray(eventsData)) {
+      // 같은 eventId를 가진 항목들을 그룹화
+      const eventGroups = new Map<number, DbEventResponse[]>()
+
+      eventsData.forEach((item: DbEventResponse) => {
+        const eventId = item.eventId
+        if (!eventGroups.has(eventId)) {
+          eventGroups.set(eventId, [])
+        }
+        eventGroups.get(eventId)!.push(item)
+      })
+
+      // 그룹화된 데이터를 EventType으로 변환
+      events = Array.from(eventGroups.values()).map((group) => {
+        // 첫 번째 항목을 기준으로 기본 정보 설정
+        const firstItem = group[0]
+
+        // status가 없으면 기본값 설정
+        const eventWithStatus = {
+          ...firstItem,
+          status: firstItem.status || "PENDING", // 기본값으로 PENDING 설정
+          thumbnailUrl:
+            firstItem.thumbnailUrl || "https://via.placeholder.com/300x200?text=No+Image", // 기본 이미지 설정
+        }
+
+        // 이미 EventType 형식인 경우 그대로 사용
+        if (eventWithStatus.title && eventWithStatus.venueName) {
+          return eventWithStatus as unknown as EventType
+        }
+        // DB 응답 형식인 경우 변환
+        return convertDbResponseToEventType(eventWithStatus as DbEventResponse)
+      })
+    } else if (eventsData.content && Array.isArray(eventsData.content)) {
+      // 페이징된 응답인 경우도 동일하게 처리
+      const eventGroups = new Map<number, DbEventResponse[]>()
+
+      eventsData.content.forEach((item: DbEventResponse) => {
+        const eventId = item.eventId
+        if (!eventGroups.has(eventId)) {
+          eventGroups.set(eventId, [])
+        }
+        eventGroups.get(eventId)!.push(item)
+      })
+
+      events = Array.from(eventGroups.values()).map((group) => {
+        const firstItem = group[0]
+        const eventWithStatus = {
+          ...firstItem,
+          status: firstItem.status || "PENDING",
+          thumbnailUrl:
+            firstItem.thumbnailUrl || "https://via.placeholder.com/300x200?text=No+Image",
+        }
+
+        if (eventWithStatus.title && eventWithStatus.venueName) {
+          return eventWithStatus as unknown as EventType
+        }
+        return convertDbResponseToEventType(eventWithStatus as DbEventResponse)
+      })
+    }
+
+    return events
+  } catch (error) {
+    console.error("API 호출 중 에러:", error)
+    throw error
+  }
+}
+
+export const getTenantEventDetail = async (
+  eventId: number,
+  accountId: number
+): Promise<EventType> => {
+  try {
+    const response = await fetch(
+      `/event/api/events/tenant/${eventId}/detail?accountId=${accountId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+
+    console.log("API 응답 상태:", response.status)
+    console.log("API 응답 헤더:", response.headers)
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error("API 에러 응답:", errorText)
+      throw new Error(`테넌트 이벤트 상세 조회에 실패했습니다. (${response.status})`)
+    }
+
+    const responseText = await response.text()
+    console.log("API 응답 텍스트:", responseText)
+
+    // JSON 파싱 시도
+    let data
+    try {
+      data = JSON.parse(responseText)
+    } catch (parseError) {
+      console.error("JSON 파싱 실패:", parseError)
+      console.error("응답이 JSON이 아닙니다:", responseText)
+      throw new Error("서버에서 유효하지 않은 JSON 응답을 받았습니다.")
+    }
+    console.log("API 응답 데이터:", data)
+
+    // API 응답에서 data 필드 추출
+    const eventData = data.data || data
+    console.log("이벤트 상세 데이터:", eventData)
+
+    // status와 thumbnailUrl에 기본값 설정
+    const eventWithDefaults = {
+      ...eventData,
+      status: eventData.status || "PENDING",
+      thumbnailUrl: eventData.thumbnailUrl || "https://via.placeholder.com/300x200?text=No+Image",
+    }
+
+    // 이미 EventType 형식인 경우 그대로 사용
+    if (eventWithDefaults.title && eventWithDefaults.venueName) {
+      return eventWithDefaults as unknown as EventType
+    }
+    const event = convertDbResponseToEventType(eventWithDefaults as DbEventResponse)
+    return event
+  } catch (error) {
+    console.error("API 호출 중 에러:", error)
+    throw error
+  }
+}
+
+export const deleteEvent = async (eventId: number): Promise<void> => {
+  try {
+    const response = await fetch(`/event/api/events/tenant/${eventId}`, {
+      method: "POST",
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to delete event: ${response.status}`)
+    }
+  } catch (error) {
+    console.error("Error deleting event:", error)
+    throw error
+  }
+}
