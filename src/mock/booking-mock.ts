@@ -5,7 +5,6 @@ import {
   BookingListResponse,
   BookingSummary,
   BookingWithDetails,
-  Event,
   EventSchedule,
   Payment,
   Seat,
@@ -98,101 +97,116 @@ const mockUsers: User[] = [
   },
 ]
 
-const mockEvents: Event[] = [
-  {
-    id: 1,
-    eventId: 1,
-    title: "오아시스 내한",
-    description: "오아시스 내한",
-    totalSeatCount: 500,
-    status: "ACTIVE",
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-01T00:00:00Z",
-  },
-  {
-    id: 2,
-    eventId: 2,
-    title: "콜드플레이 내한",
-    description: "콜드플레이 내한",
-    totalSeatCount: 300,
-    status: "ACTIVE",
-    createdAt: "2024-01-02T00:00:00Z",
-    updatedAt: "2024-01-02T00:00:00Z",
-  },
-  {
-    id: 3,
-    eventId: 3,
-    title: "트래비스 스캇 내한",
-    description: "트래비스 스캇 내한",
-    totalSeatCount: 800,
-    status: "ACTIVE",
-    createdAt: "2024-01-03T00:00:00Z",
-    updatedAt: "2024-01-03T00:00:00Z",
-  },
-  {
-    id: 4,
-    eventId: 4,
-    title: "오케스트라 앙상블",
-    description: "소규모 앙상블의 정교하고 섬세한 연주",
-    totalSeatCount: 200,
-    status: "ACTIVE",
-    createdAt: "2024-01-04T00:00:00Z",
-    updatedAt: "2024-01-04T00:00:00Z",
-  },
-  {
-    id: 5,
-    eventId: 5,
-    title: "합창단 정기공연",
-    description: "아름다운 하모니를 선보이는 합창 공연",
-    totalSeatCount: 600,
-    status: "ACTIVE",
-    createdAt: "2024-01-05T00:00:00Z",
-    updatedAt: "2024-01-05T00:00:00Z",
-  },
-]
-
 const mockVenues: Venue[] = [
   {
     venueId: 1,
-    venueName: "서울예술의전당",
-    address: "서울특별시 서초구 남부순환로 2406",
-    city: "서울",
-    state: "서초구",
-    zipcode: "06579",
-    country: "대한민국",
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-01T00:00:00Z",
-  },
-  {
-    venueId: 2,
-    venueName: "예술의전당 IBK챔버홀",
-    address: "서울특별시 서초구 남부순환로 2406",
-    city: "서울",
-    state: "서초구",
-    zipcode: "06579",
-    country: "대한민국",
-    createdAt: "2024-01-01T00:00:00Z",
-    updatedAt: "2024-01-01T00:00:00Z",
-  },
-  {
-    venueId: 3,
-    venueName: "롯데콘서트홀",
-    address: "서울특별시 송파구 올림픽로 240",
+    venueName: "올림픽공원",
     city: "서울",
     state: "송파구",
+    address: "서울특별시 송파구 올림픽로 25",
     zipcode: "05564",
     country: "대한민국",
     createdAt: "2024-01-01T00:00:00Z",
     updatedAt: "2024-01-01T00:00:00Z",
   },
   {
-    venueId: 4,
-    venueName: "세종문화회관",
-    address: "서울특별시 종로구 세종로 175",
+    venueId: 2,
+    venueName: "잠실실내체육관",
     city: "서울",
-    state: "종로구",
-    zipcode: "03141",
+    state: "송파구",
+    address: "서울특별시 송파구 올림픽로 25",
+    zipcode: "05564",
     country: "대한민국",
+    createdAt: "2024-01-01T00:00:00Z",
+    updatedAt: "2024-01-01T00:00:00Z",
+  },
+  {
+    venueId: 3,
+    venueName: "코엑스아티움",
+    city: "서울",
+    state: "강남구",
+    address: "서울특별시 강남구 삼성로 513",
+    zipcode: "06164",
+    country: "대한민국",
+    createdAt: "2024-01-01T00:00:00Z",
+    updatedAt: "2024-01-01T00:00:00Z",
+  },
+  {
+    venueId: 4,
+    venueName: "올림픽공원 체조경기장",
+    city: "서울",
+    state: "송파구",
+    address: "서울특별시 송파구 올림픽로 25",
+    zipcode: "05564",
+    country: "대한민국",
+    createdAt: "2024-01-01T00:00:00Z",
+    updatedAt: "2024-01-01T00:00:00Z",
+  },
+]
+
+const mockEvents = [
+  {
+    eventId: 1,
+    id: 1,
+    title: "BTS 콘서트",
+    description: "BTS 월드투어 2024",
+    genre: "K-POP",
+    ageLimit: 0,
+    thumbnailUrl: "/src/mock/img/1.png",
+    status: "APPROVED",
+    totalSeatCount: 15000,
+    createdAt: "2024-01-01T00:00:00Z",
+    updatedAt: "2024-01-01T00:00:00Z",
+  },
+  {
+    eventId: 2,
+    id: 2,
+    title: "뮤지컬 '레미제라블'",
+    description: "클래식 뮤지컬의 걸작",
+    genre: "뮤지컬",
+    ageLimit: 12,
+    thumbnailUrl: "/src/mock/img/2.png",
+    status: "APPROVED",
+    totalSeatCount: 2000,
+    createdAt: "2024-01-01T00:00:00Z",
+    updatedAt: "2024-01-01T00:00:00Z",
+  },
+  {
+    eventId: 3,
+    id: 3,
+    title: "클래식 콘서트",
+    description: "베토벤 교향곡 9번",
+    genre: "클래식",
+    ageLimit: 0,
+    thumbnailUrl: "/src/mock/img/3.png",
+    status: "APPROVED",
+    totalSeatCount: 3000,
+    createdAt: "2024-01-01T00:00:00Z",
+    updatedAt: "2024-01-01T00:00:00Z",
+  },
+  {
+    eventId: 4,
+    id: 4,
+    title: "재즈 페스티벌",
+    description: "서울 재즈 페스티벌 2024",
+    genre: "재즈",
+    ageLimit: 19,
+    thumbnailUrl: "/src/mock/img/1.png",
+    status: "APPROVED",
+    totalSeatCount: 5000,
+    createdAt: "2024-01-01T00:00:00Z",
+    updatedAt: "2024-01-01T00:00:00Z",
+  },
+  {
+    eventId: 5,
+    id: 5,
+    title: "팝 콘서트",
+    description: "글로벌 팝 스타 콘서트",
+    genre: "팝",
+    ageLimit: 0,
+    thumbnailUrl: "/src/mock/img/2.png",
+    status: "APPROVED",
+    totalSeatCount: 8000,
     createdAt: "2024-01-01T00:00:00Z",
     updatedAt: "2024-01-01T00:00:00Z",
   },
@@ -434,7 +448,6 @@ const generateMockBookings = (): BookingWithDetails[] => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
-      event,
       venue,
       seatClass,
       seat,
@@ -476,7 +489,6 @@ export const mockGetBookings = async (
     filteredBookings = filteredBookings.filter(
       (booking) =>
         booking.user.name.includes(filters.search!) ||
-        booking.event.title.includes(filters.search!) ||
         booking.venue.venueName.includes(filters.search!)
     )
   }
@@ -516,10 +528,19 @@ export const mockGetBookings = async (
 }
 
 export const mockGetBookingsByEvent = async (
-  eventId: number,
+  eventScheduleId: number,
   filters: BookingFilters = {}
 ): Promise<BookingListResponse> => {
-  const allBookings = generateMockBookings().filter((booking) => booking.event.id === eventId)
+  console.log("mockGetBookingsByEvent 호출됨 - eventScheduleId:", eventScheduleId)
+
+  // eventScheduleId로 필터링하도록 수정
+  const allBookings = generateMockBookings().filter(
+    (booking) => booking.eventSchedule.eventScheduleId === eventScheduleId
+  )
+
+  console.log("전체 예매 데이터 개수:", generateMockBookings().length)
+  console.log("필터링된 예매 데이터 개수:", allBookings.length)
+  console.log("필터링된 예매 데이터:", allBookings)
 
   let filteredBookings = allBookings
 
@@ -544,13 +565,16 @@ export const mockGetBookingsByEvent = async (
   const startIndex = (page - 1) * pageSize
   const endIndex = startIndex + pageSize
 
-  return {
+  const result = {
     bookings: filteredBookings.slice(startIndex, endIndex),
     total: filteredBookings.length,
     page,
     pageSize,
     totalPages: Math.ceil(filteredBookings.length / pageSize),
   }
+
+  console.log("반환할 결과:", result)
+  return result
 }
 
 export const mockGetBookingSummary = async (): Promise<BookingSummary> => {
@@ -581,8 +605,7 @@ export const mockGetBookingSummary = async (): Promise<BookingSummary> => {
 
 // BookingDisplay로 변환하는 함수
 export const convertToBookingDisplay = (bookingWithDetails: BookingWithDetails): BookingDisplay => {
-  const { booking, payment, event, eventSchedule, venue, seatClass, seat, user } =
-    bookingWithDetails
+  const { booking, payment, eventSchedule, venue, seatClass, seat, user } = bookingWithDetails
 
   const getPaymentStatusDisplay = (status: string): "결제완료" | "결제대기" | "환불됨" => {
     switch (status) {
@@ -602,10 +625,6 @@ export const convertToBookingDisplay = (bookingWithDetails: BookingWithDetails):
     orderNumber: `BK${booking.bookingId.toString().padStart(6, "0")}`,
     purchaseDate: booking.createdAt,
     customer: user.name,
-    event: {
-      name: event.title,
-      thumbnailUrl: event.id <= 3 ? `/src/mock/img/${event.id}.png` : "/placeholder.jpg",
-    },
     amount: payment.totalPrice,
     paymentStatus: getPaymentStatusDisplay(payment.status),
     paymentMethod: payment.method,

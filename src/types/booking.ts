@@ -1,5 +1,3 @@
-// ERD 기반 실제 API 구조에 맞는 타입 정의
-
 export interface Booking {
   bookingId: number
   eventScheduleId: number

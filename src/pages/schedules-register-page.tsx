@@ -87,10 +87,6 @@ function SchedulesRegisterPage() {
     // API 요청 데이터 구성 및 제출
     const requestData = createEventRequestData(eventData, scheduleForm, accountId, mode === "edit")
 
-    console.log("=== 생성된 요청 데이터 ===")
-    console.log("requestData:", requestData)
-    console.log("==========================")
-
     try {
       if (mode === "edit") {
         await updateEvent(requestData, eventId, accountId)
