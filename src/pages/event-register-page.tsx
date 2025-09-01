@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useRef } from "react"
+import React, { ChangeEvent, useEffect, useRef, useState } from "react"
 import { mockVenues } from "@/mock/venue-mock"
 import { useEventStore } from "@/store/eventStore"
 import { useScheduleFormStore } from "@/store/schedule-form-store"
@@ -8,6 +8,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 import { Button } from "@/components/catalyst-ui/button"
 import { Input } from "@/components/catalyst-ui/input"
 import { Select } from "@/components/catalyst-ui/select"
+import ReactQuillEditor from "@/components/rich-text-editor/react-quill"
 
 import { ageLimit, genreOptions, gradeOptions } from "../constants/event-register-options"
 import { PriceGrade } from "../types/event"
@@ -87,6 +88,19 @@ function EventRegisterPage() {
   const { resetScheduleFormData } = useScheduleFormStore()
   const { resetEventFormData } = useEventStore()
 
+  const [content, setContent] = useState("")
+
+  const handleEditorChange = (value: string) => {
+    setContent(value)
+    updateEventFormData({ description: value })
+  }
+
+  useEffect(() => {
+    if (eventFormData.description) {
+      setContent(eventFormData.description)
+    }
+  }, [eventFormData.description])
+
   useEffect(() => {
     console.log("=== EventRegisterPage useEffect 디버깅 ===")
     console.log("mode:", mode)
@@ -123,165 +137,187 @@ function EventRegisterPage() {
           </h1>
         </div>
 
-        <div className="space-y-8">
-          {/* 공연명 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">공연명</label>
-            <Input
-              type="text"
-              name="title"
-              value={eventFormData.title}
-              onChange={handleInputChange}
-              placeholder="공연명을 입력하세요"
-              className="max-w-md"
-            />
-          </div>
-
-          {/* 공연장 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">공연장</label>
-            <Select
-              value={eventFormData.venue || ""}
-              onChange={handleSelectChange("venue")}
-              className="max-w-md"
-            >
-              <option value="">공연장을 선택하세요</option>
-              {mockVenues.map((venue) => (
-                <option key={venue.value} value={venue.value}>
-                  {venue.label}
-                </option>
-              ))}
-            </Select>
-          </div>
-
-          {/* 장르 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">장르 선택</label>
-            <Select
-              value={eventFormData.genre || ""}
-              onChange={handleSelectChange("genre")}
-              className="max-w-md"
-            >
-              <option value="">장르를 선택하세요</option>
-              {genreOptions.map((genre) => (
-                <option key={genre.value} value={genre.value}>
-                  {genre.label}
-                </option>
-              ))}
-            </Select>
-          </div>
-
-          {/* 연령 제한 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">연령 제한</label>
-            <Select
-              value={eventFormData.ageLimit || ""}
-              onChange={handleSelectChange("ageLimit")}
-              className="max-w-md"
-            >
-              <option value="">연령 제한을 선택하세요</option>
-              {ageLimit.map((age) => (
-                <option key={age.value} value={age.value}>
-                  {age.label}
-                </option>
-              ))}
-            </Select>
-          </div>
-
-          {/* 공연 상세정보 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">공연 상세정보</label>
-            <textarea
-              name="description"
-              value={eventFormData.description}
-              onChange={handleInputChange}
-              className="w-[70%] px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[120px] resize-none"
-              placeholder="공연 상세정보를 입력하세요"
-            />
-          </div>
-
-          {/* 썸네일 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">썸네일</label>
-            <div className="flex items-center gap-4">
+        {/* Form Container */}
+        <div className="w-full lg:w-[70%]">
+          <div className="space-y-8">
+            {/* 공연명 */}
+            <div className="form-group">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                공연명 <span className="text-red-500">*</span>
+              </label>
               <Input
                 type="text"
-                placeholder="썸네일 불러오기"
-                value={eventFormData.thumbnail?.name || ""}
-                readOnly
-                className="max-w-md"
+                name="title"
+                value={eventFormData.title}
+                onChange={handleInputChange}
+                placeholder="공연명을 입력하세요"
+                className="w-full max-w-md"
               />
-              <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                accept="image/*"
-                onChange={handleThumbnailChange}
-              />
-              <Button
-                outline
-                onClick={() => fileInputRef.current?.click()}
-                className="cursor-pointer hover:bg-zinc-100 hover:text-zinc-900 transition-colors duration-200"
-              >
-                썸네일 업로드
-              </Button>
             </div>
-            {eventFormData.thumbnailPreview && (
-              <div className="mt-4">
-                <img
-                  src={eventFormData.thumbnailPreview}
-                  alt="썸네일 미리보기"
-                  className="max-w-[200px] rounded-lg shadow-md"
+
+            {/* 공연장 */}
+            <div className="form-group">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                공연장 <span className="text-red-500">*</span>
+              </label>
+              <Select
+                value={eventFormData.venue || ""}
+                onChange={handleSelectChange("venue")}
+                className="w-full max-w-md"
+              >
+                <option value="">공연장을 선택하세요</option>
+                {mockVenues.map((venue) => (
+                  <option key={venue.value} value={venue.value}>
+                    {venue.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+
+            {/* 장르 */}
+            <div className="form-group">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                장르 선택 <span className="text-red-500">*</span>
+              </label>
+              <Select
+                value={eventFormData.genre || ""}
+                onChange={handleSelectChange("genre")}
+                className="w-full max-w-md"
+              >
+                <option value="">장르를 선택하세요</option>
+                {genreOptions.map((genre) => (
+                  <option key={genre.value} value={genre.value}>
+                    {genre.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+
+            {/* 연령 제한 */}
+            <div className="form-group">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                연령 제한 <span className="text-red-500">*</span>
+              </label>
+              <Select
+                value={eventFormData.ageLimit || ""}
+                onChange={handleSelectChange("ageLimit")}
+                className="w-full max-w-md"
+              >
+                <option value="">연령 제한을 선택하세요</option>
+                {ageLimit.map((age) => (
+                  <option key={age.value} value={age.value}>
+                    {age.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+
+            {/* 공연 상세정보 */}
+            <div className="form-group">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                공연 상세정보 <span className="text-red-500">*</span>
+              </label>
+              <div className="w-full mb-16">
+                <ReactQuillEditor
+                  value={content}
+                  onChange={handleEditorChange}
+                  style={{
+                    width: "100%",
+                    height: "200px",
+                    minHeight: "200px",
+                  }}
                 />
               </div>
-            )}
-          </div>
+            </div>
 
-          {/* 등급별 가격 설정 */}
-          <div className="w-[70%]">
-            <label className="block text-sm font-medium text-gray-700 mb-4">등급별 가격 설정</label>
-            <div className="space-y-4">
-              {eventFormData.priceGrades.map((grade, index) => (
-                <div key={index} className="grid grid-cols-[1fr_1fr_auto] gap-4 items-center">
-                  <div className="w-full">
-                    <Select
-                      value={grade.grade || ""}
-                      onChange={(e) => handlePriceGradeChange(index, "grade", e.target.value)}
-                      className="w-full"
-                    >
-                      <option value="">등급을 선택하세요</option>
-                      {gradeOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </Select>
-                  </div>
-                  <div className="w-full">
-                    <Input
-                      type="number"
-                      value={grade.price}
-                      onChange={(e) =>
-                        handlePriceGradeChange(index, "price", parseInt(e.target.value))
-                      }
-                      placeholder="가격을 입력하세요"
-                      step="1000"
-                      className="w-full"
-                    />
-                  </div>
-                  <div className="w-20">
-                    {index === eventFormData.priceGrades.length - 1 && (
-                      <Button
-                        outline
-                        onClick={handleAddPriceGrade}
-                        className="cursor-pointer hover:bg-zinc-100 hover:text-zinc-900 transition-colors duration-200"
-                      >
-                        추가
-                      </Button>
-                    )}
-                  </div>
+            {/* 썸네일 */}
+            <div className="form-group">
+              <label className="block text-sm font-medium text-gray-700 mb-2">썸네일</label>
+              <div className="flex items-center gap-4 flex-wrap">
+                <Input
+                  type="text"
+                  placeholder="썸네일 불러오기"
+                  value={eventFormData.thumbnail?.name || ""}
+                  readOnly
+                  className="flex-1 max-w-md"
+                />
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleThumbnailChange}
+                />
+                <Button
+                  outline
+                  onClick={() => fileInputRef.current?.click()}
+                  className="cursor-pointer hover:bg-zinc-100 hover:text-zinc-900 transition-colors duration-200 whitespace-nowrap"
+                >
+                  썸네일 업로드
+                </Button>
+              </div>
+              {eventFormData.thumbnailPreview && (
+                <div className="mt-4">
+                  <img
+                    src={eventFormData.thumbnailPreview}
+                    alt="썸네일 미리보기"
+                    className="max-w-[200px] rounded-lg shadow-md"
+                  />
                 </div>
-              ))}
+              )}
+            </div>
+
+            {/* 등급별 가격 설정 */}
+            <div className="form-group">
+              <label className="block text-sm font-medium text-gray-700 mb-4">
+                등급별 가격 설정
+              </label>
+              <div className="space-y-4">
+                {eventFormData.priceGrades.map((grade, index) => (
+                  <div
+                    key={index}
+                    className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 items-center"
+                  >
+                    <div className="w-full">
+                      <Select
+                        value={grade.grade || ""}
+                        onChange={(e) => handlePriceGradeChange(index, "grade", e.target.value)}
+                        className="w-full"
+                      >
+                        <option value="">등급을 선택하세요</option>
+                        {gradeOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </Select>
+                    </div>
+                    <div className="w-full">
+                      <Input
+                        type="number"
+                        value={grade.price}
+                        onChange={(e) =>
+                          handlePriceGradeChange(index, "price", parseInt(e.target.value))
+                        }
+                        placeholder="가격을 입력하세요"
+                        step="1000"
+                        className="w-full"
+                      />
+                    </div>
+                    <div className="w-full md:w-20">
+                      {index === eventFormData.priceGrades.length - 1 && (
+                        <Button
+                          outline
+                          onClick={handleAddPriceGrade}
+                          className="cursor-pointer hover:bg-zinc-100 hover:text-zinc-900 transition-colors duration-200 w-full md:w-auto"
+                        >
+                          추가
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

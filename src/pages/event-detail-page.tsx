@@ -243,7 +243,7 @@ const EventDetailPage = () => {
           </div>
         </div>
         {/* Recent Orders Table */}
-        <div>
+        <div className="mb-8">
           <h2 className="text-lg font-semibold text-gray-900 mb-5">등급 및 가격</h2>
           <Table>
             <TableHead>
@@ -267,6 +267,21 @@ const EventDetailPage = () => {
                 ))}
             </TableBody>
           </Table>
+        </div>
+
+        {/* 상세정보 */}
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-5">상세정보</h2>
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            {eventData.description ? (
+              <div
+                className="prose max-w-none"
+                dangerouslySetInnerHTML={{ __html: eventData.description }}
+              />
+            ) : (
+              <p className="text-gray-500">상세정보가 없습니다.</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
