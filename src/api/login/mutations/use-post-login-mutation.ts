@@ -16,7 +16,12 @@ export const usePostLoginMutation = () => {
 
       // 성공 알림 표시
       ;(
-        window as typeof window & { showAuthNotification?: (message: string, type: string) => void }
+        window as typeof window & {
+          showAuthNotification?: (
+            message: string,
+            type: "success" | "error" | "warning" | "info"
+          ) => void
+        }
       ).showAuthNotification?.("로그인에 성공했습니다.", "success")
 
       navigate("/main")

@@ -121,7 +121,10 @@ baseClient.interceptors.response.use(
         processQueue(null, currentToken)
         ;(
           window as typeof window & {
-            showAuthNotification?: (message: string, type: string) => void
+            showAuthNotification?: (
+              message: string,
+              type: "success" | "error" | "warning" | "info"
+            ) => void
           }
         ).showAuthNotification?.("토큰이 갱신되었습니다.", "success")
         return baseClient(originalRequest)

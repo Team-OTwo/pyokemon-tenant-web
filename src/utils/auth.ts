@@ -75,7 +75,12 @@ export const logout = (reason?: "expired" | "unauthorized" | "manual") => {
   }
 
   ;(
-    window as typeof window & { showAuthNotification?: (message: string, type: string) => void }
+    window as typeof window & {
+      showAuthNotification?: (
+        message: string,
+        type: "success" | "error" | "warning" | "info"
+      ) => void
+    }
   ).showAuthNotification?.(message, type)
 
   // React Router navigate 대신 window.location 사용 (현재 라우터 컨텍스트 밖에서 호출될 수 있음)

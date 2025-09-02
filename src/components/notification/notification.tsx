@@ -32,12 +32,22 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   // 전역 함수로 알림 함수 노출
   React.useEffect(() => {
     ;(
-      window as typeof window & { showAuthNotification?: (message: string, type: string) => void }
+      window as typeof window & {
+        showAuthNotification?: (
+          message: string,
+          type: "success" | "error" | "warning" | "info"
+        ) => void
+      }
     ).showAuthNotification = showNotification
 
     return () => {
       delete (
-        window as typeof window & { showAuthNotification?: (message: string, type: string) => void }
+        window as typeof window & {
+          showAuthNotification?: (
+            message: string,
+            type: "success" | "error" | "warning" | "info"
+          ) => void
+        }
       ).showAuthNotification
     }
   }, [])
