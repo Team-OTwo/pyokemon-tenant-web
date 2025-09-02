@@ -1,3 +1,5 @@
+import { PLACEHOLDER_IMAGE } from "@/constants/default-images"
+
 import { EventFormData, EventRequestData, EventType, PriceGrade } from "@/types/event"
 import { ScheduleFormData } from "@/types/schedule"
 
@@ -274,8 +276,7 @@ export const getEvents = async (accountId: number): Promise<EventType[]> => {
         const eventWithStatus = {
           ...firstItem,
           status: firstItem.status || "PENDING", // 기본값으로 PENDING 설정
-          thumbnailUrl:
-            firstItem.thumbnailUrl || "https://via.placeholder.com/300x200?text=No+Image", // 기본 이미지 설정
+          thumbnailUrl: firstItem.thumbnailUrl || PLACEHOLDER_IMAGE, // 기본 이미지 설정
         }
 
         // 이미 EventType 형식인 경우 그대로 사용
@@ -302,8 +303,7 @@ export const getEvents = async (accountId: number): Promise<EventType[]> => {
         const eventWithStatus = {
           ...firstItem,
           status: firstItem.status || "PENDING",
-          thumbnailUrl:
-            firstItem.thumbnailUrl || "https://via.placeholder.com/300x200?text=No+Image",
+          thumbnailUrl: firstItem.thumbnailUrl || PLACEHOLDER_IMAGE,
         }
 
         if (eventWithStatus.title && eventWithStatus.venueName) {
@@ -357,7 +357,7 @@ export const getEventById = async (eventId: number, accountId: number): Promise<
     const eventWithDefaults = {
       ...eventData,
       status: eventData.status || "PENDING",
-      thumbnailUrl: eventData.thumbnailUrl || "https://via.placeholder.com/300x200?text=No+Image",
+      thumbnailUrl: eventData.thumbnailUrl || PLACEHOLDER_IMAGE,
     }
 
     // 이미 EventType 형식인 경우 그대로 사용
@@ -408,8 +408,7 @@ export const getTenantSchedules = async (accountId: number): Promise<EventType[]
         const eventWithStatus = {
           ...firstItem,
           status: firstItem.status || "PENDING", // 기본값으로 PENDING 설정
-          thumbnailUrl:
-            firstItem.thumbnailUrl || "https://via.placeholder.com/300x200?text=No+Image", // 기본 이미지 설정
+          thumbnailUrl: firstItem.thumbnailUrl || PLACEHOLDER_IMAGE, // 기본 이미지 설정
         }
 
         // 이미 EventType 형식인 경우 그대로 사용
@@ -436,8 +435,7 @@ export const getTenantSchedules = async (accountId: number): Promise<EventType[]
         const eventWithStatus = {
           ...firstItem,
           status: firstItem.status || "PENDING",
-          thumbnailUrl:
-            firstItem.thumbnailUrl || "https://via.placeholder.com/300x200?text=No+Image",
+          thumbnailUrl: firstItem.thumbnailUrl || PLACEHOLDER_IMAGE,
         }
 
         if (eventWithStatus.title && eventWithStatus.venueName) {
@@ -500,7 +498,7 @@ export const getTenantEventDetail = async (
     const eventWithDefaults = {
       ...eventData,
       status: eventData.status || "PENDING",
-      thumbnailUrl: eventData.thumbnailUrl || "https://via.placeholder.com/300x200?text=No+Image",
+      thumbnailUrl: eventData.thumbnailUrl || PLACEHOLDER_IMAGE,
     }
 
     // 이미 EventType 형식인 경우 그대로 사용

@@ -1,8 +1,7 @@
 import { useMutation } from "@tanstack/react-query"
 import { useNavigate } from "react-router-dom"
 
-import { LoginRequest } from "../../../types/login"
-import { setAuthorizationHeader } from "../../client"
+import { setAccountId, setTokens } from "../../../utils/auth"
 import { postLogin } from "../fetchers/post-login"
 
 export const usePostLoginMutation = () => {
@@ -11,13 +10,15 @@ export const usePostLoginMutation = () => {
   return useMutation({
     mutationFn: postLogin,
     onSuccess: (response) => {
-      // 토큰과 accountId를 localStorage에 저장
-      localStorage.setItem("accessToken", response.data.accessToken)
-      localStorage.setItem("refreshToken", response.data.refreshToken)
-      localStorage.setItem("accountId", response.data.accountId.toString())
+      // 토큰 저장 및 인증 헤더 설정
+      setTokens(response.data.accessToken, response.data.refreshToken)
+      setAccountId(response.data.accountId)
 
-      // 인증 헤더 설정
-      setAuthorizationHeader(response.data.accessToken)
+      // 성공 알림 표시
+      ;(
+        window as typeof window & { showAuthNotification?: (message: string, type: string) => void }
+      ).showAuthNotification?.("로그인에 성공했습니다.", "success")
+
       navigate("/main")
     },
     onError: (error) => {

@@ -115,6 +115,9 @@ export interface BookingWithDetails {
 export interface BookingFilters {
   search?: string
   status?: string
+  paymentStatus?: string
+  dateFrom?: string
+  dateTo?: string
   page?: number
   pageSize?: number
 }

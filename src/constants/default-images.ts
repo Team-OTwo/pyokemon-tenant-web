@@ -1,0 +1,7 @@
+// 기본 이미지 URL 상수
+export const DEFAULT_EVENT_IMAGE = "/images/default-event-image.png"
+export const DEFAULT_THUMBNAIL_IMAGE = "/images/default-thumbnail.png"
+
+// 임시로 사용할 수 있는 안정적인 placeholder 이미지
+export const PLACEHOLDER_IMAGE =
+  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2YzZjRmNiIvPgogIDx0ZXh0IHg9IjE1MCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjgiIGZpbGw9IiM5Y2EzYWYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmb250LXdlaWdodD0iYm9sZCI+Tm8gSW1hZ2U8L3RleHQ+Cjwvc3ZnPg=="

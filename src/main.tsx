@@ -5,11 +5,16 @@ import ReactDOM from "react-dom/client"
 import { RouterProvider } from "react-router-dom"
 import { ThemeProvider } from "styled-components"
 
+import { NotificationProvider } from "./components/notification/notification"
 import router from "./routes"
 import styledComponentsTheme from "./styles/styled-components/styled-components-theme"
+import { initializeAuth } from "./utils/auth"
 
 import "./styles/global-styles"
 import "./index.css"
+
+// 앱 시작 시 인증 초기화
+initializeAuth()
 
 // React Query 클라이언트 생성
 const queryClient = new QueryClient({
@@ -26,8 +31,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={styledComponentsTheme}>
-        <RouterProvider router={router} />
-        {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+        <NotificationProvider>
+          <RouterProvider router={router} />
+          {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+        </NotificationProvider>
       </ThemeProvider>
     </QueryClientProvider>
   </React.StrictMode>

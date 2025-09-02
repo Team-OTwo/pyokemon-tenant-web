@@ -28,7 +28,7 @@ export default defineConfig({
         secure: false,
       },
       "/bff/api": {
-        target: "http://localhost:8086",
+        target: "http://localhost:8087",
         changeOrigin: true,
         secure: false,
       },

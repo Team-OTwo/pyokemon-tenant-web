@@ -81,12 +81,19 @@ const EventDetailPage = () => {
       thumbnail: null,
       thumbnailPreview: event.thumbnailUrl || "",
       priceGrades:
+        event.seatPrice?.map((price) => ({
+          priceId: undefined,
+          grade: price.className,
+          price: price.price,
+          seatClassId: undefined,
+        })) ||
         event.prices?.map((price) => ({
           priceId: price.priceId,
           grade: price.grade,
           price: price.price,
           seatClassId: price.seatClassId,
-        })) || [],
+        })) ||
+        [],
     }
   }
 
@@ -253,14 +260,16 @@ const EventDetailPage = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {eventData.prices
+              {(eventData.seatPrice || eventData.prices)
                 ?.filter((price) => price.price > 0)
                 .map((price, index) => (
                   <TableRow key={index}>
                     <TableCell className="font-medium">
-                      {price.seatClassId
-                        ? convertSeatClassIdToGrade(price.seatClassId)
-                        : price.grade}
+                      {"className" in price
+                        ? price.className
+                        : price.seatClassId
+                          ? convertSeatClassIdToGrade(price.seatClassId)
+                          : price.grade}
                     </TableCell>
                     <TableCell>{formatCurrency(price.price)}</TableCell>
                   </TableRow>
