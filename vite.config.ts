@@ -17,13 +17,18 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      "/event/uploads": {
+        target: "http://localhost:8081",
+        changeOrigin: true,
+        secure: false,
+      },
       "/account/api": {
         target: "http://localhost:8080",
         changeOrigin: true,
         secure: false,
       },
       "/bff/api": {
-        target: "http://localhost:8086",
+        target: "http://localhost:8087",
         changeOrigin: true,
         secure: false,
       },

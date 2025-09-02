@@ -72,6 +72,10 @@ export interface EventType {
     price: number
     seatClassId?: number
   }>
+  seatPrice?: Array<{
+    className: string
+    price: number
+  }>
   status: EventStatus
 }
 

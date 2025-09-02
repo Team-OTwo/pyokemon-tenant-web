@@ -1,12 +1,9 @@
 import {
-  Booking,
-  BookingDisplay,
   BookingFilters,
   BookingListResponse,
   BookingSummary,
   BookingWithDetails,
-  EventSchedule,
-  Payment,
+  Event,
   Seat,
   SeatClass,
   User,
@@ -144,16 +141,13 @@ const mockVenues: Venue[] = [
   },
 ]
 
-const mockEvents = [
+const mockEvents: Event[] = [
   {
     eventId: 1,
     id: 1,
     title: "BTS 콘서트",
     description: "BTS 월드투어 2024",
-    genre: "K-POP",
-    ageLimit: 0,
-    thumbnailUrl: "/src/mock/img/1.png",
-    status: "APPROVED",
+    status: "ACTIVE",
     totalSeatCount: 15000,
     createdAt: "2024-01-01T00:00:00Z",
     updatedAt: "2024-01-01T00:00:00Z",
@@ -163,10 +157,7 @@ const mockEvents = [
     id: 2,
     title: "뮤지컬 '레미제라블'",
     description: "클래식 뮤지컬의 걸작",
-    genre: "뮤지컬",
-    ageLimit: 12,
-    thumbnailUrl: "/src/mock/img/2.png",
-    status: "APPROVED",
+    status: "ACTIVE",
     totalSeatCount: 2000,
     createdAt: "2024-01-01T00:00:00Z",
     updatedAt: "2024-01-01T00:00:00Z",
@@ -176,10 +167,7 @@ const mockEvents = [
     id: 3,
     title: "클래식 콘서트",
     description: "베토벤 교향곡 9번",
-    genre: "클래식",
-    ageLimit: 0,
-    thumbnailUrl: "/src/mock/img/3.png",
-    status: "APPROVED",
+    status: "ACTIVE",
     totalSeatCount: 3000,
     createdAt: "2024-01-01T00:00:00Z",
     updatedAt: "2024-01-01T00:00:00Z",
@@ -189,10 +177,7 @@ const mockEvents = [
     id: 4,
     title: "재즈 페스티벌",
     description: "서울 재즈 페스티벌 2024",
-    genre: "재즈",
-    ageLimit: 19,
-    thumbnailUrl: "/src/mock/img/1.png",
-    status: "APPROVED",
+    status: "ACTIVE",
     totalSeatCount: 5000,
     createdAt: "2024-01-01T00:00:00Z",
     updatedAt: "2024-01-01T00:00:00Z",
@@ -202,10 +187,7 @@ const mockEvents = [
     id: 5,
     title: "팝 콘서트",
     description: "글로벌 팝 스타 콘서트",
-    genre: "팝",
-    ageLimit: 0,
-    thumbnailUrl: "/src/mock/img/2.png",
-    status: "APPROVED",
+    status: "ACTIVE",
     totalSeatCount: 8000,
     createdAt: "2024-01-01T00:00:00Z",
     updatedAt: "2024-01-01T00:00:00Z",
@@ -448,6 +430,16 @@ const generateMockBookings = (): BookingWithDetails[] => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
+      event: {
+        id: event.id,
+        eventId: event.eventId,
+        title: event.title,
+        description: event.description,
+        totalSeatCount: event.totalSeatCount,
+        status: event.status,
+        createdAt: event.createdAt,
+        updatedAt: event.updatedAt,
+      },
       venue,
       seatClass,
       seat,
@@ -600,37 +592,5 @@ export const mockGetBookingSummary = async (): Promise<BookingSummary> => {
     pendingPayments,
     canceledBookings,
     averageTicketPrice,
-  }
-}
-
-// BookingDisplay로 변환하는 함수
-export const convertToBookingDisplay = (bookingWithDetails: BookingWithDetails): BookingDisplay => {
-  const { booking, payment, eventSchedule, venue, seatClass, seat, user } = bookingWithDetails
-
-  const getPaymentStatusDisplay = (status: string): "결제완료" | "결제대기" | "환불됨" => {
-    switch (status) {
-      case "COMPLETED":
-        return "결제완료"
-      case "PENDING":
-        return "결제대기"
-      case "REFUNDED":
-        return "환불됨"
-      default:
-        return "결제대기"
-    }
-  }
-
-  return {
-    id: booking.bookingId.toString(),
-    orderNumber: `BK${booking.bookingId.toString().padStart(6, "0")}`,
-    purchaseDate: booking.createdAt,
-    customer: user.name,
-    amount: payment.totalPrice,
-    paymentStatus: getPaymentStatusDisplay(payment.status),
-    paymentMethod: payment.method,
-    seatClass: seatClass.className,
-    seatInfo: `${seat.floor} ${seat.seatNumber}`,
-    venue: venue.venueName,
-    eventDate: eventSchedule.eventDate,
   }
 }

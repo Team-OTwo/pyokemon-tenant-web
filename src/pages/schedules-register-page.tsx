@@ -12,7 +12,6 @@ import { useScheduleFormStore } from "@/store/schedule-form-store"
 import { getAccountId } from "@/utils/auth"
 import { useLocation, useNavigate } from "react-router-dom"
 
-import { ExtendedEventData } from "@/types/schedule"
 import { useScheduleForm } from "@/hooks/useScheduleForm"
 import { Button } from "@/components/catalyst-ui/button"
 import { Select } from "@/components/catalyst-ui/select"

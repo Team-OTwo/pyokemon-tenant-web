@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react"
-import { getBookings, getBookingsByEvent, getBookingsByEventSchedule } from "@/api/booking-api"
+import React, { useCallback, useEffect, useState } from "react"
+import { getBookings, getBookingsByEvent } from "@/api/booking-api"
+import baseClient from "@/api/client/base-client"
 import { ArrowUturnLeftIcon } from "@heroicons/react/24/outline"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 
@@ -9,11 +10,8 @@ import {
   BookingFilters,
   BookingListResponse,
 } from "@/types/booking"
-import { Button } from "@/components/catalyst-ui/button"
-import { Heading } from "@/components/catalyst-ui/heading"
 import {
   Pagination,
-  PaginationGap,
   PaginationList,
   PaginationNext,
   PaginationPage,
@@ -61,18 +59,11 @@ const BookingsPage = () => {
   }
 
   // 데이터 로딩
-  const fetchBookings = async () => {
+  const fetchBookings = useCallback(async () => {
     setLoading(true)
     try {
       // 실제 API 호출 (eventScheduleId가 있을 때)
       if (eventScheduleId) {
-        // JWT 토큰 가져오기
-        const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken")
-
-        if (!token) {
-          throw new Error("인증 토큰이 없습니다.")
-        }
-
         // 백엔드는 0부터 시작하는 페이지 번호를 사용하므로 변환
         const backendPage = (filters.page || 1) - 1
 
@@ -93,22 +84,9 @@ const BookingsPage = () => {
           queryParams.append("status", filters.status)
         }
 
-        const response = await fetch(
-          `http://localhost:8087/bff/api/v1/bookings?${queryParams.toString()}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        )
+        const response = await baseClient.get(`/bff/api/v1/bookings?${queryParams.toString()}`)
 
-        if (!response.ok) {
-          throw new Error(`API 요청 실패: ${response.status}`)
-        }
-
-        const apiResponse: BookingApiResponse = await response.json()
+        const apiResponse: BookingApiResponse = response.data
 
         // API 응답 구조 확인 및 안전한 처리
         console.log("API 응답:", apiResponse)
@@ -177,7 +155,7 @@ const BookingsPage = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [eventScheduleId, filters, eventId])
 
   // 필터 변경 핸들러
   const handleFiltersChange = (newFilters: BookingFilters) => {
