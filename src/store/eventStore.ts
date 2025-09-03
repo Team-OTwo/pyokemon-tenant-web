@@ -19,5 +19,11 @@ export const useEventStore = create<EventStore>((set) => ({
       eventFormData: { ...state.eventFormData, ...updates },
     })),
 
-  resetEventFormData: () => set({ eventFormData: initialEventFormData }),
+  resetEventFormData: () =>
+    set({
+      eventFormData: {
+        ...initialEventFormData,
+        priceGrades: [{ priceId: undefined, grade: "", price: 0, seatClassId: undefined }],
+      },
+    }),
 }))

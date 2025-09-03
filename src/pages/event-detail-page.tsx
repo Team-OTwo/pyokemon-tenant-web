@@ -72,10 +72,26 @@ const EventDetailPage = () => {
   }
 
   function convertEventToFormData(event: EventType): EventFormData {
+    // 연령제한 숫자를 문자열로 변환하는 함수
+    const convertAgeLimitToString = (ageLimit: number): string => {
+      switch (ageLimit) {
+        case 0:
+          return "전체관람가"
+        case 12:
+          return "12세 이상"
+        case 15:
+          return "15세 이상"
+        case 19:
+          return "19세 이상"
+        default:
+          return "전체관람가" // 기본값
+      }
+    }
+
     return {
       title: event.title,
-      venue: String(event.venueId || ""), // venueId를 venue 필드에 설정
-      ageLimit: event.ageLimit.toString(),
+      venue: event.venueName?.trim() || "", // venueName을 venue 필드에 설정하고 공백 제거
+      ageLimit: convertAgeLimitToString(event.ageLimit),
       genre: event.genre,
       description: event.description,
       thumbnail: null,
@@ -107,6 +123,13 @@ const EventDetailPage = () => {
 
     // 기존 공연의 실제 데이터를 이벤트 폼에 설정
     const eventFormData = convertEventToFormData(eventData)
+
+    console.log("=== handleEdit 디버깅 ===")
+    console.log("원본 eventData:", eventData)
+    console.log("변환된 eventFormData:", eventFormData)
+    console.log("venueName:", eventData.venueName)
+    console.log("venue 필드:", eventFormData.venue)
+    console.log("==========================")
 
     navigate("/event-register", {
       state: {

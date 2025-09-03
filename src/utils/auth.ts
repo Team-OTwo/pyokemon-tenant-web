@@ -46,9 +46,68 @@ export function isTokenExpired(token: string): boolean {
   try {
     const payload = JSON.parse(atob(token.split(".")[1]))
     const currentTime = Date.now() / 1000
-    return payload.exp < currentTime
-  } catch {
+    const isExpired = payload.exp < currentTime
+
+    if (isExpired) {
+      console.log("토큰이 만료되었습니다. 만료 시간:", new Date(payload.exp * 1000))
+    }
+
+    return isExpired
+  } catch (error) {
+    console.error("토큰 파싱 오류:", error)
     return true
+  }
+}
+
+// 토큰 정보 디버깅
+export function getTokenInfo(token: string) {
+  if (!token) return null
+
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]))
+    const currentTime = Date.now() / 1000
+    const timeUntilExpiry = payload.exp - currentTime
+
+    return {
+      issuedAt: new Date(payload.iat * 1000),
+      expiresAt: new Date(payload.exp * 1000),
+      timeUntilExpiry: timeUntilExpiry,
+      isExpired: timeUntilExpiry < 0,
+      willExpireSoon: timeUntilExpiry < 600, // 10분 이내
+    }
+  } catch (error) {
+    console.error("토큰 정보 파싱 오류:", error)
+    return null
+  }
+}
+
+// 브라우저 콘솔에서 토큰 상태 확인을 위한 전역 함수
+declare global {
+  interface Window {
+    checkTokenStatus?: () => void
+  }
+}
+
+if (typeof window !== "undefined") {
+  window.checkTokenStatus = () => {
+    const accessToken = getAccessToken()
+    const refreshToken = getRefreshToken()
+
+    console.log("=== 토큰 상태 확인 ===")
+    console.log("Access Token 존재:", !!accessToken)
+    console.log("Refresh Token 존재:", !!refreshToken)
+
+    if (accessToken) {
+      const accessTokenInfo = getTokenInfo(accessToken)
+      console.log("Access Token 정보:", accessTokenInfo)
+    }
+
+    if (refreshToken) {
+      const refreshTokenInfo = getTokenInfo(refreshToken)
+      console.log("Refresh Token 정보:", refreshTokenInfo)
+    }
+
+    console.log("=====================")
   }
 }
 

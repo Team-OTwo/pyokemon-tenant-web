@@ -180,12 +180,12 @@ export const submitEvent = async (
   accountId: number
 ): Promise<void> => {
   console.log("=== 공연 등록 API 호출 ===")
-  console.log("URL:", `/event/api/events/tenant`)
+  console.log("URL:", `/api/events/tenant`)
   console.log("accountId:", accountId)
   console.log("requestData:", JSON.stringify(requestData, null, 2))
   console.log("==========================")
 
-  const response = await client.post(`/event/api/events/tenant`, requestData, {
+  const response = await client.post(`/api/events/tenant`, requestData, {
     params: { accountId },
   })
 
@@ -200,14 +200,14 @@ export const updateEvent = async (
   accountId: number
 ): Promise<void> => {
   console.log("=== 공연 수정 API 호출 ===")
-  console.log("URL:", `/event/api/events/tenant/${eventId}`)
+  console.log("URL:", `/api/events/tenant/${eventId}`)
   console.log("eventId:", eventId)
   console.log("accountId:", accountId)
   console.log("requestData:", JSON.stringify(requestData, null, 2))
   console.log("==========================")
 
   const response = await client.put(
-    `/event/api/events/tenant/${eventId}`,
+    `/api/events/tenant/${eventId}`,
     {
       eventId: eventId,
       title: requestData.title,
@@ -240,7 +240,7 @@ export const updateEvent = async (
 
 export const getEvents = async (accountId: number): Promise<EventType[]> => {
   try {
-    const response = await client.get(`/event/api/events?accountId=${accountId}`)
+    const response = await client.get(`/api/events?accountId=${accountId}`)
 
     console.log("API 응답 상태:", response.status)
     console.log("API 응답 헤더:", response.headers)
@@ -322,35 +322,20 @@ export const getEvents = async (accountId: number): Promise<EventType[]> => {
 
 export const getEventById = async (eventId: number, accountId: number): Promise<EventType> => {
   try {
-    const response = await fetch(`/event/api/events/${eventId}?accountId=${accountId}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+    const response = await client.get(`/api/events/${eventId}`, {
+      params: { accountId },
     })
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error("API 에러 응답:", errorText)
+    console.log("API 응답 상태:", response.status)
+    console.log("API 응답 데이터:", response.data)
+
+    if (!response.data.success) {
+      console.error("API 에러 응답:", response.data)
       throw new Error(`공연 상세 조회에 실패했습니다. (${response.status})`)
     }
 
-    const responseText = await response.text()
-    console.log("API 응답 텍스트:", responseText)
-
-    // JSON 파싱 시도
-    let data
-    try {
-      data = JSON.parse(responseText)
-    } catch (parseError) {
-      console.error("JSON 파싱 실패:", parseError)
-      console.error("응답이 JSON이 아닙니다:", responseText)
-      throw new Error("서버에서 유효하지 않은 JSON 응답을 받았습니다.")
-    }
-    console.log("API 응답 데이터:", data)
-
     // API 응답에서 data 필드 추출
-    const eventData = data.data || data
+    const eventData = response.data.data || response.data
     console.log("이벤트 상세 데이터:", eventData)
 
     // status와 thumbnailUrl에 기본값 설정
@@ -374,7 +359,7 @@ export const getEventById = async (eventId: number, accountId: number): Promise<
 
 export const getTenantSchedules = async (accountId: number): Promise<EventType[]> => {
   try {
-    const response = await client.get(`/event/api/events/tenant?account_id=${accountId}`)
+    const response = await client.get(`/api/events/tenant?account_id=${accountId}`)
 
     if (!response.data.success) {
       console.error("API 에러 응답:", response.data)
@@ -457,41 +442,20 @@ export const getTenantEventDetail = async (
   accountId: number
 ): Promise<EventType> => {
   try {
-    const response = await fetch(
-      `/event/api/events/tenant/${eventId}/detail?accountId=${accountId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    )
+    const response = await client.get(`/api/events/tenant/${eventId}/detail`, {
+      params: { accountId },
+    })
 
     console.log("API 응답 상태:", response.status)
-    console.log("API 응답 헤더:", response.headers)
+    console.log("API 응답 데이터:", response.data)
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error("API 에러 응답:", errorText)
+    if (!response.data.success) {
+      console.error("API 에러 응답:", response.data)
       throw new Error(`테넌트 이벤트 상세 조회에 실패했습니다. (${response.status})`)
     }
 
-    const responseText = await response.text()
-    console.log("API 응답 텍스트:", responseText)
-
-    // JSON 파싱 시도
-    let data
-    try {
-      data = JSON.parse(responseText)
-    } catch (parseError) {
-      console.error("JSON 파싱 실패:", parseError)
-      console.error("응답이 JSON이 아닙니다:", responseText)
-      throw new Error("서버에서 유효하지 않은 JSON 응답을 받았습니다.")
-    }
-    console.log("API 응답 데이터:", data)
-
     // API 응답에서 data 필드 추출
-    const eventData = data.data || data
+    const eventData = response.data.data || response.data
     console.log("이벤트 상세 데이터:", eventData)
 
     // status와 thumbnailUrl에 기본값 설정
@@ -515,11 +479,9 @@ export const getTenantEventDetail = async (
 
 export const deleteEvent = async (eventId: number): Promise<void> => {
   try {
-    const response = await fetch(`/event/api/events/tenant/${eventId}`, {
-      method: "POST",
-    })
+    const response = await client.delete(`/api/events/tenant/${eventId}`)
 
-    if (!response.ok) {
+    if (!response.data.success) {
       throw new Error(`Failed to delete event: ${response.status}`)
     }
   } catch (error) {

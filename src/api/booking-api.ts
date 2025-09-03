@@ -1,5 +1,3 @@
-import { mockGetBookings, mockGetBookingsByEvent, mockGetBookingSummary } from "@/mock/booking-mock"
-
 import {
   BookingFilters,
   BookingListResponse,
@@ -7,22 +5,36 @@ import {
   BookingWithDetails,
 } from "@/types/booking"
 
+import { bffClient } from "./client"
+
 // 예매 목록 조회
 export const getBookings = async (filters: BookingFilters): Promise<BookingListResponse> => {
-  return await mockGetBookings(filters)
+  try {
+    const response = await bffClient.get("/api/mypage/bookings", {
+      params: {
+        page: filters.page || 0,
+        pageSize: filters.pageSize || 10,
+        ...filters,
+      },
+    })
+    return response.data
+  } catch (error) {
+    console.error("Failed to fetch bookings:", error)
+    throw error
+  }
 }
 
 // 특정 예매 상세 조회
 export const getBookingById = async (bookingId: number): Promise<BookingWithDetails> => {
-  // Mock 데이터에서 해당 booking 찾기
-  const allBookings = await mockGetBookings({})
-  const booking = allBookings.bookings.find((b) => b.booking.bookingId === bookingId)
-
-  if (!booking) {
-    throw new Error("Booking not found")
+  try {
+    const response = await bffClient.get("/api/mypage/bookings/detail", {
+      params: { bookingId },
+    })
+    return response.data
+  } catch (error) {
+    console.error("Failed to fetch booking detail:", error)
+    throw error
   }
-
-  return booking
 }
 
 // 특정 이벤트의 예매 목록 조회
@@ -30,7 +42,20 @@ export const getBookingsByEvent = async (
   eventId: number,
   filters: Omit<BookingFilters, "eventId">
 ): Promise<BookingListResponse> => {
-  return await mockGetBookingsByEvent(eventId, filters)
+  try {
+    const response = await bffClient.get("/api/mypage/bookings", {
+      params: {
+        eventId,
+        page: filters.page || 0,
+        pageSize: filters.pageSize || 10,
+        ...filters,
+      },
+    })
+    return response.data
+  } catch (error) {
+    console.error("Failed to fetch bookings by event:", error)
+    throw error
+  }
 }
 
 // 특정 이벤트 스케줄의 예매 목록 조회 (ERD 구조에 맞게)
@@ -38,14 +63,33 @@ export const getBookingsByEventSchedule = async (
   eventScheduleId: number,
   filters: Omit<BookingFilters, "eventScheduleId">
 ): Promise<BookingListResponse> => {
-  // API가 아직 없으므로 바로 mock 데이터 반환
-  console.log("Mock 데이터 사용 - eventScheduleId:", eventScheduleId)
-  return await mockGetBookingsByEvent(eventScheduleId, filters)
+  try {
+    const response = await bffClient.get("/api/mypage/bookings", {
+      params: {
+        eventScheduleId,
+        page: filters.page || 0,
+        pageSize: filters.pageSize || 10,
+        ...filters,
+      },
+    })
+    return response.data
+  } catch (error) {
+    console.error("Failed to fetch bookings by event schedule:", error)
+    throw error
+  }
 }
 
 // 예매 통계 조회
 export const getBookingSummary = async (eventId?: number): Promise<BookingSummary> => {
-  return await mockGetBookingSummary()
+  try {
+    const response = await bffClient.get("/api/mypage/bookings/summary", {
+      params: { eventId },
+    })
+    return response.data
+  } catch (error) {
+    console.error("Failed to fetch booking summary:", error)
+    throw error
+  }
 }
 
 // 예매 상태 변경

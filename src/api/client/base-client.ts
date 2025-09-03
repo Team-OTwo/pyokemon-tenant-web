@@ -1,157 +1,128 @@
+import { getAccountApiUrl, getBffApiUrl, getBookingApiUrl, getEventApiUrl } from "@/constants/env"
 import { getRefreshToken, logout, setTokens } from "@/utils/auth"
-import axios, { AxiosError, AxiosResponse } from "axios"
+import axios, { AxiosError, AxiosInstance } from "axios"
 
-let isRefreshing = false
-let failedQueue: Array<{ resolve: (value?: unknown) => void; reject: (reason?: unknown) => void }> =
-  []
+// 클라이언트 생성 함수
+const createClient = (baseURL: string): AxiosInstance => {
+  const client = axios.create({ baseURL })
 
-declare global {
-  interface Window {
-    showAuthNotification?: (message: string, type: "success" | "error" | "warning" | "info") => void
-  }
-}
+  client.interceptors.request.use(
+    (config) => {
+      const accessToken = localStorage.getItem("accessToken")
+      if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`
+      }
 
-const processQueue = (error: unknown, token: string | null = null) => {
-  failedQueue.forEach(({ resolve, reject }) => {
-    if (error) {
-      reject(error)
-    } else {
-      resolve(token)
-    }
-  })
-  failedQueue = []
-}
+      const accountId = localStorage.getItem("accountId")
+      if (accountId) {
+        config.headers["x-auth-accountId"] = accountId
+      }
 
-const isTokenExpiringSoon = (token: string): boolean => {
-  if (!token) return true
+      return config
+    },
+    (error) => Promise.reject(error)
+  )
 
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]))
-    const currentTime = Date.now() / 1000
-    const timeUntilExpiry = payload.exp - currentTime
-    return timeUntilExpiry < 300 // 5분 이내에 만료
-  } catch {
-    return true
-  }
-}
+  // Refresh Token 요청이 진행 중인지 체크
+  let isRefreshing = false
 
-const refreshTokenIfNeeded = async (): Promise<void> => {
-  const refreshToken = getRefreshToken()
-  if (!refreshToken) {
-    logout("expired")
-    return
+  // 대기 중인 요청들을 저장하는 배열
+  let refreshSubscribers: ((token: string) => void)[] = []
+
+  // refresh가 끝나면 실행될 콜백 저장
+  const subscribeTokenRefresh = (cb: (token: string) => void) => {
+    refreshSubscribers.push(cb)
   }
 
-  try {
-    // 실제 refresh token API 호출
-    const response = await axios.post("/account/api/refresh", {
-      refreshToken: refreshToken,
-    })
-
-    const { accessToken, refreshToken: newRefreshToken } = response.data
-    setTokens(accessToken, newRefreshToken)
-  } catch (error) {
-    logout("expired")
-    throw error
+  // refresh 성공 후 저장된 콜백 실행, 대기 중인 요청들에게 새 토큰 적용
+  const onRefreshed = (token: string) => {
+    refreshSubscribers.forEach((cb) => cb(token))
+    refreshSubscribers = []
   }
-}
 
-const baseClient = axios.create({})
+  client.interceptors.response.use(
+    (config) => {
+      return config
+    },
+    async (error) => {
+      console.log(error)
+      const originalRequest = error.config
+      const status = error.response?.status
 
-baseClient.interceptors.request.use(
-  async (config) => {
-    const accessToken = localStorage.getItem("accessToken")
-    if (accessToken) {
-      const isExpiringSoon = isTokenExpiringSoon(accessToken)
-      if (isExpiringSoon && !isRefreshing) {
+      if (status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true
+
+        if (isRefreshing) {
+          return new Promise((resolve) => {
+            subscribeTokenRefresh((token: string) => {
+              originalRequest.headers.Authorization = `Bearer ${token}`
+              resolve(axios(originalRequest))
+            })
+          })
+        }
+
+        isRefreshing = true
+
         try {
-          await refreshTokenIfNeeded()
+          const refreshToken = localStorage.getItem("refreshToken")
+          const res = await axios.post(
+            `${getAccountApiUrl()}/api/refresh`,
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${refreshToken}`,
+              },
+            }
+          )
+          console.log(res)
+          const newAccessToken = res.data.data.accessToken
+          localStorage.setItem("accessToken", newAccessToken)
+
+          onRefreshed(newAccessToken)
+          isRefreshing = false
+
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
+          return axios(originalRequest)
         } catch (error) {
+          isRefreshing = false
+          localStorage.clear()
+
+          // TODO: login 페이지로 이동
+          window.location.href = "/tenant/login"
+
           return Promise.reject(error)
         }
       }
-      const currentToken = localStorage.getItem("accessToken")
-      if (currentToken) {
-        config.headers.Authorization = `Bearer ${currentToken}`
-      }
-    }
 
-    const accountId = localStorage.getItem("accountId")
-    if (accountId) {
-      config.headers["x-auth-accountId"] = accountId
-    }
-
-    return config
-  },
-  (error) => Promise.reject(error)
-)
-
-baseClient.interceptors.response.use(
-  (response: AxiosResponse) => response,
-  async (error: AxiosError) => {
-    const originalRequest = error.config as typeof error.config & { _retry?: boolean }
-
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject })
-        })
-          .then((token) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`
-            return baseClient(originalRequest)
-          })
-          .catch((err) => Promise.reject(err))
-      }
-
-      originalRequest._retry = true
-      isRefreshing = true
-
-      const refreshToken = getRefreshToken()
-      if (!refreshToken) {
-        logout("expired")
-        return Promise.reject(error)
-      }
-
-      try {
-        await refreshTokenIfNeeded()
-        const currentToken = localStorage.getItem("accessToken")
-        if (currentToken) {
-          originalRequest.headers.Authorization = `Bearer ${currentToken}`
-        }
-        processQueue(null, currentToken)
-        ;(
-          window as typeof window & {
-            showAuthNotification?: (
-              message: string,
-              type: "success" | "error" | "warning" | "info"
-            ) => void
-          }
-        ).showAuthNotification?.("토큰이 갱신되었습니다.", "success")
-        return baseClient(originalRequest)
-      } catch (refreshError) {
-        processQueue(refreshError, null)
-        logout("expired")
-        return Promise.reject(refreshError)
-      } finally {
-        isRefreshing = false
-      }
-    }
-
-    if (error.response?.status === 403) {
-      logout("unauthorized")
       return Promise.reject(error)
     }
+  )
 
-    return Promise.reject(error)
-  }
-)
+  return client
+}
 
+// 서비스별 클라이언트 인스턴스 생성
+export const eventClient = createClient(getEventApiUrl())
+export const accountClient = createClient(getAccountApiUrl())
+export const bookingClient = createClient(getBookingApiUrl())
+export const bffClient = createClient(getBffApiUrl())
+
+// 기존 baseClient 호환성 유지 (이벤트 클라이언트로 매핑)
+const baseClient = eventClient
+
+// 공통 헤더 설정 함수
 export const setAuthorizationHeader = (token: string) => {
-  baseClient.defaults.headers.common["Authorization"] = `Bearer ${token}`
+  eventClient.defaults.headers.common["Authorization"] = `Bearer ${token}`
+  accountClient.defaults.headers.common["Authorization"] = `Bearer ${token}`
+  bookingClient.defaults.headers.common["Authorization"] = `Bearer ${token}`
+  bffClient.defaults.headers.common["Authorization"] = `Bearer ${token}`
 }
 
 export const removeAuthorizationHeader = () => {
-  delete baseClient.defaults.headers.common["Authorization"]
+  delete eventClient.defaults.headers.common["Authorization"]
+  delete accountClient.defaults.headers.common["Authorization"]
+  delete bookingClient.defaults.headers.common["Authorization"]
+  delete bffClient.defaults.headers.common["Authorization"]
 }
 
 export default baseClient

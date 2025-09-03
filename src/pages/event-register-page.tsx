@@ -1,5 +1,4 @@
 import React, { ChangeEvent, useEffect, useRef, useState } from "react"
-import { mockVenues } from "@/mock/venue-mock"
 import { useEventStore } from "@/store/eventStore"
 import { useScheduleFormStore } from "@/store/schedule-form-store"
 import { ArrowUturnLeftIcon } from "@heroicons/react/16/solid"
@@ -11,6 +10,7 @@ import { Select } from "@/components/catalyst-ui/select"
 import ReactQuillEditor from "@/components/rich-text-editor/react-quill"
 
 import { ageLimit, genreOptions, gradeOptions } from "../constants/event-register-options"
+import { VENUE_OPTIONS } from "../constants/venue"
 import { PriceGrade } from "../types/event"
 
 function EventRegisterPage() {
@@ -102,24 +102,21 @@ function EventRegisterPage() {
   }, [eventFormData.description])
 
   useEffect(() => {
-    console.log("=== EventRegisterPage useEffect 디버깅 ===")
-    console.log("mode:", mode)
-    console.log("eventData:", eventData)
-    console.log("eventId:", eventId)
-    console.log("==========================")
-
     if (mode === "edit" && eventData) {
-      console.log("=== 수정 모드 데이터 설정 ===")
-      console.log("설정할 eventData:", eventData)
       setEventFormData(eventData)
-      console.log("==========================")
+      if (eventData.description) {
+        setContent(eventData.description)
+      }
     } else if (mode === "create") {
       resetEventFormData()
       resetScheduleFormData()
-    } else if (mode === "back") {
-      // 이전 페이지에서 돌아왔을 때는 상태를 보존
-      // eventFormData와 scheduleFormData가 이미 Zustand에 저장되어 있음
-      // eventId도 유지됨
+    } else if (mode === "back" || (mode === "edit" && !eventData)) {
+      if (eventData) {
+        setEventFormData(eventData)
+        if (eventData.description) {
+          setContent(eventData.description)
+        }
+      }
     }
   }, [mode, eventData, setEventFormData, resetScheduleFormData, resetEventFormData])
 
@@ -166,7 +163,7 @@ function EventRegisterPage() {
                 className="w-full max-w-md"
               >
                 <option value="">공연장을 선택하세요</option>
-                {mockVenues.map((venue) => (
+                {VENUE_OPTIONS.map((venue) => (
                   <option key={venue.value} value={venue.value}>
                     {venue.label}
                   </option>
