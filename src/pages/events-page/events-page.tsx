@@ -19,7 +19,7 @@ import EventCard from "./_components/event-card"
 const EventsPage = () => {
   const [activeStatus, setActiveStatus] = useState("ALL")
   const [searchValue, setSearchValue] = useState("")
-  const [sortBy, setSortBy] = useState("name")
+  const [sortBy, setSortBy] = useState("date")
   const [events, setEvents] = useState<EventType[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
