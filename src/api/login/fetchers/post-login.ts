@@ -1,8 +1,7 @@
 import { LoginRequest, LoginResponse } from "../../../types/login"
-import { client } from "../../client"
+import { accountClient } from "../../client"
 
 export const postLogin = async (data: LoginRequest): Promise<LoginResponse> => {
-  const response = await client.post("/account/api/login", data, {})
-
+  const response = await accountClient.post("/api/login", data, {})
   return response.data
 }
