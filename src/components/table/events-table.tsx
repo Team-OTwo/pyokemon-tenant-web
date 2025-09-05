@@ -1,6 +1,7 @@
 import React from "react"
 import { CalendarIcon, MapPinIcon, UsersIcon } from "@heroicons/react/20/solid"
 import { format, isBefore } from "date-fns"
+import { useNavigate } from "react-router-dom"
 
 import { Badge } from "@/components/catalyst-ui/badge"
 import {
@@ -22,6 +23,8 @@ interface EventsTableProps {
 }
 
 const EventsTable: React.FC<EventsTableProps> = ({ events, loading }) => {
+  const navigate = useNavigate()
+
   const getStatusBadge = (eventDate: string) => {
     const now = new Date()
     const eventDateTime = new Date(eventDate)
@@ -35,6 +38,14 @@ const EventsTable: React.FC<EventsTableProps> = ({ events, loading }) => {
 
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), "yyyy년 MM월 dd일")
+  }
+
+  const handleEventClick = (event: MonthlyEvent) => {
+    navigate(`/events`, {
+      state: {
+        searchTitle: event.title, // 이벤트 목록에서 검색할 제목
+      },
+    })
   }
 
   if (loading) {
@@ -110,7 +121,12 @@ const EventsTable: React.FC<EventsTableProps> = ({ events, loading }) => {
         {events.map((event, index) => (
           <TableRow key={index}>
             <TableCell>
-              <Text className="font-medium">{event.title}</Text>
+              <Text
+                className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer transition-colors"
+                onClick={() => handleEventClick(event)}
+              >
+                {event.title}
+              </Text>
             </TableCell>
             <TableCell>
               <div className="flex items-center gap-2">

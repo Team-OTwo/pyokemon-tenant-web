@@ -34,6 +34,12 @@ const BFF_API_URL: Record<Environment, string> = {
   dev: `${GATEWAY_URL.dev}/bff`,
 }
 
+// 이미지 서버 URL (게이트웨이 도메인 + 8081 포트)
+const IMAGE_SERVER_URL: Record<Environment, string> = {
+  local: GATEWAY_URL.local.replace(":8087", ":8081"),
+  dev: GATEWAY_URL.dev.replace(":8087", ":8081"),
+}
+
 // 함수로 API URL 가져오기 (다른 웹 프로젝트와 동일한 방식)
 export const getGatewayUrl = () => GATEWAY_URL[ENV]
 export const getEventApiUrl = () => EVENT_API_URL[ENV]
@@ -41,6 +47,7 @@ export const getAccountApiUrl = () => ACCOUNT_API_URL[ENV]
 export const getPaymentApiUrl = () => PAYMENT_API_URL[ENV]
 export const getBookingApiUrl = () => BOOKING_API_URL[ENV]
 export const getBffApiUrl = () => BFF_API_URL[ENV]
+export const getImageServerUrl = () => IMAGE_SERVER_URL[ENV]
 
 // 현재 환경의 API URL들 (기존 호환성 유지)
 export const CURRENT_EVENT_API_URL = EVENT_API_URL[ENV]
