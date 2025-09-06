@@ -4,15 +4,16 @@ import {
   deleteEvent,
   getTenantEventDetail,
 } from "@/api/event-register-api"
+import { getEventApiUrl, getImageServerUrl } from "@/constants/env"
 import { event } from "@/constants/event"
 import EventCard from "@/pages/events-page/_components/event-card"
 import { useScheduleFormStore } from "@/store/schedule-form-store"
 import { convertEventToScheduleFormData } from "@/util/convertEventToScheduleFormData"
 import { getAccountId } from "@/utils/auth"
 import { ArrowUturnLeftIcon } from "@heroicons/react/16/solid"
-import { useNavigate, useParams } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 
-import { EventFormData, EventType } from "@/types/event"
+import { EventFormData, EventStatus, EventType } from "@/types/event"
 import { Button } from "@/components/catalyst-ui/button"
 import {
   Table,
@@ -23,13 +24,36 @@ import {
   TableRow,
 } from "@/components/catalyst-ui/table"
 
+// HTML 내용에서 이미지 경로를 게이트웨이를 통해 완전한 URL로 변환하는 함수
+const convertImageUrlsInHtml = (htmlContent: string): string => {
+  if (!htmlContent) return htmlContent
+
+  // src="/event/uploads/..." 패턴을 찾아서 게이트웨이를 통해 올바른 경로로 변환
+  const imageServerUrl = getImageServerUrl()
+  const convertedHtml = htmlContent.replace(
+    /src="\/event\/uploads\/([^"]+)"/g,
+    `src="${imageServerUrl}/uploads/$1"`
+  )
+
+  return convertedHtml
+}
+
 const EventDetailPage = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const { eventId } = useParams<{ eventId: string }>()
   const [eventData, setEventData] = useState<EventType | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [useMockData, setUseMockData] = useState(false)
+
+  // 이전 페이지에서 전달받은 상태 정보
+  const previousState = location.state as {
+    status?: string
+    title?: string
+    venueName?: string
+    eventDate?: string
+  } | null
 
   // API에서 이벤트 상세 정보 가져오기
   useEffect(() => {
@@ -47,6 +71,12 @@ const EventDetailPage = () => {
         const accountId = getAccountId()
 
         const data = await getTenantEventDetail(parseInt(eventId), accountId)
+
+        // 이전 페이지에서 전달받은 status가 있으면 사용
+        if (previousState?.status) {
+          data.status = previousState.status as EventStatus
+        }
+
         setEventData(data)
         setUseMockData(false)
       } catch (err) {
@@ -123,13 +153,6 @@ const EventDetailPage = () => {
 
     // 기존 공연의 실제 데이터를 이벤트 폼에 설정
     const eventFormData = convertEventToFormData(eventData)
-
-    console.log("=== handleEdit 디버깅 ===")
-    console.log("원본 eventData:", eventData)
-    console.log("변환된 eventFormData:", eventFormData)
-    console.log("venueName:", eventData.venueName)
-    console.log("venue 필드:", eventFormData.venue)
-    console.log("==========================")
 
     navigate("/event-register", {
       state: {
@@ -308,7 +331,7 @@ const EventDetailPage = () => {
             {eventData.description ? (
               <div
                 className="prose max-w-none"
-                dangerouslySetInnerHTML={{ __html: eventData.description }}
+                dangerouslySetInnerHTML={{ __html: convertImageUrlsInHtml(eventData.description) }}
               />
             ) : (
               <p className="text-gray-500">상세정보가 없습니다.</p>

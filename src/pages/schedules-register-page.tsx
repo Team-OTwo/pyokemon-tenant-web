@@ -79,10 +79,10 @@ function SchedulesRegisterPage() {
 
     try {
       if (mode === "edit") {
-        await updateEvent(requestData, eventId, accountId)
+        await updateEvent(requestData, eventId, accountId, eventData.thumbnail)
         alert("공연이 성공적으로 수정되었습니다.")
       } else {
-        await submitEvent(requestData, accountId)
+        await submitEvent(requestData, accountId, eventData.thumbnail)
         alert("공연이 성공적으로 등록되었습니다.")
       }
 

@@ -1,9 +1,42 @@
 import { PLACEHOLDER_IMAGE } from "@/constants/default-images"
+import { getImageServerUrl } from "@/constants/env"
 
 import { EventFormData, EventRequestData, EventType, PriceGrade } from "@/types/event"
 import { ScheduleFormData } from "@/types/schedule"
 
 import { client } from "./client"
+
+// 이미지 URL을 게이트웨이를 통해 완전한 URL로 변환하는 함수
+const convertToFullImageUrl = (imageUrl: string): string => {
+  if (!imageUrl) return PLACEHOLDER_IMAGE
+
+  // 이미 완전한 URL인 경우 그대로 반환
+  if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+    return imageUrl
+  }
+
+  // 상대 경로인 경우 게이트웨이를 통해 변환
+  if (imageUrl.startsWith("/")) {
+    return `${getImageServerUrl()}${imageUrl}`
+  }
+
+  // 상대 경로가 아닌 경우도 게이트웨이를 통해 변환
+  return `${getImageServerUrl()}/${imageUrl}`
+}
+
+// HTML description 내의 이미지 URL을 게이트웨이를 통해 완전한 URL로 변환하는 함수
+const convertImageUrlsInDescription = (description: string | undefined): string => {
+  if (!description) return description || ""
+
+  // src="/event/uploads/..." 패턴을 찾아서 게이트웨이를 통해 완전한 URL로 변환
+  const imageServerUrl = getImageServerUrl()
+  const convertedDescription = description.replace(
+    /src="\/event\/uploads\/([^"]+)"/g,
+    `src="${imageServerUrl}/uploads/$1"`
+  )
+
+  return convertedDescription
+}
 
 // DB 응답 타입 정의 (JOIN 결과)
 interface DbEventResponse {
@@ -63,7 +96,7 @@ const convertDbResponseToEventType = (dbResponse: DbEventResponse): EventType =>
     genre: dbResponse.genre || "",
     description: dbResponse.description || "",
     eventScheduleId: dbResponse.eventScheduleId || 1,
-    thumbnailUrl: dbResponse.thumbnailUrl,
+    thumbnailUrl: convertToFullImageUrl(dbResponse.thumbnailUrl),
     status: dbResponse.status as "PENDING" | "APPROVED" | "REJECTED",
     prices: dbResponse.prices.map((price) => ({
       priceId: price.priceId || 1, // priceId 추가
@@ -110,13 +143,6 @@ export const createEventRequestData = (
   accountId: number,
   isEditMode: boolean = false
 ): EventRequestData => {
-  console.log("=== createEventRequestData 디버깅 ===")
-  console.log("isEditMode:", isEditMode)
-  console.log("eventData:", eventData)
-  console.log("scheduleForm:", scheduleForm)
-  console.log("accountId:", accountId)
-  console.log("==========================")
-
   const isValidTime = (hour: string, minute: string) => {
     return hour && minute && hour !== "" && minute !== ""
   }
@@ -168,25 +194,29 @@ export const createEventRequestData = (
     ],
   }
 
-  console.log("=== 생성된 결과 ===")
-  console.log("result:", result)
-  console.log("==========================")
-
   return result
 }
 
 export const submitEvent = async (
   requestData: EventRequestData,
-  accountId: number
+  accountId: number,
+  thumbnailFile?: File
 ): Promise<void> => {
-  console.log("=== 공연 등록 API 호출 ===")
-  console.log("URL:", `/api/events/tenant`)
-  console.log("accountId:", accountId)
-  console.log("requestData:", JSON.stringify(requestData, null, 2))
-  console.log("==========================")
+  const formData = new FormData()
 
-  const response = await client.post(`/api/events/tenant`, requestData, {
+  // eventData를 JSON 문자열로 변환하여 추가
+  formData.append("eventData", JSON.stringify(requestData))
+
+  // 썸네일 파일이 있으면 추가
+  if (thumbnailFile) {
+    formData.append("thumbnail", thumbnailFile)
+  }
+
+  const response = await client.post(`/api/events/tenant`, formData, {
     params: { accountId },
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
   })
 
   if (!response.data.success) {
@@ -197,41 +227,47 @@ export const submitEvent = async (
 export const updateEvent = async (
   requestData: EventRequestData,
   eventId: number,
-  accountId: number
+  accountId: number,
+  thumbnailFile?: File
 ): Promise<void> => {
-  console.log("=== 공연 수정 API 호출 ===")
-  console.log("URL:", `/api/events/tenant/${eventId}`)
-  console.log("eventId:", eventId)
-  console.log("accountId:", accountId)
-  console.log("requestData:", JSON.stringify(requestData, null, 2))
-  console.log("==========================")
+  const formData = new FormData()
 
-  const response = await client.put(
-    `/api/events/tenant/${eventId}`,
-    {
-      eventId: eventId,
-      title: requestData.title,
-      ageLimit: requestData.ageLimit,
-      description: requestData.description,
-      genre: requestData.genre,
-      thumbnailUrl: requestData.thumbnailUrl,
-      status: "PENDING",
-      schedules: requestData.schedules.map((schedule) => ({
-        eventScheduleId: schedule.eventScheduleId || 1, // requestData에서 전달받은 실제 스케줄 ID 사용
-        venueId: schedule.venueId,
-        ticketOpenAt: schedule.ticketOpenAt,
-        eventDate: schedule.eventDate,
-        prices: schedule.prices.map((price) => ({
-          priceId: price.priceId || 1, // requestData에서 전달받은 실제 가격 ID 사용
-          seatClassId: price.seatClassId,
-          price: price.price,
-        })),
+  // 업데이트할 데이터 구성
+  const updateData = {
+    eventId: eventId,
+    title: requestData.title,
+    ageLimit: requestData.ageLimit,
+    description: requestData.description,
+    genre: requestData.genre,
+    thumbnailUrl: requestData.thumbnailUrl,
+    status: "PENDING",
+    schedules: requestData.schedules.map((schedule) => ({
+      eventScheduleId: schedule.eventScheduleId || 1, // requestData에서 전달받은 실제 스케줄 ID 사용
+      venueId: schedule.venueId,
+      ticketOpenAt: schedule.ticketOpenAt,
+      eventDate: schedule.eventDate,
+      prices: schedule.prices.map((price) => ({
+        priceId: price.priceId || 1, // requestData에서 전달받은 실제 가격 ID 사용
+        seatClassId: price.seatClassId,
+        price: price.price,
       })),
+    })),
+  }
+
+  // eventData를 JSON 문자열로 변환하여 추가
+  formData.append("eventData", JSON.stringify(updateData))
+
+  // 썸네일 파일이 있으면 추가
+  if (thumbnailFile) {
+    formData.append("thumbnail", thumbnailFile)
+  }
+
+  const response = await client.put(`/api/events/tenant/${eventId}`, formData, {
+    params: { accountId },
+    headers: {
+      "Content-Type": "multipart/form-data",
     },
-    {
-      params: { accountId },
-    }
-  )
+  })
 
   if (!response.data.success) {
     throw new Error("공연 수정에 실패했습니다.")
@@ -242,11 +278,7 @@ export const getEvents = async (accountId: number): Promise<EventType[]> => {
   try {
     const response = await client.get(`/api/events?accountId=${accountId}`)
 
-    console.log("API 응답 상태:", response.status)
-    console.log("API 응답 헤더:", response.headers)
-
     if (!response.data.success) {
-      console.error("API 에러 응답:", response.data)
       throw new Error(`공연 목록 조회에 실패했습니다. (${response.status})`)
     }
 
@@ -276,7 +308,8 @@ export const getEvents = async (accountId: number): Promise<EventType[]> => {
         const eventWithStatus = {
           ...firstItem,
           status: firstItem.status || "PENDING", // 기본값으로 PENDING 설정
-          thumbnailUrl: firstItem.thumbnailUrl || PLACEHOLDER_IMAGE, // 기본 이미지 설정
+          thumbnailUrl: convertToFullImageUrl(firstItem.thumbnailUrl), // 이미지 URL 변환
+          description: convertImageUrlsInDescription(firstItem.description), // description 내 이미지 URL 변환
         }
 
         // 이미 EventType 형식인 경우 그대로 사용
@@ -326,23 +359,18 @@ export const getEventById = async (eventId: number, accountId: number): Promise<
       params: { accountId },
     })
 
-    console.log("API 응답 상태:", response.status)
-    console.log("API 응답 데이터:", response.data)
-
     if (!response.data.success) {
-      console.error("API 에러 응답:", response.data)
       throw new Error(`공연 상세 조회에 실패했습니다. (${response.status})`)
     }
 
     // API 응답에서 data 필드 추출
     const eventData = response.data.data || response.data
-    console.log("이벤트 상세 데이터:", eventData)
 
-    // status와 thumbnailUrl에 기본값 설정
+    // thumbnailUrl과 description 내 이미지 URL 변환
     const eventWithDefaults = {
       ...eventData,
-      status: eventData.status || "PENDING",
-      thumbnailUrl: eventData.thumbnailUrl || PLACEHOLDER_IMAGE,
+      thumbnailUrl: convertToFullImageUrl(eventData.thumbnailUrl),
+      description: convertImageUrlsInDescription(eventData.description),
     }
 
     // 이미 EventType 형식인 경우 그대로 사용
@@ -393,7 +421,8 @@ export const getTenantSchedules = async (accountId: number): Promise<EventType[]
         const eventWithStatus = {
           ...firstItem,
           status: firstItem.status || "PENDING", // 기본값으로 PENDING 설정
-          thumbnailUrl: firstItem.thumbnailUrl || PLACEHOLDER_IMAGE, // 기본 이미지 설정
+          thumbnailUrl: convertToFullImageUrl(firstItem.thumbnailUrl), // 이미지 URL 변환
+          description: convertImageUrlsInDescription(firstItem.description), // description 내 이미지 URL 변환
         }
 
         // 이미 EventType 형식인 경우 그대로 사용
@@ -446,23 +475,18 @@ export const getTenantEventDetail = async (
       params: { accountId },
     })
 
-    console.log("API 응답 상태:", response.status)
-    console.log("API 응답 데이터:", response.data)
-
     if (!response.data.success) {
-      console.error("API 에러 응답:", response.data)
       throw new Error(`테넌트 이벤트 상세 조회에 실패했습니다. (${response.status})`)
     }
 
     // API 응답에서 data 필드 추출
     const eventData = response.data.data || response.data
-    console.log("이벤트 상세 데이터:", eventData)
 
-    // status와 thumbnailUrl에 기본값 설정
+    // thumbnailUrl과 description 내 이미지 URL 변환
     const eventWithDefaults = {
       ...eventData,
-      status: eventData.status || "PENDING",
-      thumbnailUrl: eventData.thumbnailUrl || PLACEHOLDER_IMAGE,
+      thumbnailUrl: convertToFullImageUrl(eventData.thumbnailUrl),
+      description: convertImageUrlsInDescription(eventData.description),
     }
 
     // 이미 EventType 형식인 경우 그대로 사용
@@ -479,7 +503,7 @@ export const getTenantEventDetail = async (
 
 export const deleteEvent = async (eventId: number): Promise<void> => {
   try {
-    const response = await client.delete(`/api/events/tenant/${eventId}`)
+    const response = await client.post(`/api/events/tenant/${eventId}`)
 
     if (!response.data.success) {
       throw new Error(`Failed to delete event: ${response.status}`)

@@ -4,7 +4,7 @@ import { eventList, STATUS_FILTER_OPTIONS } from "@/constants/event"
 import { getAccountId } from "@/utils/auth"
 import { searchEventsByTitle } from "@/utils/search"
 import { PlusIcon } from "@heroicons/react/16/solid"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 
 import { EventType } from "@/types/event"
 import { Badge } from "@/components/catalyst-ui/badge"
@@ -17,8 +17,14 @@ import { Text } from "@/components/catalyst-ui/text"
 import EventCard from "./_components/event-card"
 
 const EventsPage = () => {
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  // 이전 페이지에서 전달받은 검색 제목
+  const previousState = location.state as { searchTitle?: string } | null
+
   const [activeStatus, setActiveStatus] = useState("ALL")
-  const [searchValue, setSearchValue] = useState("")
+  const [searchValue, setSearchValue] = useState(previousState?.searchTitle || "")
   const [sortBy, setSortBy] = useState("date")
   const [events, setEvents] = useState<EventType[]>([])
   const [loading, setLoading] = useState(true)
@@ -26,7 +32,6 @@ const EventsPage = () => {
   const [useMockData, setUseMockData] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(7) // 페이지당 7개로 변경
-  const navigate = useNavigate()
 
   const sortOptions = [
     { value: "name", label: "이름순" },

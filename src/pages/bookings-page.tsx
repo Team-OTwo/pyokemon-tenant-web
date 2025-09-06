@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react"
 import { getBookings, getBookingsByEvent } from "@/api/booking-api"
-import baseClient from "@/api/client/base-client"
+import { bffClient } from "@/api/client"
 import { ArrowUturnLeftIcon } from "@heroicons/react/24/outline"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 
@@ -84,7 +84,7 @@ const BookingsPage = () => {
           queryParams.append("status", filters.status)
         }
 
-        const response = await baseClient.get(`/bff/api/v1/bookings?${queryParams.toString()}`)
+        const response = await bffClient.get(`/api/v1/bookings?${queryParams.toString()}`)
 
         const apiResponse: BookingApiResponse = response.data
 
