@@ -24,16 +24,23 @@ const convertToFullImageUrl = (imageUrl: string): string => {
   return `${getImageServerUrl()}/${imageUrl}`
 }
 
-// HTML description 내의 이미지 URL을 게이트웨이를 통해 완전한 URL로 변환하는 함수
+// HTML description 내의 이미지 URL을 게이트웨이를 통해 완전한 URL로 변환
 const convertImageUrlsInDescription = (description: string | undefined): string => {
   if (!description) return description || ""
 
-  // src="/event/uploads/..." 패턴을 찾아서 게이트웨이를 통해 완전한 URL로 변환
+  // src="/event/uploads/..."
   const imageServerUrl = getImageServerUrl()
-  const convertedDescription = description.replace(
-    /src="\/event\/uploads\/([^"]+)"/g,
-    `src="${imageServerUrl}/uploads/$1"`
-  )
+
+  // 다양한 이미지 URL
+  const convertedDescription = description
+    // /event/uploads/...
+    .replace(/src="\/event\/uploads\/([^"]+)"/g, `src="${imageServerUrl}/event/uploads/$1"`)
+    // /uploads/...
+    .replace(/src="\/uploads\/([^"]+)"/g, `src="${imageServerUrl}/event/uploads/$1"`)
+    // 상대 경로
+    .replace(/src="\.\.\/uploads\/([^"]+)"/g, `src="${imageServerUrl}/event/uploads/$1"`)
+    // 절대 경로 X
+    .replace(/src="uploads\/([^"]+)"/g, `src="${imageServerUrl}/event/uploads/$1"`)
 
   return convertedDescription
 }

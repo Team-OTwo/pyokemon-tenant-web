@@ -4,7 +4,7 @@ import {
   deleteEvent,
   getTenantEventDetail,
 } from "@/api/event-register-api"
-import { getEventApiUrl, getImageServerUrl } from "@/constants/env"
+import { getImageServerUrl } from "@/constants/env"
 import { event } from "@/constants/event"
 import EventCard from "@/pages/events-page/_components/event-card"
 import { useScheduleFormStore } from "@/store/schedule-form-store"
@@ -24,16 +24,28 @@ import {
   TableRow,
 } from "@/components/catalyst-ui/table"
 
-// HTML 내용에서 이미지 경로를 게이트웨이를 통해 완전한 URL로 변환하는 함수
+// HTML 내용에서 이미지 경로를 게이트웨이를 통해 완전한 URL로 변환
 const convertImageUrlsInHtml = (htmlContent: string): string => {
   if (!htmlContent) return htmlContent
 
-  // src="/event/uploads/..." 패턴을 찾아서 게이트웨이를 통해 올바른 경로로 변환
+  // src="/event/uploads/..."
   const imageServerUrl = getImageServerUrl()
-  const convertedHtml = htmlContent.replace(
-    /src="\/event\/uploads\/([^"]+)"/g,
-    `src="${imageServerUrl}/uploads/$1"`
-  )
+
+  console.log("이미지 서버 URL:", imageServerUrl)
+  console.log("원본 HTML:", htmlContent)
+
+  // 다양한 이미지 URL
+  const convertedHtml = htmlContent
+    // /event/uploads/...
+    .replace(/src="\/event\/uploads\/([^"]+)"/g, `src="${imageServerUrl}/event/uploads/$1"`)
+    // /uploads/...
+    .replace(/src="\/uploads\/([^"]+)"/g, `src="${imageServerUrl}/event/uploads/$1"`)
+    // 상대 경로
+    .replace(/src="\.\.\/uploads\/([^"]+)"/g, `src="${imageServerUrl}/event/uploads/$1"`)
+    // 절대 경로 X
+    .replace(/src="uploads\/([^"]+)"/g, `src="${imageServerUrl}/event/uploads/$1"`)
+
+  console.log("변환된 HTML:", convertedHtml)
 
   return convertedHtml
 }
@@ -95,7 +107,7 @@ const EventDetailPage = () => {
     }
 
     fetchEvent()
-  }, [eventId])
+  }, [eventId, previousState?.status])
 
   const handleGoBack = () => {
     navigate("/events")
@@ -330,8 +342,10 @@ const EventDetailPage = () => {
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             {eventData.description ? (
               <div
-                className="prose max-w-none"
-                dangerouslySetInnerHTML={{ __html: convertImageUrlsInHtml(eventData.description) }}
+                className="prose max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:block [&_img]:mx-auto [&_img]:rounded-lg [&_img]:shadow-sm [&_img]:border [&_img]:border-gray-200"
+                dangerouslySetInnerHTML={{
+                  __html: convertImageUrlsInHtml(eventData.description),
+                }}
               />
             ) : (
               <p className="text-gray-500">상세정보가 없습니다.</p>
