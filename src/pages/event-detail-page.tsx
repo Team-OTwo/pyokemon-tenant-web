@@ -4,7 +4,7 @@ import {
   deleteEvent,
   getTenantEventDetail,
 } from "@/api/event-register-api"
-import { getEventApiUrl, getImageServerUrl } from "@/constants/env"
+import { getImageServerUrl } from "@/constants/env"
 import { event } from "@/constants/event"
 import EventCard from "@/pages/events-page/_components/event-card"
 import { useScheduleFormStore } from "@/store/schedule-form-store"
@@ -30,10 +30,22 @@ const convertImageUrlsInHtml = (htmlContent: string): string => {
 
   // src="/event/uploads/..." 패턴을 찾아서 게이트웨이를 통해 올바른 경로로 변환
   const imageServerUrl = getImageServerUrl()
-  const convertedHtml = htmlContent.replace(
-    /src="\/event\/uploads\/([^"]+)"/g,
-    `src="${imageServerUrl}/uploads/$1"`
-  )
+
+  console.log("이미지 서버 URL:", imageServerUrl)
+  console.log("원본 HTML:", htmlContent)
+
+  // 다양한 이미지 URL 패턴을 처리
+  const convertedHtml = htmlContent
+    // /event/uploads/... 패턴
+    .replace(/src="\/event\/uploads\/([^"]+)"/g, `src="${imageServerUrl}/event/uploads/$1"`)
+    // /uploads/... 패턴 (이미 /event가 없는 경우)
+    .replace(/src="\/uploads\/([^"]+)"/g, `src="${imageServerUrl}/event/uploads/$1"`)
+    // 상대 경로 패턴
+    .replace(/src="\.\.\/uploads\/([^"]+)"/g, `src="${imageServerUrl}/event/uploads/$1"`)
+    // 절대 경로가 아닌 경우
+    .replace(/src="uploads\/([^"]+)"/g, `src="${imageServerUrl}/event/uploads/$1"`)
+
+  console.log("변환된 HTML:", convertedHtml)
 
   return convertedHtml
 }
@@ -330,7 +342,7 @@ const EventDetailPage = () => {
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             {eventData.description ? (
               <div
-                className="prose max-w-none"
+                className="prose max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:block [&_img]:mx-auto [&_img]:rounded-lg [&_img]:shadow-sm [&_img]:border [&_img]:border-gray-200"
                 dangerouslySetInnerHTML={{ __html: convertImageUrlsInHtml(eventData.description) }}
               />
             ) : (
