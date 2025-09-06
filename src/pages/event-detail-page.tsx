@@ -342,7 +342,7 @@ const EventDetailPage = () => {
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             {eventData.description ? (
               <div
-                className="prose max-w-none [&_img]:max-w-full [&_img]:h-auto [&_img]:block [&_img]:mx-auto [&_img]:rounded-lg [&_img]:shadow-sm [&_img]:border [&_img]:border-gray-200"
+                className="prose max-w-none"
                 dangerouslySetInnerHTML={{ __html: convertImageUrlsInHtml(eventData.description) }}
               />
             ) : (

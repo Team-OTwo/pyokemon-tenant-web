@@ -30,10 +30,21 @@ const convertImageUrlsInDescription = (description: string | undefined): string 
 
   // src="/event/uploads/..." 패턴을 찾아서 게이트웨이를 통해 완전한 URL로 변환
   const imageServerUrl = getImageServerUrl()
-  const convertedDescription = description.replace(
-    /src="\/event\/uploads\/([^"]+)"/g,
-    `src="${imageServerUrl}/uploads/$1"`
-  )
+
+  // 다양한 이미지 URL 패턴을 처리
+  const convertedDescription = description
+    // 이미 완전한 URL인 경우 (http:// 또는 https://로 시작)
+    .replace(/src="(https?:\/\/[^"]+)"/g, (match, url) => {
+      return match // 그대로 유지
+    })
+    // /event/uploads/... 패턴
+    .replace(/src="\/event\/uploads\/([^"]+)"/g, `src="${imageServerUrl}/event/uploads/$1"`)
+    // /uploads/... 패턴 (이미 /event가 없는 경우)
+    .replace(/src="\/uploads\/([^"]+)"/g, `src="${imageServerUrl}/event/uploads/$1"`)
+    // 상대 경로 패턴
+    .replace(/src="\.\.\/uploads\/([^"]+)"/g, `src="${imageServerUrl}/event/uploads/$1"`)
+    // 절대 경로가 아닌 경우
+    .replace(/src="uploads\/([^"]+)"/g, `src="${imageServerUrl}/event/uploads/$1"`)
 
   return convertedDescription
 }
