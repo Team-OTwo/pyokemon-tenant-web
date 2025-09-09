@@ -10,6 +10,18 @@ export const usePostLoginMutation = () => {
   return useMutation({
     mutationFn: postLogin,
     onSuccess: (response) => {
+      if (response.data.role !== "TENANT") {
+        ;(
+          window as typeof window & {
+            showAuthNotification?: (
+              message: string,
+              type: "success" | "error" | "warning" | "info"
+            ) => void
+          }
+        ).showAuthNotification?.("접근 권한이 없습니다.Tenant 계정으로 로그인해주세요.", "error")
+        return
+      }
+
       // 토큰 저장 및 인증 헤더 설정
       setTokens(response.data.accessToken, response.data.refreshToken)
       setAccountId(response.data.accountId)
